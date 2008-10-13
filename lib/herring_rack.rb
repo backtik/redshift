@@ -20,7 +20,8 @@ module Rack
       when '.ajax'
         update_page(req.POST['red']) if req.post?
       when '.red'
-        [::File.read("#{HerringRoot}#{req.path_info}").translate_to_sexp_array.red!, {"Content-Type" => "text/js"}]
+        # [herring_out(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
+        [herring_out(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
       when '.html'
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/html"}]
       when '.js'

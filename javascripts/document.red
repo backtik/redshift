@@ -66,6 +66,7 @@ end
 # Initialize the Document object and make it impossible
 # to initialize additional DocumentClass objects
 Doc = DocumentClass.new(document)
+
 # undef DocumentClass.initialize
 # 
 # Window.implement({

@@ -15,7 +15,7 @@ elsif `window.ActiveXObject`
   Browser::Engine = {:name => 'trident', :version => (`window.XMLHttpRequest`) ? 5 : 4 }
 elsif `!navigator.taintEnabled`
   Browser::Engine = {:name => 'webkit', :version => (Browser::Features[:xpath]) ? 420 : 419}
-elsif `document.getBoxObjectFor` != nil
+elsif `document.getBoxObjectFor != nil`
   Browser::Engine = {:name => 'gecko', :version => (`document.getElementsByClassName`) ? 19 : 18}
 end
 
@@ -25,18 +25,18 @@ Browser::Features[:xhr]  = !!Browser::Request
 module Browser
   # add convinience methods to the Browser::Engine
   def Engine.presto?
-    self[:name] == 'presto'
+    Engine[:name] == 'presto'
   end
   
   def Engine.trident?
-    self[:name] == 'trident'
+    Engine[:name] == 'trident'
   end
   
   def Engine.webkit?
-    self[:name] == 'trident'
+    Engine[:name] == 'trident'
   end
   
   def Engine.gecko?
-    self[:name] == 'gecko'
+    Engine[:name] == 'gecko'
   end
 end
