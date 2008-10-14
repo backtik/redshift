@@ -1,9 +1,3 @@
-class String
-  def fmt(array)
-    return self
-  end
-end
-
 module Element
   
   Attributes = {
@@ -35,7 +29,6 @@ module Element
       # return Document.new_element(tag, props) if (`typeof tag == 'string'`) 
       # return Document[tag].set(properties)
       # return Document[tag]
-      puts "getting there"
       @native = tag
   	end
   	
@@ -56,7 +49,6 @@ module Element
   	
   	def get(prop)
 	  	property = Element::Properties[prop]
-      # return (property && property.get) ? property.get.apply(this, Array.slice(arguments, 1)) : this.getProperty(prop);
       return (property && property.respond_to?(:get)) ? property.get(self,prop) : self.get_property(prop)
   	end
   	
