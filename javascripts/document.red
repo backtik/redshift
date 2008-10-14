@@ -28,7 +28,7 @@ class DocumentClass
     return nil
   end
   
-  delegate :title, :window, :inner_width, :inner_height, :outer_width, :inner_width,
+  delegate :title, :inner_width, :inner_height, :outer_width, :inner_width,
   :screen_x, :screen_y, :page_x_offset, :page_y_offset, :scroll_x, :scroll_y,
   :scroll_max_x, :scroll_max_y, :parent, :to => :native
   
@@ -45,6 +45,10 @@ class DocumentClass
   
   def native
    @native_document
+  end
+  
+  def window
+    `#{@native_document}.defaultView || #{@native_document}.parentWindow`
   end
   
   def [](element)
