@@ -10,7 +10,7 @@
 #      finds all elements of tag a with class 'special'
 #
 # Document[element object]
-#     find the extist extended object
+#     find the existing extended object
 #
 
 class DocumentClass
@@ -67,19 +67,15 @@ class DocumentClass
   end
   
   def find_by_id(id)
-    puts `typeof(id)`
-    puts id
-    puts "something" if `document.getElementById('a')`
     id = `document.getElementById(id)`
     return id ? self.find_by_native_element(id) : nil
   end
-  # 
+  
   # def find_all_by_selector(selector)
   #  return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
   # end
-  # 
+  
   def find_by_native_element(element)
-    puts 'finding native element'
     ::Element::Extended.new(element)
   end
   
