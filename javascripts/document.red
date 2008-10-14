@@ -14,16 +14,37 @@
 #
 
 class DocumentClass
-  # delegate :window, :inner_width, :inner_height, :outer_width, :inner_width
-  # :screen_x, :screen_y, :page_x_offset, :page_y_offset, :scroll_x, :scroll_y,
-  # :scroll_max_x, :scroll_max_y, :parent, :to => :native_document
+  NATIVE = `document`
+  
+  def self.delegate(*methods)
+    to = methods.pop[:to]
+    `for(var i=0,l=methods.length;i<l;++i){
+      var a=methods[i]._value;
+      f1 = this.prototype['m$'+a]=function(){console.log(arguments.callee.delegated_method);return c$DocumentClass.c$NATIVE[arguments.callee.delegated_method];};
+      f1.delegated_method = a
+      f2 = this.prototype['m$'+a+'Eql']=function(x){return c$DocumentClass.c$NATIVE[arguments.callee.delegated_method]=x;};
+      f2.delegated_method = a
+    }`
+    return nil
+  end
+  
+  delegate :title, :window, :inner_width, :inner_height, :outer_width, :inner_width,
+  :screen_x, :screen_y, :page_x_offset, :page_y_offset, :scroll_x, :scroll_y,
+  :scroll_max_x, :scroll_max_y, :parent, :to => :native
+  
+  attr :proc
   
   def initialize(doc)
-    @native_document = doc
+    `document.addEventListener('DOMContentLoaded', function(){
+      document.__loaded__ = true
+      #{::Document.proc.call}
+    }, false)`
+		
+   @native_document = doc
   end
   
   def native
-    @native_document
+   @native_document
   end
   
   def [](element)
@@ -46,6 +67,9 @@ class DocumentClass
   end
   
   def find_by_id(id)
+    puts `typeof(id)`
+    puts id
+    puts "something" if `document.getElementById('a')`
     id = `document.getElementById(id)`
     return id ? self.find_by_native_element(id) : nil
   end
@@ -55,59 +79,15 @@ class DocumentClass
   # end
   # 
   def find_by_native_element(element)
+    puts 'finding native element'
     ::Element::Extended.new(element)
   end
-  # 
-  # def loaded?
-  #   
-  # end
+  
+  def ready?(&block)
+    @proc = block
+  end
 end
 
 # Initialize the Document object and make it impossible
 # to initialize additional DocumentClass objects
-Doc = DocumentClass.new(document)
-
-# undef DocumentClass.initialize
-# 
-# Window.implement({
-# 
-#   $$: function(selector){
-#     if (arguments.length == 1 && typeof selector == 'string') return this.document.getElements(selector);
-#     var elements = [];
-#     var args = Array.flatten(arguments);
-#     for (var i = 0, l = args.length; i < l; i++){
-#       var item = args[i];
-#       switch ($type(item)){
-#         case 'element': item = [item]; break;
-#         case 'string': item = this.document.getElements(item, true); break;
-#         default: item = false;
-#       }
-#       if (item) elements.extend(item);
-#     }
-#     return new Elements(elements);
-#   },
-# 
-#   getDocument: function(){
-#     return this.document;
-#   },
-# 
-#   getWindow: function(){
-#     return this;
-#   }
-# 
-# });
-
-# 
-# $.element = function(el, nocash){
-#   $uid(el);
-#   if (!nocash && !el.$family && !(/^object|embed$/i).test(el.tagName)){
-#     var proto = Element.Prototype;
-#     for (var p in proto) el[p] = proto[p];
-#   };
-#   return el;
-# };
-# 
-# $.object = function(obj, nocash, doc){
-#   if (obj.toElement) return $.element(obj.toElement(doc), nocash);
-#   return null;
-# };
+Document = DocumentClass.new(document)

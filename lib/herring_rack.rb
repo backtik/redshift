@@ -21,7 +21,7 @@ module Rack
         update_page(req.POST['red']) if req.post?
       when '.red'
         # [herring_out(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
-        [herring_out(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
+        [translate_to_string_including_ruby(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
       when '.html'
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/html"}]
       when '.js'

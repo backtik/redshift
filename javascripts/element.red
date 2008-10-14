@@ -35,6 +35,7 @@ module Element
       # return Document.new_element(tag, props) if (`typeof tag == 'string'`) 
       # return Document[tag].set(properties)
       # return Document[tag]
+      puts "getting there"
       @native = tag
   	end
   	
