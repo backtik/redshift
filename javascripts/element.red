@@ -113,11 +113,11 @@ module Element
     # end
     
     def has_class?(name)
-      !!"(`#{@native}.className`)".match(name)
+      !!(`$q(#{@native}.className)`).match(name)
     end
     
   	def add_class(name)
-      # `#{@native}.className` = (`#{@native}.className` + ' ' + name) unless self.has_class?(name)
+      `#{@native}.className = (#{@native}.className + ' ' + name)` unless self.has_class?(name)
   		return self
   	end
   end
