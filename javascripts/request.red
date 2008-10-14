@@ -21,33 +21,33 @@ class Request
   attr :on_state_change
   
   def initialize(options)
-    @xhr = Browser.request
-    @options = options.merge(OPTIONS)
+    @xhr = Browser::Request
+    @options = OPTIONS.merge(options)
     @on_state_change = lambda {
-      return unless @xhr[:readyState] == 4 || @running
+      return unless `#{@xhr}.readyState == 4 || #{@running}`
           
       @running = false
       @status  = 0
       
       begin
-        @status = @xhr[:status]
+        @status = `#{@xhr}.status`
       rescue 
         return nil
       end
         
       if self.success?
-        self.success!(@xhr[:responseText], @xhr[:responseXML])
+        self.success!(`#{@xhr}.responseText`, `#{@xhr}.responseXML`)
       else
         @response = {:text => nil, :xml => nil};
   			self.fail!
       end
     
-      @xhr.onreadystatechange = nil
+      `#{@xhr}.onreadystatechange` = nil
     }
   end
   
   def headers
-    @options[:$_contents][:headers]
+    @options[:headers]
   end
   
 	def success?
@@ -76,7 +76,7 @@ class Request
   
   def check
     return true unless @running
-    case @options[:$_contents][:link]
+    case @options[:link]
     when 'cancel'
        self.cancel
        return true
@@ -116,13 +116,13 @@ class Request
 			data = nil
 		end
     
-    # use the browser's built-in XHR abiliy to open a new 
-    @xhr.open(@options[:$_contents][:method], @options[:$_contents][:url], @options[:$_contents][:async])
+    # use the browser's built-in XHR abiliy to open a new request
+    `#{@xhr}.open#{(@options[:method]}, #{@options[:url]}, #{@options[:async]})`
     
-    @xhr[:onreadystatechange] = self.on_state_change
+    `#{@xhr}.onreadystatechange` = self.on_state_change
     
     # use the brower's built-in XHR ability to send the data
-    @xhr.send(data)
+    `#{@xhr}.send(data)`
 
     self.on_state_change unless @options[:async]
 		return self
@@ -132,8 +132,8 @@ class Request
     return self unless @running
     @running = false
     @xhr.abort
-    @xhr[:onreadystatechange] = nil
-    @xhr = Browser.request
+    `#{@xhr}.onreadystatechange` = nil
+    @xhr = Browser::Request
     self.fire_event('cancel')
     return self
   end  
