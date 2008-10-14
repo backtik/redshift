@@ -1,13 +1,22 @@
-# Browser represets the browser object and is used to store properties about the user's browser.  The properties are stored
+# +Browser+ is used to store properties about the user's browser.  The properties are stored
 # in named Hashes inside of Browser
-# Browser::Engine[:name] returns the name of engine as a string. Will be one of 'presto', 'trident', 'webkit', 'gecko'
+# 
+# Browser::Engine[:name] returns the name of engine as a string. Will be one of 'presto', 'trident', 'webkit', 'gecko', 'ipod'
+#
 # Browser::Engine[:version] returns the version of browser engine as a integer
+#
 # Browser::Platform[:name] returns the platform name as a string. Will be one of 'mac', 'win', 'linux', 'other'
+#
 # Browser::Features[:xpath] true if the browser has xpath abilities
+#
 # Browser::Features[:air] true if the browser has air abilities
+#
 # Browser::Features[:xhr] true if the browser has xhr abilities
+#
 # Browser::Plugins
+#
 # Browser::Request returns a new object for XML HTTP Requests using the method supported by the browser
+#
 module Browser
   Engine   = {:name => 'unknown', :version => '' }
 	Platform = {:name => `$q((navigator.platform.match(/mac|win|linux/i) || ['other'])[0].toLowerCase())` }
