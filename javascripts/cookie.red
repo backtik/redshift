@@ -1,90 +1,142 @@
 # Class +Cookie+ governs the writing and accessing of cookies in the browser.
 # 
+# A cookie is a key-value pair stored by your browser as text data. If you
+# know a cookie's key, you can read or overwrite its value, or reassign any of
+# a number of parameters.
+# 
+# Instances of class +Cookie+ are temporary holders for browser-based cookie
+# data. When you create a new +Cookie+ object using <tt>Cookie.new</tt> or
+# update an existing +Cookie+ object using <tt>Cookie#update</tt>, class
+# +Cookie+ writes the key-value pair and the cookie's parameters to the
+# browser's cookie file. You can then read the value of the cookie immediately
+# or during subsequent visits using <tt>Cookie.read</tt>.
+# 
+# The following parameters can be set for a +Cookie+ object:
+# 
+# *Required*
+# _key_::   The unique (per domain) identifier by which you identify a cookie.
+# _value_:: The string of data associated with a given key.
+# 
+# *Optional*
+# _duration_:: The amount of time (in days) before the cookie should expire.
+# _domain_::   The domain to which the cookie should be sent.
+# _path_::     The path, relative to the domain, where the cookie is active.
+# _secure_::   If +true+, the browser will use SSL when sending the cookie.
+# 
+# The browser can hold up to 20 cookies from a single domain.
+# 
 class Cookie
   OPTIONS = {
-    :path     => false,
-    :domain   => false,
-    :duration => false,
+    :duration => nil,
+    :domain   => nil,
+    :path     => nil,
     :secure   => false,
     :document => Document
   }
   
+  attr_accessor :key, :value, :duration, :domain, :path, :secure, :document
+  
   # call-seq:
   #   Cookie.new(key, value, options = {}) -> cookie
   # 
-  # Returns a new +Cookie+ object with the given parameters.
+  # Returns a new +Cookie+ object with the given parameters and stores the
+  # data in the browser as cookie data. If the browser already has a cookie
+  # that matches _key_, that cookie's parameters will be overwritten.
   # 
-  #   Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   Cookie.new(:user_jds, '2237115568')   #=> #<Cookie: @key="user_jds" @value="2237115568">
+  #   Cookie.read(:user_jds)                #=> '2237115568'
+  #   
+  #   Cookie.new(:user_jds, '8557acb0')     #=> #<Cookie: @key="user_jds" @value="8557acb0">
+  #   Cookie.read(:user_jds)                #=> '8557acb0'
   # 
   def initialize(key, value, options = {})
-    @key     = key
-    @options = OPTIONS.merge(options)
-    return self.update(value)
+    self.key = key
+    self.update(value, OPTIONS.merge(options))
   end
   
   # call-seq:
-  #   cook.destroy -> cook
+  #   Cookie.read(key) -> string
   # 
-  # Returns _cook_, expired and overwritten with the empty string.
+  # Returns the string value of the cookie named _key_, or +nil+ if no such
+  # cookie exists.
   # 
-  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   c = Cookie.new(:user_jds, '2237115568', :domain => '.example.com')
   #   
-  #   c.destroy   #=> #<Cookie:0x3f51f6>
+  #   Cookie.read(:user_jds)   #=> '2237115568'
+  # 
+  # This method can be used to test whether a cookie with the name _key_
+  # exists in the browser.
+  # 
+  #   Cookie.new(:user_jds, '8557acb0') unless Cookie.read(:user_jds)
+  # 
+  def self.read(key)
+    value = `#{OPTIONS[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}._value + '=([^;]*)')`
+    return value ? `$q(decodeURIComponent(value[1]))` : nil
+  end
+  
+  # call-seq:
+  #   Cookie.store(cookie) -> cookie
+  # 
+  # Writes the given cookie to the browser, then returns _cookie_. This method
+  # is called internally by <tt>Cookie.new</tt> and <tt>Cookie#update</tt>.
+  # 
+  def self.store(cookie)
+    `var str = cookie.m$key()._value + '=' + encodeURIComponent(cookie.m$value()._value)`
+    `str += '; domain=' + cookie.m$domain()._value` if cookie.domain
+    `str += '; path='   + cookie.m$path()._value`   if cookie.path
+    if cookie.duration
+      `date = new Date()`
+      `date.setTime(date.getTime() + cookie.m$duration() * 86400000)`
+      `str += '; expires=' + date.toGMTString()`
+    end
+    `str += '; secure'` if cookie.secure
+    
+    `#{cookie.document.native}.cookie = str`
+    return cookie
+  end
+  
+  # call-seq:
+  #   cookie.destroy -> true
+  # 
+  # Expires _cookie_, then returns +true+.
+  # 
+  #   c = Cookie.new(:user_jds, '2237115568', :duration => 14)
+  #   
+  #   c.destroy                 #=> true
+  #   Cookie.read(:user_jds)    #=> nil
   # 
   def destroy
     self.update('',:duration => -1)
   end
   
   # call-seq:
-  #   cook.inspect -> string
+  #   cookie.inspect -> string
   # 
-  # Returns a string representing _cook_ and its data.
+  # Returns a string representing _cookie_ and its key-value data.
   # 
-  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   c = Cookie.new(:user_jds, '2237115568', :duration => 14)
   #   
-  #   c.inspect   #=> #<Cookie: @key="login" @value="2237115568">
+  #   c.inspect   #=> #<Cookie: @key="user_jds" @value="2237115568">
   # 
   def inspect
-    "#<Cookie: @key=#{@key.inspect} @value=#{@value.inspect}>"
+    "#<Cookie: @key=#{self.key.inspect} @value=#{self.value.inspect}>"
   end
   
   # call-seq:
-  #   cook.read -> string
+  #   cookie.update(value, options = {}) -> cookie
   # 
-  # Returns _cook_'s string value.
+  # Updates _cookie_ with the given parameters, then writes the cookie data to
+  # the browser.
   # 
-  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   c = Cookie.new(:user_jds, '2237115568', :duration => 14)
   #   
-  #   c.read    #=> "2237115568"
+  #   Cookie.read(:user_jds)    #=> '2237115568'
+  #   c.update('8557acb0')      #=> #<Cookie: @key="user_jds" @value="8557acb0">
+  #   Cookie.read(:user_jds)    #=> '8557acb0'
   # 
-  def read
-    value = `#{@options[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(@key)}._value + '=([^;]*)')`
-    return value ? `$q(decodeURIComponent(value[1]))` : ''
-  end
-  
-  # call-seq:
-  #   cook.update(value, options = {}) -> cook
-  # 
-  # Updates _cook_ with the given parameters.
-  # 
-  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
-  #   
-  #   c.update('8557acb0')    #=> #<Cookie: @key="login" @value="8557acb0">
-  # 
-  def update(str, options = {})
-    @options.update(options)
-    @value = str
-    str = `$q(encodeURIComponent(str._value))`
-    str += "; domain=#{@options[:domain]}" if @options[:domain]
-    str += "; path=#{@options[:path]}"     if @options[:path]
-    if @options[:duration]
-      `date = new Date()`
-      `date.setTime(date.getTime() + #{@options[:duration]} * 24 * 60 * 60 * 1000)`
-      str += "; expires=#{`$q(date.toGMTString())`}"
-    end
-    str += '; secure' if @options[:secure]
-    
-    `#{@options[:document].native}.cookie = #{@key}._value + '=' + str._value`
-    return self
+  def update(value, options = {})
+    self.value = value
+    options.each {|k,v| self.send("#{k}=",v) }
+    Cookie.store(self)
   end
 end
