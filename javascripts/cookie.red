@@ -14,6 +14,8 @@ class Cookie
   # 
   # Returns a new +Cookie+ object with the given parameters.
   # 
+  #   Cookie.new(:login, '2237115568', :domain => '.example.com')
+  # 
   def initialize(key, value, options = {})
     @key     = key
     @options = OPTIONS.merge(options)
@@ -25,6 +27,10 @@ class Cookie
   # 
   # Returns _cook_, expired and overwritten with the empty string.
   # 
+  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   
+  #   c.destroy   #=> #<Cookie:0x3f51f6>
+  # 
   def destroy
     self.update('',:duration => -1)
   end
@@ -34,14 +40,22 @@ class Cookie
   # 
   # Returns a string representing _cook_ and its data.
   # 
+  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   
+  #   c.inspect   #=> #<Cookie: @key="login" @value="2237115568">
+  # 
   def inspect
     "#<Cookie: @key=#{@key.inspect} @value=#{@value.inspect}>"
   end
   
   # call-seq:
-  #   cook.read -> string or nil
+  #   cook.read -> string
   # 
   # Returns _cook_'s string value.
+  # 
+  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   
+  #   c.read    #=> "2237115568"
   # 
   def read
     value = `#{@options[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(@key)}._value + '=([^;]*)')`
@@ -52,6 +66,10 @@ class Cookie
   #   cook.update(value, options = {}) -> cook
   # 
   # Updates _cook_ with the given parameters.
+  # 
+  #   c = Cookie.new(:login, '2237115568', :domain => '.example.com')
+  #   
+  #   c.update('8557acb0')    #=> #<Cookie: @key="login" @value="8557acb0">
   # 
   def update(str, options = {})
     @options.update(options)
