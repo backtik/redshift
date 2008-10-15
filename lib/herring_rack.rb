@@ -28,6 +28,8 @@ module Rack
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/javascript"}]
       when '.css'
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/css"}]
+      when '.ico'
+        ['', {"Content-Type" => "image/png"}]
       else
         ["",{}]
       end

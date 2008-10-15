@@ -26,7 +26,7 @@ var Builder = {
 
 	scripts: {
 		source: {
-			''      : ['browser'],
+			'core'      : ['browser'],
       // 'Native'    : ['Array', 'Function', 'Number', 'String', 'Hash', 'Event'],
       // 'Class'     : ['Class', 'Class.Extras'],
       // 'Element'   : ['Element', 'Element.Event', 'Element.Style', 'Element.Dimensions'],
@@ -36,7 +36,7 @@ var Builder = {
 		},
 
 		specs: {
-			''      : ['browser'],
+			'core'      : ['browser'],
       // 'Native'    : ['Array', 'String', 'Function', 'Number', 'Hash'],
       // 'Class'     : ['Class', 'Class.Extras'],
       // 'Element'   : ['Element', 'Element.Style'],
@@ -80,7 +80,7 @@ var Builder = {
 			if (files[i] == file) return false;
 		}
 		this.included[type][folder].push(file);
-		return document.writeln('\t<script type="text/javascript" src="' + this.root + this.paths[type] + '/' + folder + '/' + file + '.js"></script>');
+		return document.writeln('\t<script type="text/javascript" src="' + this.root + this.paths[type] + '/' + folder + '/' + file + '.red"></script>');
 	},
 
 	includeFolder: function(type, folder){
