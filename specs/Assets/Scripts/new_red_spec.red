@@ -78,6 +78,16 @@
 # Using:
 # RedSpec is intended for use with Red Herring, the framework-independant Red runner (url)
 
+module DSL
+  def should (expression)
+    expression
+  end
+  
+  def equal(other)
+    true
+  end
+end
+
 # Just stores the @@spec_list class variables. @@spec_list is an array of
 # all the specs created with Spec.describe. This might go away with everthing nested inside
 # of class Spec
@@ -164,6 +174,7 @@ module Specs
     def executor
       ::Specs::Executor.new(self)
     end
+    
   end
   
   # responsible for gathering all specs from RedSpec.specs (or a subset if you're rerunning
