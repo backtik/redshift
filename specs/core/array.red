@@ -1,11 +1,9 @@
-describe Array do
-  self.it 'intersects' do
-    ([1,1,3,5] & [1,2,3]).should_equal([1, 3])
+Spec.describe Array do |it|
+  it.can 'intersect' do
+    ([1,1,3,5] & [1,2,3]) == ([1, 3])
   end
   
-  self.it 'sets values with bracket notation' do
-    a = []
-    a[0] = 1
-    a.should_equal([1])
+  it.can 'sort' do
+    [3,2,1].sort == [1,2,3]
   end
 end

@@ -1,34 +1,52 @@
 class Spec
-  attr_accessor :name, :block
+  attr_accessor :name, :block, :buffer
   
-  def initialize(name, &block)
-    @name  = name.to_s
-    @block = block
+  def self.describe(name, &block)
+    s = Spec.new(name, &block)
+    block.call(s)
+    s.to_js_spec
   end
   
-  def block_to_js_object
-    
+  def initialize(name, &block)
+    @name   = name.to_s
+    @block  = block
+    @buffer = []
   end
   
   def to_js_spec
-    puts `#{@block}._block`
-    `describe(#{@name}._value, {})`
+    `a = {}`
+    self.buffer.each do |pair|
+      `a[#{pair[0]}] = #{pair[1]}`
+    end
+    `describe(#{@name}._value, a)`
   end
-end
-
-# calls JSSpec function 'describe'
-# describe('what', {
-#         'one': function() {
-#           test experssions
-#         },
-#         'two': function() {
-#           test experssions
-#         }
-# })
-def it(name, &block)
-  puts `#{block}._block`
-end
-
-def describe(what, &block)
-  Spec.new(what, &block).to_js_spec
+  
+  def value_of(expression)
+    `JSSpec.DSL.value_of(expression)`
+  end
+  
+  def should_be(value)
+    `#{self}.should_be(value)`
+  end
+  
+  def verb(display_name, name, &block)
+    self.buffer << [(display_name + ' ' + name), `#{block}._block`]
+  end
+  
+  def should(name, &block)
+    self.verb('should', name, &block)
+    # self.buffer << [('can ' + name), `#{block}._block`]
+  end
+  
+  def can(name, &block)
+    self.verb('can', name, &block)
+  end
+  
+  def needs(name, &block)
+    self.verb('needs', name, &block)
+  end
+  
+  def is(name, &block)
+   self.verb('is', name, &block)
+  end
 end
