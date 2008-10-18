@@ -136,6 +136,10 @@ class Spec
     self.verb("can", description, &block)
   end
   
+  def returns(description, &block)
+     self.verb("returns", description, &block)
+  end
+  
   def to_heading_html
     "<li id='spec_#{self.object_id.to_s}_list'><h3><a href='#spec_#{self.object_id.to_s}'> #{RedSpec.escapeTags(self.name)}</a> [<a href='?rerun=#{self.name}'>rerun</a>]</h3></li>"
   end
@@ -220,6 +224,7 @@ module Specs
       end
       
       self.ordered_executor.run
+      self.logger.on_runner_end
     end
 
     #     def get_spec_by_id          ; end
@@ -239,8 +244,8 @@ module Specs
     
     def initialize(example_to_run)
       self.example  = example_to_run
-      self.on_start = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_start".intern
-      self.on_end   = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_end"
+      # self.on_start = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_start".intern
+      # self.on_end   = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_end"
     end
     
     def run
@@ -252,6 +257,14 @@ module Specs
       
       result = self.example.block.call
       
+      if result
+        self.type = 'success'
+        puts "woot!"
+      else
+        self.type = 'failure'
+        puts 'FAILWHALE'
+      end
+            
       if self.example.class.to_s.downcase.split('::')[1] == 'example'
         ::Specs::Logger.on_example_end(self.example)
       else
@@ -304,12 +317,12 @@ module Specs
       title = `document.title`
       self.started_at = Time.now
       
-      container = `document.getElementById('jsspec_container')`
+      container = `document.getElementById('redspec_container')`
       if container
         `container.innerHTML = ""`
       else
         `container = document.createElement("DIV")`
-        `container.id = "jsspec_container"`
+        `container.id = "redspec_container"`
         `document.body.appendChild(container)`
       end
     
@@ -375,6 +388,10 @@ module Specs
         #   return true
         # }`
       end
+    end
+    
+    def on_runner_end
+      puts "it's over!"
     end
         
     def self.on_spec_start(spec)
