@@ -78,6 +78,15 @@
 # Using:
 # RedSpec is intended for use with Red Herring, the framework-independant Red runner (url)
 
+
+class String
+  # returns the underlying javascript value of a string as a native javascript object
+  def js
+    `#{self}._value`
+  end
+end
+
+
 module DSL
   def should (expression)
     expression
@@ -128,7 +137,7 @@ class Spec
   end
   
   def to_heading_html
-    "<li id='spec_#{self.object_id}_list'><h3><a href='#spec_#{self.object_id}'> #{RedSpec.escapeTags(self.name)}</a> [<a href='?rerun=#{self.name}'>rerun</a>]</h3></li>"
+    "<li id='spec_#{self.object_id.to_s}_list'><h3><a href='#spec_#{self.object_id.to_s}'> #{RedSpec.escapeTags(self.name)}</a> [<a href='?rerun=#{self.name}'>rerun</a>]</h3></li>"
   end
   
   def examples_to_html
@@ -140,9 +149,9 @@ class Spec
   end
   
   def to_html_with_examples
-    "<li id='spec_#{self.object_id}'>
+    "<li id='spec_#{self.object_id.to_s}'>
        <h3>#{RedSpec.escape_tags(self.name)} [<a href='?rerun=#{self.name}'>rerun</a>]</h3>
-       <ul id='spec_#{self.object_id}_examples' class='examples'>
+       <ul id='spec_#{self.object_id.to_s}_examples' class='examples'>
          #{self.examples_to_html}
        </ul>
      </li>
@@ -165,7 +174,7 @@ module Specs
     end
     
     def to_html
-      "<li id='example_#{self.object_id}'>
+      "<li id='example_#{self.object_id.to_s}'>
         <h4>#{RedSpec.escape_tags(self.name)}</h4>
        </li>
       "
@@ -226,32 +235,56 @@ module Specs
   # and stores their state (success/failure) and any
   # failure messages, normalized for browser differences
   class Executor
-    attr_accessor :example, :type, :containing_ordered_executor
+    attr_accessor :example, :type, :containing_ordered_executor, :on_start, :on_end
     
     def initialize(example_to_run)
-      self.example = example_to_run
+      self.example  = example_to_run
+      self.on_start = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_start".intern
+      self.on_end   = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_end"
     end
     
     def run
-    result = self.example.block.call
-    self.type = 'success'
-    rescue
-      self.type = 'failure'
+      if self.example.class.to_s.downcase.split('::')[1] == 'example'
+        ::Specs::Logger.on_example_start(self.example)
+      else
+        ::Specs::Logger.on_spec_start(self.example)
+      end
+      
+      result = self.example.block.call
+      
+      if self.example.class.to_s.downcase.split('::')[1] == 'example'
+        ::Specs::Logger.on_example_end(self.example)
+      else
+        ::Specs::Logger.on_spec_end(self.example)
+      end
+      
+      self.containing_ordered_executor.next
+      
+      # self.type = 'success'
+      # rescue
+      #   self.type = 'failure'
     end
   end
   
   
   class OrderedExecutor
-    attr_accessor :queue
+    attr_accessor :queue, :at
     
     def initialize
       @queue = []
+      self.at = 0
     end
     
     def add_executor(executor)
       # some other stuff with callbacks? no idea
       executor.containing_ordered_executor = self
       self.queue << executor
+    end
+    
+    # Runs the next Executor in the queue.
+    def next
+      self.at += 1
+      self.queue[self.at].run unless self.at >= self.queue.size
     end
     
     def run
@@ -344,7 +377,7 @@ module Specs
       end
     end
         
-    def on_spec_start(spec)
+    def self.on_spec_start(spec)
       `spec_list = document.getElementById("spec_" + spec.id + "_list")`
     	`spec_log = document.getElementById("spec_" + spec.id)`
 
@@ -352,17 +385,18 @@ module Specs
     	`spec_log.className = "ongoing"`
     end
     
-    def on_spec_end(spec)
+    def self.on_spec_end(spec)
       
     end
     
-    def on_example_start(example)
-      `li = document.getElementById("example_" + #{example.id})`
-    	`li.className = "ongoing"`
+    def self.on_example_start(example)
+      puts "called Logger.on_example_start"
+      # `li = document.getElementById("example_" + #{example.object_id.to_s})`
+      # `li.className = "ongoing"`
     end
     
-    def on_example_end(example)
-      
+    def self.on_example_end(example)
+       puts "called Logger.on_example_end"
     end
     
   end
