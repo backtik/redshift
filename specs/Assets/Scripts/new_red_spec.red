@@ -259,10 +259,10 @@ module Specs
       
       if result
         self.type = 'success'
-        puts "woot!"
+        puts "it #{self.example.name} succeeded"
       else
         self.type = 'failure'
-        puts 'FAILWHALE'
+        puts "it #{self.example.name} failed"
       end
             
       if self.example.class.to_s.downcase.split('::')[1] == 'example'
@@ -391,7 +391,7 @@ module Specs
     end
     
     def on_runner_end
-      puts "it's over!"
+      # puts "it's over!"
     end
         
     def self.on_spec_start(spec)
@@ -407,13 +407,13 @@ module Specs
     end
     
     def self.on_example_start(example)
-      puts "called Logger.on_example_start"
+      # puts "called Logger.on_example_start"
       # `li = document.getElementById("example_" + #{example.object_id.to_s})`
       # `li.className = "ongoing"`
     end
     
     def self.on_example_end(example)
-       puts "called Logger.on_example_end"
+       # puts "called Logger.on_example_end"
     end
     
   end
