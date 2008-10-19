@@ -79,23 +79,17 @@
 # RedSpec is intended for use with Red Herring, the framework-independant Red runner (url)
 
 
-class String
-  # returns the underlying javascript value of a string as a native javascript object
-  def js
-    `#{self}._value`
-  end
-end
-
-
 module DSL
-  def should (expression)
-    expression
+  def should_equal(other)
+    raise ::Specs::Failure unless self == other
   end
   
-  def equal(other)
-    true
+  def should_not_equal(other)
+    raise ::Specs::Failure unless self if other
   end
 end
+
+Array.include(DSL)
 
 # Just stores the @@spec_list class variables. @@spec_list is an array of
 # all the specs created with Spec.describe. This might go away with everthing nested inside
@@ -168,6 +162,8 @@ class Spec
 end
 
 module Specs
+  class Failure < Exception
+  end
   # # each block within a spec is an example.  typicall referenced with 'it' and one
   # # of the action verb methods ('should', 'can', 'has', etc)
   class Example
@@ -243,22 +239,26 @@ module Specs
   # and stores their state (success/failure) and any
   # failure messages, normalized for browser differences
   class Executor
-    attr_accessor :example, :type, :containing_ordered_executor, :on_start, :on_end
+    attr_accessor :example, :type, :containing_ordered_executor, :on_start
     
     def initialize(example)
       self.example  = example
     end
     
     def run
-      if self.example.class.to_s.downcase.split('::')[1] == 'example'
-        ::Specs::Logger.on_example_start(self.example)
-      else
-        ::Specs::Logger.on_spec_start(self.example)
+      ::Specs::Logger.on_example_start(self.example)
+
+      
+      begin
+        self.example.block.call
+        result = true
+        puts 'good'
+      rescue ::Specs::Failure
+        result = false
       end
       
-      result = self.example.block.call
-      
       if result
+        puts "it worked"
         self.type = 'success'
         self.example.result = 'success'
       else
@@ -267,11 +267,7 @@ module Specs
         self.example.spec.runner.total_failures += 1
       end
             
-      if self.example.class.to_s.downcase.split('::')[1] == 'example'
-        ::Specs::Logger.on_example_end(self.example)
-      else
-        ::Specs::Logger.on_spec_end(self.example)
-      end
+      ::Specs::Logger.on_example_end(self.example)
       
       self.containing_ordered_executor.next
     end
@@ -333,6 +329,7 @@ module Specs
         ' <li><span id="total_examples">' + #{self.runner.total_examples} + '</span> examples</li>',
         ' <li><span id="total_failures">0</span> failures</li>',
         ' <li><span id="total_errors">0</span> errors</li>',
+        ' <li><span id="total_pending">0</span> pending</li>',
         ' <li><span id="progress">0</span>% done</li>',
         ' <li><span id="total_elapsed">0</span> secs</li>',
         '</ul>',
