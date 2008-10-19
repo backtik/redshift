@@ -112,7 +112,7 @@ class RedSpec
 end
 
 class Spec  
-  attr_accessor :name, :block, :examples
+  attr_accessor :name, :block, :examples, :runner
   
   def self.describe(name, &block)
     s = Spec.new(name, &block)
@@ -129,7 +129,7 @@ class Spec
   # the meat of the verb calls on 'it' ('can', 'has', 'does', 'wants', etc).
   # allows us to add new verbs and stay DRY.
   def verb(display_verb, description, &block)
-    self.examples << ::Specs::Example.new((display_verb + " " + description), &block)
+    self.examples << ::Specs::Example.new((display_verb + " " + description), self, &block)
   end
   
   def can(description, &block)
@@ -141,7 +141,7 @@ class Spec
   end
   
   def to_heading_html
-    "<li id='spec_#{self.object_id.to_s}_list'><h3><a href='#spec_#{self.object_id.to_s}'> #{RedSpec.escapeTags(self.name)}</a> [<a href='?rerun=#{self.name}'>rerun</a>]</h3></li>"
+    "<li id=\"spec_#{self.object_id.to_s}_list\"><h3><a href=\"#spec_#{self.object_id.to_s}\"> #{RedSpec.escapeTags(self.name)}</a> [<a href=\"?rerun=#{self.name}\">rerun</a>]</h3></li>"
   end
   
   def examples_to_html
@@ -153,9 +153,9 @@ class Spec
   end
   
   def to_html_with_examples
-    "<li id='spec_#{self.object_id.to_s}'>
-       <h3>#{RedSpec.escape_tags(self.name)} [<a href='?rerun=#{self.name}'>rerun</a>]</h3>
-       <ul id='spec_#{self.object_id.to_s}_examples' class='examples'>
+    "<li id=\"spec_#{self.object_id.to_s}\">
+       <h3>#{RedSpec.escape_tags(self.name)} [<a href=\"?rerun=#{self.name}\">rerun</a>]</h3>
+       <ul id=\"spec_#{self.object_id.to_s}_examples\" class=\"examples\">
          #{self.examples_to_html}
        </ul>
      </li>
@@ -171,14 +171,15 @@ module Specs
   # # each block within a spec is an example.  typicall referenced with 'it' and one
   # # of the action verb methods ('should', 'can', 'has', etc)
   class Example
-    attr_accessor :block, :name
-    def initialize(name, &block)
-      @name = name
+    attr_accessor :block, :name, :result, :spec
+    def initialize(name, spec, &block)
+      @name  = name
+      @spec  = spec
       @block = block
     end
     
     def to_html
-      "<li id='example_#{self.object_id.to_s}'>
+      "<li id=\"example_#{self.object_id.to_s}\">
         <h4>#{RedSpec.escape_tags(self.name)}</h4>
        </li>
       "
@@ -193,7 +194,7 @@ module Specs
   # responsible for gathering all specs from RedSpec.specs (or a subset if you're rerunning
   # a particual spec) into one place and running them.
   class Runner
-    attr_accessor :specs, :specs_map, :total_examples, :logger, :ordered_executor
+    attr_accessor :specs, :specs_map, :total_examples, :logger, :ordered_executor, :total_failures, :total_errors
     def initialize(arg_specs, logger)
       logger.runner = self
       @logger = logger
@@ -201,6 +202,7 @@ module Specs
       @specs = []
       @specs_map = {}
       @total_examples = 0
+      self.total_failures = 0
       self.add_all_specs(arg_specs)
     end
     
@@ -209,6 +211,7 @@ module Specs
     end
     
     def add_spec(spec)
+      spec.runner = self
       self.specs << spec
       # self.specs_map[spec.object_id] = spec
       self.total_examples += spec.examples.size
@@ -242,10 +245,8 @@ module Specs
   class Executor
     attr_accessor :example, :type, :containing_ordered_executor, :on_start, :on_end
     
-    def initialize(example_to_run)
-      self.example  = example_to_run
-      # self.on_start = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_start".intern
-      # self.on_end   = "on_#{example_to_run.class.to_s.downcase.split('::')[1]}_end"
+    def initialize(example)
+      self.example  = example
     end
     
     def run
@@ -259,10 +260,11 @@ module Specs
       
       if result
         self.type = 'success'
-        puts "it #{self.example.name} succeeded"
+        self.example.result = 'success'
       else
         self.type = 'failure'
-        puts "it #{self.example.name} failed"
+        self.example.result = 'exception'
+        self.example.spec.runner.total_failures += 1
       end
             
       if self.example.class.to_s.downcase.split('::')[1] == 'example'
@@ -272,10 +274,6 @@ module Specs
       end
       
       self.containing_ordered_executor.next
-      
-      # self.type = 'success'
-      # rescue
-      #   self.type = 'failure'
     end
   end
   
@@ -316,7 +314,7 @@ module Specs
     def on_runner_start
       title = `document.title`
       self.started_at = Time.now
-      
+      # self.runnetotal_failures = 0
       container = `document.getElementById('redspec_container')`
       if container
         `container.innerHTML = ""`
@@ -391,7 +389,7 @@ module Specs
     end
     
     def on_runner_end
-      # puts "it's over!"
+      `document.getElementById("total_failures").innerHTML = #{self.runner.total_failures}`
     end
         
     def self.on_spec_start(spec)
@@ -407,13 +405,13 @@ module Specs
     end
     
     def self.on_example_start(example)
-      # puts "called Logger.on_example_start"
-      # `li = document.getElementById("example_" + #{example.object_id.to_s})`
-      # `li.className = "ongoing"`
+      `li = document.getElementById("example_" + #{example.object_id.to_s})`
+      `li.className = "ongoing"`
     end
     
     def self.on_example_end(example)
-       # puts "called Logger.on_example_end"
+      `li = document.getElementById("example_" + #{example.object_id.to_s})`
+      `li.className = #{example.result}._value`
     end
     
   end

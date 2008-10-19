@@ -6,6 +6,6 @@ Spec.describe Hash do |it|
   end
   
   it.returns 'the deleted object when deleting by key' do
-    {:a => 1, :b => 2}.delete(:a) == 2
+    {:a => 1, :b => 2}.delete(:a) == 1
   end
 end
