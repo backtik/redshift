@@ -15,14 +15,11 @@
 #
 # Browser::Plugins
 #
-# Browser::Request returns a new object for XML HTTP Requests using the method supported by the browser
-#
 module Browser
   Engine   = {:name => 'unknown', :version => '' }
-	Platform = {:name => `$q((navigator.platform.match(/mac|win|linux/i) || ['other'])[0].toLowerCase())` }
-	Features = {:xpath => `!!(document.evaluate)`, :air => `!!(window.runtime)` }
-	Plugins  = {}
-	Request  = `typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
+  Platform = {:name => `$q((navigator.platform.match(/mac|win|linux/i) || ['other'])[0].toLowerCase())` }
+  Features = {:xpath => `!!(document.evaluate)`, :air => `!!(window.runtime)` }
+  Plugins  = {}
   
   # Browser sniffing. Runs once at library load time to populate
   # singleton Browser class object with correct ::Engine data
@@ -35,9 +32,8 @@ module Browser
   elsif `document.getBoxObjectFor != null`
     Engine = {:name => 'gecko', :version => (`document.getElementsByClassName`) ? 19 : 18}
   end
-
+  
   Platform[:name] = 'ipod' if defined? `window.orientation`
-  Features[:xhr]  = !!Browser::Request
   
   # call-seq:
   #    Engine.presto? -> true or false

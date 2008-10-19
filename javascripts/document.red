@@ -13,7 +13,7 @@
 #     find the existing extended object
 #
 
-class DocumentClass
+module Document
   NATIVE = `document`
   
   def self.delegate(*methods)
@@ -34,24 +34,17 @@ class DocumentClass
   
   attr :proc
   
-  def initialize(doc)
-    `document.addEventListener('DOMContentLoaded', function(){
-      document.__loaded__ = true
-      #{::Document.proc.call}
-    }, false)`
-		
-   @native_document = doc
+  `document.head=document.getElementsByTagName('head')[0]`
+  
+  def self.native
+    `document`
   end
   
-  def native
-   @native_document
-  end
-  
-  def window
+  def self.window
     `#{@native_document}.defaultView || #{@native_document}.parentWindow`
   end
   
-  def [](element)
+  def self.[](element)
     case element.class
     when ::String
       return self.find_by_string(element)
@@ -66,11 +59,11 @@ class DocumentClass
     end
   end
   
-  def find_by_string(string)
+  def self.find_by_string(string)
     `string.toString().match(/^#[a-zA-z_]*$/)` ? self.find_by_id(`string.toString().replace('#','')`) : self.find_all_by_selector(string)
   end
   
-  def find_by_id(id)
+  def self.find_by_id(id)
     id = `document.getElementById(id)`
     return id ? self.find_by_native_element(id) : nil
   end
@@ -79,15 +72,15 @@ class DocumentClass
   #  return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
   # end
   
-  def find_by_native_element(element)
+  def self.find_by_native_element(element)
     ::Element::Extended.new(element)
   end
   
-  def ready?(&block)
+  def self.ready?(&block)
     @proc = block
+    `document.addEventListener('DOMContentLoaded', function(){
+      document.__loaded__ = true
+      #{@proc.call}
+    }.m$(this), false)`
   end
 end
-
-# Initialize the Document object and make it impossible
-# to initialize additional DocumentClass objects
-Document = DocumentClass.new(document)
