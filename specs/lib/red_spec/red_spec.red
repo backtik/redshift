@@ -162,8 +162,8 @@ class Spec
 end
 
 module Specs
-  class Failure < Exception
-  end
+  class Failure < Exception; end
+  
   # # each block within a spec is an example.  typicall referenced with 'it' and one
   # # of the action verb methods ('should', 'can', 'has', etc)
   class Example
@@ -252,9 +252,10 @@ module Specs
       begin
         self.example.block.call
         result = true
-        puts 'good'
+        puts "good"
       rescue ::Specs::Failure
         result = false
+        puts "bad"
       end
       
       if result
