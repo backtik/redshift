@@ -1,5 +1,6 @@
 class Request
   # include Event
+  include Chainable
   
   METHODS = %w(GET POST PUT DELETE)
   OPTIONS = {
@@ -191,7 +192,7 @@ class Request
   # Fires _req_'s "complete" and "success" events, then returns _req_.
   # 
   def success!(text, xml)
-    self.fire_event('complete', [text, xml]).fire_event('success', [text, xml])
+    self.fire_event('complete', [text, xml]).fire_event('success', [text, xml]).call_chain
   end
   
   # call-seq:
