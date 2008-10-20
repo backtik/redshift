@@ -1,2 +1,1 @@
-a = [1,2,3] * ':'
-puts a == '1:2:3'
+puts %w(a b c).size

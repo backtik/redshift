@@ -64,10 +64,11 @@ end
 
 String.include(DSL::Base)
 Array.include(DSL::Base)
+Numeric.include(DSL::Base)
 Array.include(DSL::Array)
 nil.extend(DSL::Base)
-true.extend(DSL::Base)
-false.extend(DSL::Base)
+TrueClass.extend(DSL::Base)
+FalseClass.extend(DSL::Base)
 
 
 # Just stores the @@spec_list class variables. @@spec_list is an array of

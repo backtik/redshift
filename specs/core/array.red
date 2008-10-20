@@ -31,11 +31,10 @@ Spec.describe Array do |it|
     ([1,2] << 'c' << 'd' << [3,4]).should_equal([1, 2, "c", "d", [3, 4]])
   end
   
-  # BROKE
   it.can 'compare itself to another array' do
-    # (['a','a','c'] <=> ['a','b','c']).should_equal(-1)
-    # ([1,2,3,4,5,6] <=> [1,2]).should_equal(1)
-    # ([1,2] <=> [1,2]).should_equal(0)
+    (['a','a','c'] <=> ['a','b','c']).should_equal(-1)
+    ([1,2,3,4,5,6] <=> [1,2]).should_equal(1)
+    ([1,2] <=> [1,2]).should_equal(0)
   end
   
   # BROKE
@@ -175,6 +174,67 @@ Spec.describe Array do |it|
   it.can 'loop through its elements'
   it.can 'check whether it is empty'
   it.can 'check whether it is equal to another array, returning true or false'
+  
+  it.can 'fetch items with an index' do
+    ['a','b','c'].fetch(1).should_equal('b')
+  end
+  
+  it.returns 'nil when fetching an item with a provided index beyond the length' do
+    ['a','b','c'].fetch(5).should_equal(nil)
+  end
+  
+  it.returns 'a default value if one is provided when fetching at an index and there is no object at the index' do
+    ['a','b','c'].fetch(5, 'FAIL').should_equal('FAIL')
+  end
+  
+  it.can 'call a blockon failed value fetching if a block is provided'
+  
+  it.can 'fill itself with new values' do
+    ['a','b','c', 'd'].fill('x').should_equal(['x','x','x','x'])
+  end
+  
+  it.can 'fill itself with new values starting a start position and continuing for an optional length' do
+    ['a','b','c', 'd'].fill('x', 2).should_equal(['a','b','x','x'])
+    ['a','b','c', 'd'].fill('x', 1,2).should_equal(['a','x','x','d'])
+  end
+  
+  it.can 'get the its first element' do
+    ['1','2','3'].first.should_equal('1')
+  end  
+  
+  it.can 'get the its first n elements with a provider number' do
+     ['1','2','3'].first(2).should_equal(['1','2'])
+  end
+  
+  it.can 'flatten and return a new flat array' do
+    a = ['a','b',['d','e','f'],'g']
+    b = a.flatten
+    b.should_equal(['a','b','d','e','f','g'])
+    a.should_not_equal(b)
+  end
+  
+  it.can 'flatten itself' do
+    a = ['a','b',['d','e','f'],'g']
+    b = a.flatten!
+    b.should_equal(['a','b','d','e','f','g'])
+    a.should_equal(b)
+  end
+  
+  it.returns 'nil if flattening itself and no changes were made' do
+    ['a','b','d','e','f','g'].flatten!.should_equal(nil)
+  end
+  
+  it.can 'determine whether it includes an object returning true or false' do
+    # ['a','b','c'].include?('a').should_equal(0)
+  end
+  
+  it.returns 'the index of an object when looking for an object and the object is in the array' do
+    ['a','b','c'].index('a').should_equal(0)
+  end
+  
+  it.returns 'nil when looking for an object and the object is not in the array' do
+    ['a','b','c'].index('a').should_equal(nil)
+  end
   
   
 end
