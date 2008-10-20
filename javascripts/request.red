@@ -109,16 +109,16 @@ class Request
       data      = nil
     end
     
-    `#{@xhr}.open(#{method}._value, #{url}._value, #{@options[:async]})`
-    `#{@xhr}.onreadystatechange = #{self.on_state_change}._block`
+    `#{@xhr}.open(#{method}.__value__, #{url}.__value__, #{@options[:async]})`
+    `#{@xhr}.onreadystatechange = #{self.on_state_change}.__block__`
     
     @options[:headers].each do |k,v|
-      `#{@xhr}.setRequestHeader(k._value,v._value)`
+      `#{@xhr}.setRequestHeader(k.__value__,v.__value__)`
     # raise(HeaderError, "#{k} => #{v}")
     end
     
     self.fire_event('request')
-    `#{@xhr}.send($T(data)?data._value:'')`
+    `#{@xhr}.send($T(data)?data.__value__:'')`
     self.on_state_change.call unless @options[:async]
     return self
   end
@@ -230,7 +230,7 @@ class Request
     # 
     def strip_scripts(evaluate = false)
       scripts = ''
-      result = `this._value.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi,function(){scripts._value+=arguments[1]+'\\n';return '';})`
+      result = `this.__value__.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi,function(){scripts.__value__+=arguments[1]+'\\n';return '';})`
       Document.execute_js(scripts) if evaluate
       return result
     end
@@ -263,27 +263,6 @@ class Request
         query_string.push(result)
       end
       return query_string.join('&')
-    end
-  end
-  
-  class DocumentClass
-    # call-seq:
-    #   Document.execute_js(str) -> str
-    # 
-    # Executes _str_ as JavaScript, then returns _str_.
-    # 
-    def Document.execute_js(str)
-      return str if str == ''
-      if `window.execScript`
-        `window.execScript(str._value)`
-      else
-        `scriptElement = document.createElement('script')`
-        `scriptElement.setAttribute('type','text/javascript')`
-        `scriptElement.text = str`
-        `document.head.appendChild(scriptElement)`
-        `document.head.removeChild(scriptElement)`
-      end
-      return str
     end
   end
   

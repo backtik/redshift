@@ -70,7 +70,7 @@ class Cookie
   #   Cookie.new(:user_jds, '8557acb0') unless Cookie.read(:user_jds)
   # 
   def self.read(key)
-    value = `#{OPTIONS[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}._value + '=([^;]*)')`
+    value = `#{OPTIONS[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}.__value__ + '=([^;]*)')`
     return value ? `$q(decodeURIComponent(value[1]))` : nil
   end
   
@@ -81,9 +81,9 @@ class Cookie
   # is called internally by <tt>Cookie.new</tt> and <tt>Cookie#update</tt>.
   # 
   def self.store(cookie)
-    `var str = cookie.m$key()._value + '=' + encodeURIComponent(cookie.m$value()._value)`
-    `str += '; domain=' + cookie.m$domain()._value` if cookie.domain
-    `str += '; path='   + cookie.m$path()._value`   if cookie.path
+    `var str = cookie.m$key().__value__ + '=' + encodeURIComponent(cookie.m$value().__value__)`
+    `str += '; domain=' + cookie.m$domain().__value__` if cookie.domain
+    `str += '; path='   + cookie.m$path().__value__`   if cookie.path
     if cookie.duration
       `date = new Date()`
       `date.setTime(date.getTime() + cookie.m$duration() * 86400000)`
