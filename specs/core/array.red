@@ -45,39 +45,49 @@ Spec.describe Array do |it|
     # (['a','c', 7] == ['a', 'd', 'f']).should_equal(false)
   end
   
-  it.returns 'the object at the numeric index using bracket notation' do
+  it.can 'retrieve the object at a numeric index' do
     ['a','b','c'][0].should_equal('a')
+    ['a','b','c'].slice(0).should_equal('a')
   end
   
   it.returns 'nil if the object at the numeric index is nil or index is greater than its length' do
     ['a','b',nil][2].should_equal(nil)
     ['a','b'][2].should_equal(nil)
+    ['a','b',nil].slice(2).should_equal(nil)
+    ['a','b'].slice(2).should_equal(nil)
   end
   
-  it.returns 'a sub array when a start position and length are passed into bracket notation' do
+  it.returns 'a sub array based on a start position and length' do
     (['a','b','c','d'][1,2]).should_equal(['b','c'])
   end
   
-  it.returns 'a limited sub array when a start position and length are passed into bracket notation and the position + length go beyond the size of the array' do
+  it.returns 'a limited sub array when a start position and length are provided and position + length go beyond the size of the array' do
     (['a','b','c','d'][3,2]).should_equal(['d'])
+    ['a','b','c','d'].slice(3,2).should_equal(['d'])
   end
   
-  it.returns 'nil if a position and length are passed into bracket notation and position is past the size of the array' do
+  it.returns 'nil if a position and length are provided and position is past the size of the array' do
     (['a','b','c','d'][4,2]).should_equal(nil)
+    ['a','b','c','d'].slice(4,2).should_equal(nil)
   end
   
-  it.returns 'a sub array when a range is passed into bracket notation' do
+  it.returns 'a sub array when a range is provided' do
     (['a','b','c','d'][1..3]).should_equal(['b','c', 'd'])
+    ['a','b','c','d'].slice(1..3).should_equal(['b','c', 'd'])
   end
   
-  it.returns 'a limited sub array when a range is passed into bracket notation and the range goes beyond the size of the array' do
+  it.returns 'a limited sub array when a range is provided and the range goes beyond the size of the array' do
     (['a','b','c','d'][2..5]).should_equal(['c','d'])
+    ['a','b','c','d'].slice(2..5).should_equal(['c','d'])
   end
   
-  it.returns 'nil if a range is passed into bracket notation and the range begins beyong the sie of the array' do
+  it.returns 'nil if a range is provided and the range begins beyong the sie of the array' do
     (['a','b','c','d'][4..5]).should_equal(nil)
+    ['a','b','c','d'].slice(4..5).should_equal(nil)
   end
   
+  it.can 'so'
+    
   it.can 'sort' do
     [3,2,1].sort.should_equal([1,2,3])
   end
