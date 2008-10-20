@@ -258,24 +258,17 @@ module Specs
     def run
       ::Specs::Logger.on_example_start(self.example)
 
-      
       begin
         self.example.block.call unless self.example.result
-        result = true
-      rescue ::Specs::Failure
-        self.example.result = 'failure'
-        result = false
-      rescue Exception
-        self.example.rescue = 'error'
-        result = false
-      end
-      
-      if result
+        
         self.type = 'success'
         self.example.result = 'success'
-      else
+      rescue ::Specs::Failure
         self.type = 'failure'
-        self.example.result = 'exception'
+        self.example.result = 'failure'
+        self.example.spec.runner.total_failures += 1
+      rescue Exception
+        self.example.rescue = 'exception'
         self.example.spec.runner.total_failures += 1
       end
             
