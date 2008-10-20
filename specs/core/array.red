@@ -236,5 +236,144 @@ Spec.describe Array do |it|
     ['a','b','c'].index('a').should_equal(nil)
   end
   
+  it.can 'insert an object before paritcular index' do
+    [1,2,3,4].insert(2,99).should_equal([1, 2, 99, 3, 4])
+  end
+  
+  it.can 'insert an object before a paricular negative index' do
+    [1,2,3,4].insert(-2,'a','b','c').should_equal([1, 2, 3, "a", "b", "c", 4])
+  end
+  
+  it.returns 'printable version of itself' do
+     [1,2,3].inspect.should_equal("[1, 2, 3]")
+  end
+  
+  it.can 'join each element with a string, returning a new string' do
+    ['a','b','c'].join(',').should_equal('a,b,c')
+  end
+  
+  
+  it.can 'get the its last element' do
+    ['1','2','3'].last.should_equal('3')
+  end  
+  
+  it.can 'get the its last n elements with a provider number' do
+     ['1','2','3'].last(2).should_equal(['2','3'])
+  end
+  
+  it.can 'provide its length as a number' do
+    a = ['1','2','3']
+    a.size.should_equal(3)
+    a.length.should_equal(3)
+  end
+  
+  it.returns 'the number of non-nil items' do
+    [1, nil, 3, nil, 5].nitems.should_equal(3)
+  end
+  
+  it.can 'remove its last item returing that item' do
+    a = ['1','2','3']
+    a.pop.should_equal('3')
+    a.should_equal(['1','2'])
+  end
+  
+  it.returns 'nil when attempting to pop an item when empty' do
+    [].pop.should_equal(nil)
+  end
+  
+  it.can 'append items to its end, returning itself' do
+    [1,2,3].push(4).push(5,6,7).should_equal([1, 2, 3, 4, 5, 6, 7])
+  end
+  
+  it.can 'rassoc'
+  
+  it.can 'create a new array with rejected elements removed' do
+    a = [1,2,3,4,5]
+    b = a.reject {|x| x > 3 }
+    b.should_equal([1, 2, 3])
+    a.should_not_equal(b)
+  end
+  
+  it.can 'remove every element for which block evaluates to true' do
+    a = [1,2,3,4,5]
+    b = a.reject {|x| x > 3 }
+    b.should_equal([1, 2, 3])
+    a.should_equal(b)
+  end
+  
+  it.can 'repalce its contents with the contents of another array, truncating or expanding if necessary' do
+    ['a','b','c'].replace(['w','x','y', 'z']).should_equal(["w", "x", "y", "z"])
+  end
+  
+  it.can 'return a reversed array' do
+    a = [1,2,3,4,5]
+    b = a.reverse
+    b.should_equal([5, 4, 3, 2, 1])
+    a.should_not_equal(b)
+  end
+  
+  it.can 'reverse itself' do
+    a = [1,2,3,4,5]
+    b = a.reverse
+    b.should_equal([5, 4, 3, 2, 1])
+    a.should_equal(b)
+  end
+  
+  it.can 'return a sorted array' do
+    a = [3, 2, 4, 1]
+    b = a.sort
+    b.should_equal([1,2,3,4])
+    a.should_not_equal(b)
+  end
+  
+  it.can 'sort itself' do
+    a = [3, 2, 4, 1]
+    b = a.sort!
+    b.should_equal([1,2,3,4])
+    a.should_equal(b)
+  end
+  
+  it.can 'convert itself to an array' do
+    [1,2,3].to_a.should_equal([1, 2, 3])
+  end
+  
+  it.can 'convert itself to a string, calling .to_s on each element' do
+    [1,2,3].to_s.should_equal('123')
+  end
+  
+  it.can 'transpose' do
+    [[1,2],[3,4],[5,6]].transpose.should_equal([[1, 3, 5], [2, 4, 6]])
+  end
+  
+  it.can 'return a new array with repeated elements removed' do
+    a = ['a','b','b','c','c','c']
+    b = a.uniq
+    b.should_equal(["a", "b", "c"])
+    a.should_not_equal(b)
+  end
+  
+  it.can 'remove repeated elements from itself' do
+    a = ['a','b','b','c','c','c']
+    b = a.uniq!
+    b.should_equal(["a", "b", "c"])
+    a.should_equal(b)
+  end
+  
+  it.returns 'nil if removing repeated elements from itself has no effect' do
+    ["a", "b", "c"].uniq!.should_equal(nil)
+  end
+  
+  it.can 'prepend objects to the front, shifting the indices of another array\'s other elements up one, then returns itself' do
+    a = ['b','c']
+    a.unshift('a').should_equal(["a", "b", "c"])
+    a.unshift(1,2,3).should_equal([1, 2, 3, "a", "b", "c"])
+  end
+  
+  it.can 'retrurn an array containing the elements in self corresponding to the given selector(s)'
+  it.can 'combine with another array instering elements at a position in one the same indexed element in the other (zipping)'
+  
+  it.can 'provider a union of two arrays' do
+   ([1,2,3] | [3,4,1]).should_equal([1, 2, 3, 4])
+  end
   
 end
