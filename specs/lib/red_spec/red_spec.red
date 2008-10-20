@@ -200,14 +200,16 @@ module Specs
   # responsible for gathering all specs from RedSpec.specs (or a subset if you're rerunning
   # a particual spec) into one place and running them.
   class Runner
-    attr_accessor :specs, :specs_map, :total_examples, :logger, :ordered_executor, :total_failures, :total_errors
+    attr_accessor :specs, :specs_map, :total_examples, :logger, :ordered_executor, :total_failures, :total_errors, :total_pending
     def initialize(arg_specs, logger)
       logger.runner = self
       @logger = logger
       
       @specs = []
       @specs_map = {}
-      @total_examples = 0
+      
+      self.total_examples = 0
+      self.total_pending  = 0
       self.total_failures = 0
       self.add_all_specs(arg_specs)
     end
@@ -259,7 +261,12 @@ module Specs
       ::Specs::Logger.on_example_start(self.example)
 
       begin
-        self.example.block.call unless self.example.result
+        if self.example.result # result was set to pending on Example#initialize
+          self.type = 'pending'
+          self.example.spec.runner.total_pending += 1
+        else
+          self.example.block.call 
+        end
         
         self.type = 'success'
         self.example.result = 'success'
@@ -269,7 +276,7 @@ module Specs
         self.example.spec.runner.total_failures += 1
       rescue Exception
         self.example.rescue = 'exception'
-        self.example.spec.runner.total_failures += 1
+        self.example.spec.runner.total_errors += 1
       end
             
       ::Specs::Logger.on_example_end(self.example)
@@ -392,7 +399,9 @@ module Specs
     
     def on_runner_end
       `document.getElementById("total_elapsed").innerHTML = (#{Time.now - self.started_at })`
+      `document.getElementById("total_failures").innerHTML = #{self.runner.total_errors}`
       `document.getElementById("total_failures").innerHTML = #{self.runner.total_failures}`
+      `document.getElementById("total_pending").innerHTML = #{self.runner.total_pending}`
     end
         
     def self.on_spec_start(spec)

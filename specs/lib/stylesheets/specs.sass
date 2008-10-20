@@ -6,6 +6,7 @@
 !unrun_text     = #8A7575
 !success_text   = #657528
 !exception_text = #B33F3F
+!pending_text   = yellow
 !number_data    = #D2E0E6
 
 // mixin for an element that needs to take up the entire window
@@ -95,6 +96,11 @@ html
     h3 
       :color= !success_text
       :background-color #E2E5D2
+  .pending
+    h3
+      :color= !pending_text
+      :background-color #E2E5D2
+      
 
 
 // the list of examples, grouped by spec name
@@ -108,6 +114,14 @@ html
   :width 70%
   :height expression(document.body.clientHeight-40)
   
+  .pending
+    h3
+      :color= !pending_text
+      :background-color blue
+    h4 
+      :color= !pending_text
+      :background blue
+      :cursor pointer
   .exception 
     h3 
       :color= !exception_text
