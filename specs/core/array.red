@@ -86,7 +86,11 @@ Spec.describe Array do |it|
     ['a','b','c','d'].slice(4..5).should_equal(nil)
   end
   
-  it.can 'so'
+  it.can 'assign objects to a specific location in the array, padding with nil if neccessary' do
+    a = []
+    a[4] = '4'
+    a.should_equal([nil,nil,nil,nil,'4']) 
+  end
     
   it.can 'sort' do
     [3,2,1].sort.should_equal([1,2,3])
