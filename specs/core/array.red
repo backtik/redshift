@@ -46,8 +46,11 @@ Spec.describe Array do |it|
   end
   
   it.can 'retrieve the object at a numeric index' do
-    ['a','b','c'][0].should_equal('a')
-    ['a','b','c'].slice(0).should_equal('a')
+    a = ['a','b','c']
+    a[0].should_equal('a')
+    a.at(-1).should_equal('c')
+    a.at(0).should_equal('a')
+    a.slice(0).should_equal('a')
   end
   
   it.returns 'nil if the object at the numeric index is nil or index is greater than its length' do
@@ -86,17 +89,92 @@ Spec.describe Array do |it|
     ['a','b','c','d'].slice(4..5).should_equal(nil)
   end
   
+  it.can 'assgin objects to a specific location in the array, overwriting as neccessary' do
+    a = ['0']
+    a[0] = 'zero'
+    a.should_equal(['zero'])
+  end
+  
   it.can 'assign objects to a specific location in the array, padding with nil if neccessary' do
     a = []
     a[4] = '4'
     a.should_equal([nil,nil,nil,nil,'4']) 
   end
-    
-  it.can 'sort' do
-    [3,2,1].sort.should_equal([1,2,3])
+  
+  it.can 'assign objects from an array to a location in the array based on a start position and legth' do
+    ([1,2,3,4,5,6,7][0,3] = ['a','b', 'c']).should_equal(['a','b','c',4,5,6,7])
   end
+  
+  it.can 'assign objects from an array to a location in the array based on a range' do
+    ([1,2,3,4,5,6,7][1..2] = ['a','b']).should_equal([1,'a','b',4,5,6,7])
+  end
+  
+  it.can 'array assoc'
   
   it.can 'clear' do
     [3,2,1].clear.should_equal([])
   end
+  
+  it.can 'map additonal values into a new array' do
+   a = [1,2,3,4]
+   b = a.collect {|x| x + 100}
+   b.should_equal([101,102,103,104])
+   a.should_not_equal(b)
+   
+   # map is an alias for collect
+   a = [1,2,3,4]
+   b = a.map {|x| x + 100}
+   b.should_equal([101,102,103,104])
+   a.should_not_equal(b)
+  end
+  
+  it.can 'map additonal values into itself' do
+    a = [1,2,3,4]
+    b = a.collect! {|x| x + 100}
+    b.should_equal([101,102,103,104])
+    a.should_equal(b)
+
+    # map! is an alias for collect!
+    a = [1,2,3,4]
+    b = a.map! {|x| x + 100}
+    b.should_equal([101,102,103,104])
+    a.should_equal(b)
+  end
+  
+  it.can 'remove nil elements' do
+    ['a',nil,'b',nil,'c'].compact!.should_equal(["a", "b", "c"])
+  end
+  
+  it.returns 'nil when attempting to remove nil elements from an array that has no nil elements' do
+    ["a", "b", "c"].compact!.should_equal(nil)
+  end
+  
+  it.can 'add the elelemts of a new array to its own end, as elements' do
+    [1,2].concat([3,4]).concat([5,6]).should_equal([1, 2, 3, 4, 5, 6])
+  end
+  
+  it.can 'delete any objects in an array equal to a passed object, returning the passed object'
+  
+  it.returns 'nil when attempting to delete an object from an array that does not contain the object' do
+    # ['a','b','b','b','c'].delete('z').should_equal(nil)
+  end  
+  
+  it.can 'delete objects from an array based on a provided block'
+  
+  it.can 'delete an item at a specific index, returning the item' do
+    a = ['a','b','c','d']
+    a.delete_at(2).should_equal('c')
+    a.should_equal(['a','b','d'])
+  end
+  
+  it.returns 'nil when attemping to delete an item at specific position if the array does not contain an object at the position' do
+    ['a','b','c','d'].delete_at(6).should_equal(nil)
+  end
+  
+  it.can 'delete objects based on a specific equality checking block'
+  it.can 'loop through its elements'
+  it.can 'check whether it is empty'
+  it.can 'check whether it is equal to another array, returning true or false'
+  
+  
 end

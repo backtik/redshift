@@ -1,55 +1,3 @@
-# Spec
-#   self.describe
-#   specs
-#   examples
-#   has_exception?
-#   total_failures
-#   total_errors
-#   filter_entries_by_embedded_expressions
-#   extract_special_entries
-#   make_examples_from_entries
-#   example_by_id
-#   executor
-#   
-# Spec::Executor
-#   merge_exceptions
-#   run
-# 
-# Spec::Runner
-#   total_examples
-#   specs
-#   specs_map
-#   add_all_specs(specs)
-#   add_spec
-#   get_spec_by_id
-#   get_spec_by_context
-#   has_exception
-#   total_failures
-#   total_errors
-#   run
-#   rerun
-# 
-# Spec::Logger
-#   on_runner_start
-#   on_runner_end
-#   blink_title
-#   on_spec_start
-#   on_spec_end
-#   on_example_start
-#   on_example_end
-#   
-# Spec::Matchers
-#   include
-#   length
-#   equality
-#   nil
-#   date
-#   object
-#   array
-#   number
-#   string
-#   pattern
-#   
 # Spec::DSL (module)
 #   should_fail
 #   should_be
@@ -85,6 +33,11 @@ module DSL
     true
   end
   
+  def should_not_be(other)
+    raise ::Specs::Failure if self === other
+    true
+  end
+  
   def should_not_equal(other)
     raise ::Specs::Failure if self == other
     true
@@ -94,6 +47,8 @@ end
 String.include(DSL)
 Array.include(DSL)
 nil.extend(DSL)
+true.extend(DSL)
+false.extend(DSL)
 
 # TODO: this is being added to Red natively. Remove.
 def nil.to_proc
