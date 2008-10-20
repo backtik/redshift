@@ -82,14 +82,23 @@
 module DSL
   def should_equal(other)
     raise ::Specs::Failure unless self == other
+    true
   end
   
   def should_not_equal(other)
-    raise ::Specs::Failure unless self if other
+    raise ::Specs::Failure if self == other
+    true
   end
 end
 
+String.include(DSL)
 Array.include(DSL)
+nil.extend(DSL)
+
+# TODO: this is being added to Red natively. Remove.
+def nil.to_proc
+  nil
+end
 
 # Just stores the @@spec_list class variables. @@spec_list is an array of
 # all the specs created with Spec.describe. This might go away with everthing nested inside
@@ -169,6 +178,7 @@ module Specs
   class Example
     attr_accessor :block, :name, :result, :spec
     def initialize(name, spec, &block)
+      self.result = "pending" if block.nil?
       @name  = name
       @spec  = spec
       @block = block
@@ -250,16 +260,17 @@ module Specs
 
       
       begin
-        self.example.block.call
+        self.example.block.call unless self.example.result
         result = true
-        puts "good"
       rescue ::Specs::Failure
+        self.example.result = 'failure'
         result = false
-        puts "bad"
+      rescue Exception
+        self.example.rescue = 'error'
+        result = false
       end
       
       if result
-        puts "it worked"
         self.type = 'success'
         self.example.result = 'success'
       else
@@ -344,7 +355,7 @@ module Specs
        self.runner.specs.each do |spec|
          all_runner_specs << spec.to_heading_html
        end
-       `all_runner_specs_as_list_items = #{all_runner_specs.join("")}._value`
+       `all_runner_specs_as_list_items = #{all_runner_specs.join("")}.__value__`
        
       `list = document.createElement("DIV")`
       `list.id = "list"`
@@ -363,7 +374,7 @@ module Specs
       self.runner.specs.each do |spec|
         all_runner_specs_with_examples << spec.to_html_with_examples
       end
-      `all_runner_specs_as_list_items_with_examples = #{all_runner_specs_with_examples.join("")}._value`
+      `all_runner_specs_as_list_items_with_examples = #{all_runner_specs_with_examples.join("")}.__value__`
       
       `log.innerHTML = [
         '<h2>Log</h2>',
@@ -410,7 +421,7 @@ module Specs
     
     def self.on_example_end(example)
       `li = document.getElementById("example_" + #{example.object_id.to_s})`
-      `li.className = #{example.result}._value`
+      `li.className = #{example.result}.__value__`
     end
     
   end
@@ -424,4 +435,4 @@ main = lambda {
 }
 
 # Wait for the window to load and then determing run the specs
-`window.onload = #{main}._block`
+`window.onload = #{main}.__block__`

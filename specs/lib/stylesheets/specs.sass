@@ -1,9 +1,14 @@
-// #CC100B is the official red of red
-!canvas = #F3F1F1
-!dashboard = #41464D
-!color1 = #657528
+// The colors of RedSpec
+!official       = #CC100B
+!canvas         = #F3F1F1
+!dashboard      = #41464D
+!unrun_bg       = #D0C8C8
+!unrun_text     = #8A7575
+!success_text   = #657528
+!exception_text = #B33F3F
+!number_data    = #D2E0E6
 
-
+// mixin for an element that needs to take up the entire window
 =full_screen
   :width  100%
   :height 100%
@@ -15,6 +20,11 @@ body
   :color= !dashboard
   +full_screen
 
+#container
+  +full_screen
+
+
+// Reset 
 *
   :margin 0
   :padding 0
@@ -29,10 +39,11 @@ ul
 html
   :overflow hidden
 
-#container
-  +full_screen
 
-
+// The dashboard runs accross the top of the specs log
+// and contains the following data:
+// h1 - RedSpec name/link
+// ul of completion time, % done, # of errors, # of failures, and # of total examples 
 #dashboard
   :position absolute
   :top 0
@@ -42,6 +53,16 @@ html
   :background= !dashboard
   :color= !canvas
   :height 30px
+  
+  // RedSpec name
+  h1
+    :font 25px/1.1 Arial, sans-serif
+    :font-weight bolder
+    :float left
+    :margin 1px 0 2px 20px
+    :text-shadow 0 2px 2px rgba(0,0,0,0.5)
+  
+  // the dashboard data list
   ul 
     :margin-right 20px
   li 
@@ -49,17 +70,12 @@ html
     :font-size 12px
     :float right
     :margin 10px 5px 0
-  h1
-    :font 25px/1.1 Arial, sans-serif
-    :font-weight bolder
-    :float left
-    :margin 1px 0 2px 20px
-    :text-shadow 0 2px 2px rgba(0,0,0,0.5)
+    // wrapped around numerical data points of the dashboard data list
     span 
-      :color #D2E0E6
+      :color= !number_data
   
 
-
+// The list of Specs, by name
 #list 
   :position absolute
   :width 30%
@@ -70,16 +86,18 @@ html
   :bottom 0
   :height expression(document.body.clientHeight-40)
   
+  
   .exception 
     h3 
-      :color #B33F3F
+      :color= !exception_text
       :background #EED8D8
   .success 
     h3 
+      :color= !success_text
       :background-color #E2E5D2
-      color= !color1
 
 
+// the list of examples, grouped by spec name
 #log 
   :position absolute
   :top 40px
@@ -92,27 +110,26 @@ html
   
   .exception 
     h3 
-      :color #B33F3F
+      :color= !exception_text
       :background #EE9A9A
     h4 
-      :color #B33F3F
+      :color= !exception_text
       :background #EED8D8
       :cursor pointer
+      
   .success 
     h3 
       :background-color #CFE773
-      :color #657528
+      :color= !success_text
     h4 
       :background-color #E2E5D2
-      :color #657528
+      :color= !success_text
       :cursor default
     .stub
       h4 
         :background-color #E5E5E1
         :color #A1A87E
         :cursor default
-  
-
 
 span.spc 
   :display block
@@ -120,9 +137,9 @@ span.spc
 
 
 #log-wrapper, #list-wrapper
-  overflow hidden
-  padding 4px 4px 0
-  background #fff
+  :overflow hidden
+  :padding 4px 4px 0
+  :background #fff
 
 
 #log-wrapper 
@@ -134,11 +151,11 @@ span.spc
 
 
 .success a:link, .success a:visited
-  :color #657528
+  :color= !success_text
 
 
 .exception a:link, .exception a:visited 
-  :color #B33F3F
+  :color= !exception_text
 
 
 a:link, a:visited 
@@ -151,8 +168,8 @@ a:hover, a:active
 
 h2 
   :font-size 14px
-  :background #D0C8C8
-  :color #8A7575
+  :background= !unrun_bg
+  :color= !unrun_text
   :margin-bottom 4px
   :padding 2px 5px
 
@@ -180,6 +197,7 @@ br
 h3 
   :font-size 12px
   :padding 3px 5px 1px
+  :cursor default
 
 
 h4 
@@ -187,11 +205,7 @@ h4
   :background #C8CBD0
   :padding 3px 5px 1px
   :margin-bottom 4px
-
-
-h3, h4 
   :cursor default
-
 
 #list 
   h3 
@@ -202,12 +216,9 @@ h3, h4
 
 #log
   h3 
-    :background #D0C8C8
-    :color #8A7575
+    :background= !unrun_bg
+    :color= !unrun_text
     :margin-bottom 4px
-
-
-#log 
   li 
     div 
       :overflow hidden
