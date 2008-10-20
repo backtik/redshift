@@ -28,32 +28,47 @@
 
 
 module DSL
-  def should_equal(other)
-    raise ::Specs::Failure unless self == other
-    true
+  module Base
+    def should_equal(other)
+      raise ::Specs::Failure unless self == other
+      true
+    end
+    
+    def should_be(other)
+      raise ::Specs::Failure unless self === other
+      true
+    end
+  
+    def should_not_be(other)
+      raise ::Specs::Failure if self === other
+      true
+    end
+  
+    def should_not_equal(other)
+      raise ::Specs::Failure if self == other
+      true
+    end
   end
   
-  def should_not_be(other)
-    raise ::Specs::Failure if self === other
-    true
-  end
-  
-  def should_not_equal(other)
-    raise ::Specs::Failure if self == other
-    true
+  module Array
+    def should_have(n)
+      raise ::Specs::Failure unless self.size == n
+    end
+    
+    # just for looks
+    def items
+      true
+    end
   end
 end
 
-String.include(DSL)
-Array.include(DSL)
-nil.extend(DSL)
-true.extend(DSL)
-false.extend(DSL)
+String.include(DSL::Base)
+Array.include(DSL::Base)
+Array.include(DSL::Array)
+nil.extend(DSL::Base)
+true.extend(DSL::Base)
+false.extend(DSL::Base)
 
-# TODO: this is being added to Red natively. Remove.
-def nil.to_proc
-  nil
-end
 
 # Just stores the @@spec_list class variables. @@spec_list is an array of
 # all the specs created with Spec.describe. This might go away with everthing nested inside
