@@ -34,23 +34,25 @@ end
 # powerful <tt>Document.[]</tt> method.
 # 
 module Document
+  
   `document.head=document.getElementsByTagName('head')[0]`
   `document.html=document.getElementsByTagName('html')[0]`
   `document.window=(document.defaultView||document.parentWindow)`
+  `c$Document.__native__= document`
   
-  def self.delegate(*properties) # :nodoc:
-    to = properties.pop[:to]
-    `for(var i=0,l=properties.length;i<l;++i){
-      var a=properties[i].__value__,t=to.__value__;
-      var f1=function(){var result=this['m$'+t]()[arguments.callee.__propertyName__];return result==null?nil:result;};f1.__propertyName__=a;this['m$'+a]=f1;
-      var f2=function(x){return this['m$'+t]()[arguments.callee.__propertyName__]=x;};f2.__propertyName__=a;this['m$'+a+'Eql']=f2;
-    }`
-    return nil
-  end
-  
-  delegate(:innerHeight, :innerWidth, :outerWidth, :pageXOffset,
-           :pageYOffset, :screenX, :screenY, :scrollMaxX,
-           :scrollMaxY, :scrollX, :scrollY, {:to => :window})
+  # def self.delegate(*properties) # :nodoc:
+  #   to = properties.pop[:to]
+  #   `for(var i=0,l=properties.length;i<l;++i){
+  #     var a=properties[i].__value__,t=to.__value__;
+  #     var f1=function(){var result=this['m$'+t]()[arguments.callee.__propertyName__];return result==null?nil:result;};f1.__propertyName__=a;this['m$'+a]=f1;
+  #     var f2=function(x){return this['m$'+t]()[arguments.callee.__propertyName__]=x;};f2.__propertyName__=a;this['m$'+a+'Eql']=f2;
+  #   }`
+  #   return nil
+  # end
+  # 
+  # delegate(:innerHeight, :innerWidth, :outerWidth, :pageXOffset,
+  #          :pageYOffset, :screenX, :screenY, :scrollMaxX,
+  #          :scrollMaxY, :scrollX, :scrollY, {:to => :window})
   
   # call-seq:
   #   Document[str]     -> element or nil
@@ -180,11 +182,11 @@ module Document
     return `result`.flatten
   end
   
-  def self.native # :nodoc:
-    `document`
-  end
+  # def self.native # :nodoc:
+  #   `document`
+  # end
   
   def self.window # :nodoc:
-    `window`
+    Window
   end
 end
