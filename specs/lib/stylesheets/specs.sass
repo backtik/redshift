@@ -2,15 +2,16 @@
 // (cc) http://creativecommons.org/licenses/by/3.0/us/
 
 // The colors of RedSpec
-!official       = #CC0404
-!canvas         = #F3F1F1
-!dashboard      = #41464D
-!unrun_bg       = #D0C8C8
-!unrun_text     = #8A7575
-!success_text   = #657528
-!exception_text = #B33F3F
-!pending_text   = yellow
-!number_data    = #D2E0E6
+!official           = #CC0404
+!canvas             = #F3F1F1
+!dashboard          = #41464D
+!unrun_bg           = #D0C8C8
+!unrun_text         = #8A7575
+!success_text       = #657528
+!exception_text     = #B33F3F
+!pending_bg         = #F9FF70
+!pending_text       = !pending_bg - #7D70AA
+!number_data        = #D2E0E6
 
 // mixin for an element that needs to take up the entire window
 =full_screen
@@ -120,10 +121,10 @@ html
   .pending
     h3
       :color= !pending_text
-      :background-color blue
+      :background-color= !pending_bg
     h4 
       :color= !pending_text
-      :background blue
+      :background= !pending_bg
       :cursor pointer
   .exception 
     h3 
