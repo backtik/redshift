@@ -73,6 +73,14 @@ module Situated
   		return {:x => `#{self}.__native__.offsetWidth`, :y => `#{self}.__native__.offsetHeight`}
     end
     
+    # call-seq:
+    #   situated.scroll -> hash
+    # returns a hash containing keys <tt>:x<tt> and <tt>:y<tt> representing the 
+    # the distance that a _situated_ has been scrolled
+    # originating at the top left corner of the _situated_
+    # 
+    # For example if a _situated_ has been scrolled 10px left and 5px down
+    # situated.scroll #=> {:x => 10, :y => 5}
     def scroll
       return self.window.scroll if self.is_body? 
   		return {:x => `#{self}.__native__.scrollLeft`, :y => `#{self}.__native__.scrollTop`}
@@ -89,11 +97,44 @@ module Situated
   		return position
     end
     
+    # call-seq:
+    #   situated.scroll_size -> hash
+    # returns a hash containing keys <tt>:x<tt> and <tt>:y<tt> representing the 
+    # the size that a _situated_ included potential scrollable area.
+    #
+    # For example if a _situated_ has been a visible width of 100px and visible height of 50px
+    # and 100 additional pixels of horizontal unseen content that can be scrolled to uncover
+    #  
+    # situated.scroll_size #=> {:x => 200, :y => 50}
+    #
     def scroll_size
       return self.window.scroll_size if self.is_body?
   		return {:x => `#{self}.__native__.scrollWidth`, :y => `#{self}.__native__.scrollHeight`}
     end
     
+    # call-seq:
+    #   situated.scroll_to(x,y) -> situated
+    # 
+    # Scrolls the _situated_ to the position referenced by the coordinates <tt>x</tt> and <tt>y</tt>
+    # which are pixel dimensions measured from the top left corner of hte _situated_
+    #
+    # Will scroll to the limit of one dimension if a cooridnate for that dimension
+    # is larger than the size element
+    #
+    # No scrolling in a direction will occur if scrolling in that direction would have no effect.
+    #
+    # Examples:
+    #
+    # Given a _situated_ that is 200px wide and 500px long and has
+    # only 150px of horizontal dimension visible at any time and 
+    # only 200px of vertical dimension visible at any time
+    #
+    # situated.scroll_to(10,10)
+    # will scroll the visible area 10 pixels from the left and 10pixels from the top
+    # 
+    # scroll.scroll_to(200,0) will scroll the _situated_ to the maximum left scrolling possible
+    # and return the _situated_ to the original height position.
+    #
     def scroll_to(x,y)
       if self.is_body?
         self.window.scroll_to(x, y)
@@ -104,6 +145,13 @@ module Situated
   		return self
     end
     
+    # call-seq:
+    #   situated.offset_parent -> element
+    #
+    # returns the parent element that provides the visual offset from
+    # the top left corner of the viewport
+    # 
+    # This is typically the closest statically position element or <tt>body</tt>
     def offset_parent
       element = self
       return nil if element.is_body?
@@ -145,10 +193,10 @@ module Situated
 				  end
   			end
 
-  			element = `$E(#{element}.__native__.offsetParent)`
+  			element = element.offset_parent #`$E(#{element}.__native__.offsetParent)`
   			
   			if trident?
-  				element = `$E(#{element}.__native__.offsetParent)` while (element && !`#{element}.__native__.currentStyle.hasLayout`) 
+  				element = element.offset_parent while (element && !`#{element}.__native__.currentStyle.hasLayout`) 
   			end
   		end
   		
