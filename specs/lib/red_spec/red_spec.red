@@ -48,6 +48,49 @@ module DSL
       raise ::Specs::Failure if self == other
       true
     end
+    
+    def should_not_be_nil
+      raise ::Specs::Failure if self == nil
+    end
+  
+    # here for polymorphic purposes. all objects will need to respond
+    # to these but having these methods called implies you are
+    # are not getting a object you intended
+    def should_be_nil;      raise ::Specs::Failure; end
+    def should_be_true;     raise ::Specs::Failure; end
+    def should_be_false;    raise ::Specs::Failure; end
+    def should_have(n);     raise ::Specs::Failure; end
+    def items;              raise ::Specs::Failure; end
+  end
+  
+  module Nil
+    def should_be_nil
+      raise ::Specs::Failure unless self == nil
+    end
+    
+    def should_not_be_nil
+      raise ::Specs::Failure if self == nil
+    end
+  end
+  
+  module Boolean
+    def should_be_true
+      raise ::Specs::Failure unless `this.valueOf()`
+    end
+    
+    def should_be_false
+       raise ::Specs::Failure if `this.valueOf()`
+    end
+  end
+  
+  module Proc
+    def should_raise(specific_exception = nil)
+      
+    end
+    
+    def should_not_raise(specific_exception = nil)
+      
+    end
   end
   
   module Array
@@ -64,11 +107,16 @@ end
 
 String.include(DSL::Base)
 Array.include(DSL::Base)
+Hash.include(DSL::Base)
 Numeric.include(DSL::Base)
-Array.include(DSL::Array)
+Class.include(DSL::Base)
 nil.extend(DSL::Base)
-TrueClass.extend(DSL::Base)
-FalseClass.extend(DSL::Base)
+nil.extend(DSL::Nil)
+
+`Red.donateMethodsToClass(#{DSL::Boolean}.prototype, Boolean.prototype)`
+
+Array.include(DSL::Array)
+Proc.include(DSL::Proc)
 
 
 # Just stores the @@spec_list class variables. @@spec_list is an array of
@@ -112,6 +160,14 @@ class Spec
   
   def returns(description, &block)
      self.verb("returns", description, &block)
+  end
+  
+  def has(description, &block)
+    self.verb("has", description, &block)
+  end
+  
+  def does_not(description, &block)
+    self.verb("does not", description, &block)
   end
   
   def to_heading_html
@@ -316,7 +372,7 @@ module Specs
         ' <li><span id="progress">0</span>% done</li>',
         ' <li><span id="total_elapsed">0</span> secs</li>',
         '</ul>',
-        '<p><a href="">RedSpec homepage</a></p>',
+        '<p><a href="">RedSpec documentation</a></p>',
         ].join("");`
         
       `container.appendChild(title);`
@@ -331,7 +387,7 @@ module Specs
       `list = document.createElement("DIV")`
       `list.id = "list"`
       `list.innerHTML = [
-         '<h2>List</h2>',
+         '<h2>Specs</h2>',
          '<ul class="specs">',
          all_runner_specs_as_list_items,
         '</ul>'
