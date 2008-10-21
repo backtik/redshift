@@ -148,7 +148,8 @@ module Element
   
   # TODO: REGEXP PORT REQUIRED
   # def (Properties['href']).get(element)
-  #    # (`!#{element.native}.href`) ? nil : this.href.replace(new RegExp('^' + document.location.protocol + '\/\/' + document.location.host), '');
+  #   r = Regexp.new('^' + `$q(document.location.protocol)` + '\/\/' + `$q(document.location.host)`)
+  #   (`#{element.native}.href`) ? nil : `#{element.native}.href`.replace(r, '')
   # end
   
   def (Properties['html']).set(element, html)
