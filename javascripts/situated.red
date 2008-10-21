@@ -70,28 +70,28 @@ module Situated
   module Element
     def size
       return self.window.size if self.is_body?
-  		return {:x => self.native.offset_width, :y => self.native.offset_height}
+  		return {:x => `#{self}.__native__.offsetWidth`, :y => `#{self}.__native__.offsetHeight`}
     end
     
     def scroll
       return self.window.scroll if self.is_body? 
-  		return {:x => self.scroll_left, :y => this.scroll_top}
+  		return {:x => `#{self}.__native__.scrollLeft`, :y => `#{self}.__native__.scrollTop`}
     end
     
     def scrolls
       element = self
       position = {:x => 0, :y => 0}
   		while element && !element.is_body? do
-  			position[:x] += element.scroll_left
-  			position[:y] += element.scroll_top
-  			element = element.native.parent_node
+  			position[:x] += `#{element}.__native__.scrollLeft`
+  			position[:y] += `#{element}.__native__.scrollTop`
+  			element = `$E(#{element}.__native__.parentNode)`
   		end
   		return position
     end
     
     def scroll_size
       return self.window.scroll_size if self.is_body?
-  		return {:x => self.scroll_width, :y => self.scroll_height}
+  		return {:x => `#{self}.__native__.scrollWidth`, :y => `#{self}.__native__.scrollHeight`}
     end
     
     def scroll_to(x,y)
@@ -108,11 +108,11 @@ module Situated
       element = self
       return nil if element.is_body?
       
-      # TODO:
-      # Element.wrap(element.native.offset_parent)
-      return element.native.offset_parent unless trident?
-
-  		while ((element = element.native.parent_node) && !element.is_body?) do 
+      # All engines except trident have a native offsetParent property
+      return `$E(#{element}.__native__.offsetParent)` unless trident?
+      
+      # For trident we walk the DOM until we have a static positioned element or reach the body
+  		while ((element = `$E(#{element}.__native__.parentNode)`) && !element.is_body?) do 
   		  return element unless element.styles[:position] == 'static'
   		end
   		
@@ -125,15 +125,16 @@ module Situated
       return position if self.is_body?
 
   		while (element && !element.is_body?) do
-  			position[:x] += element.offset_left
-  			position[:y] += element.offset_top
+  			position[:x] += `#{element}.__native__.offsetLeft`
+  			position[:y] += `#{element}.__native__.offsetTop`
 
   			if gecko?
   				if !element.styles['border-box']
   					position[:x] += element.styles['border-left-width']
   					position[:y] += element.styles['border-top-width']
   				end
-  				parent = element.native.parent_node
+  				
+  				parent = `$E(#{element}.__native__.parentNode)`
   				
   				if parent && parent.styles[:overflow] != 'visible'
   					position[:x] += parent.styles['border-left-width']
@@ -144,10 +145,10 @@ module Situated
 				  end
   			end
 
-  			element = element.native.offset_parent
+  			element = `$E(#{element}.__native__.offsetParent)`
   			
   			if trident?
-  				element = element.native.offset_parent while (element && !element.native.currentStyle.hasLayout) 
+  				element = `$E(#{element}.__native__.offsetParent)` while (element && !`#{element}.__native__.currentStyle.hasLayout`) 
   			end
   		end
   		
@@ -181,21 +182,21 @@ module Situated
   module Viewport
     def size
       win = self.window
-  	  return {:x => win.native.innerWidth, :y => win.native.innerHeight} if (presto? || webkit?)
+  	  return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
   		doc = getCompatElement(self)
-  		return {:x => doc.native.clientWidth, :y => doc.native.clientHeight}
+  		return {:x => `#{doc}.__native__.clientWidth`, :y => `#{doc}.__native__.clientHeight`}
     end
     
     def scroll
       win = self.window
   		doc = getCompatElement(self)
-  		return {:x => win.pageXOffset || doc.scrollLeft, :y => win.pageYOffset || doc.scrollTop}
+  		return {:x => `#{win}.__native__.pageXOffset` || `#{doc}.__native__.scrollLeft`, :y => `#{win}.__native__pageYOffset` || `#{doc}.__native__.scrollTop`}
     end
     
     def scroll_size
       doc = getCompatElement(self);
   		min = self.size
-  		return {:x => Math.max(doc.scrollWidth, min.x), :y => Math.max(doc.scrollHeight, min.y)}
+  		return {:x => `Math.max(#{doc}.__native__.scrollWidth, #{min[:x]})`, :y => `Math.max(#{doc}.__native__.scrollHeight,#{ min[:y]})`}
     end
     
     # call-seq:
