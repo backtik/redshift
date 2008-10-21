@@ -107,7 +107,11 @@ Spec.describe Array do |it|
     ([1,2,3,4,5,6,7][1..2] = ['a','b']).should_equal([1,'a','b',4,5,6,7])
   end
   
-  it.can 'array assoc'
+  it.can 'assoc' do
+    a  = [['colors','red','blue','green'], ['letters','a','b','c'], 'foo']
+    a.assoc('letters').should_equal(["letters", "a", "b", "c"])
+    a.assoc('foo').should_be_nil
+  end
   
   it.can 'clear' do
     [3,2,1].clear.should_equal([])
@@ -285,7 +289,11 @@ Spec.describe Array do |it|
     [1,2,3].push(4).push(5,6,7).should_equal([1, 2, 3, 4, 5, 6, 7])
   end
   
-  it.can 'rassoc'
+  it.can 'rassoc' do
+    a  = [[1,'one'], [2,'two'], [:ii,'two']]
+    a.rassoc('two').should_equal([2, "two"])
+    a.rassoc('three').should_be_nil
+  end
   
   it.can 'create a new array with rejected elements removed' do
     a = [1,2,3,4,5]

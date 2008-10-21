@@ -296,7 +296,8 @@ module Specs
         end
         
         self.type = 'success'
-        self.example.result = 'success'
+        self.example.result = 'success' unless self.example.result
+        
       rescue ::Specs::Failure
         self.type = 'failure'
         self.example.result = 'failure'
@@ -449,6 +450,7 @@ module Specs
     end
     
     def self.on_example_end(example)
+      puts example.result
       `li = document.getElementById("example_" + #{example.object_id.to_s})`
       `li.className = #{example.result}.__value__`
     end

@@ -1,7 +1,15 @@
 Spec.describe Object do |it|
-  it.can 'find its class' do
-    puts Object.new.class.class.inspect
-    # Object.new.class.should_equal('Object')
+  it.can 'find its class'
+  
+  it.can 'be extended with additioanl functionality' do
+    module Stuff
+      def x
+      end
+    end
+    
+    o = Object.new
+    o.extend(Stuff)
+    o.respond_to?(:x).should_be_true
   end
   
   it.has 'an object_id' do
