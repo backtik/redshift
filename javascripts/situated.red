@@ -3,7 +3,7 @@
 # representation within the browser.
 #
 module Situated
-  module Base
+  module PositionAndSize
     
     # call-seq:
     #   situated.height -> integer
@@ -68,6 +68,8 @@ module Situated
   end
   
   module Element
+    include PositionAndSize
+    
     def size
       return self.window.size if self.is_body?
   		return {:x => `#{self}.__native__.offsetWidth`, :y => `#{self}.__native__.offsetHeight`}
@@ -228,6 +230,8 @@ module Situated
   
   
   module Viewport
+    include PositionAndSize
+    
     def size
       win = self.window
   	  return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
