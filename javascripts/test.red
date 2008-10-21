@@ -15,3 +15,4 @@ Document.ready? do
   puts foo.call_chain(4,5,6)
   puts foo.call_chain
 end
+

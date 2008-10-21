@@ -1,6 +1,7 @@
 require 'rack/request'
 require 'rack/response'
 require 'rubygems' rescue nil
+require 'sass' rescue nil
 require 'red'
 require 'red/executable'
 require 'red/version'
@@ -28,6 +29,10 @@ module Rack
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/javascript"}]
       when '.css'
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/css"}]
+      when '.sass'
+        [Sass::Engine.new(::File.read("#{HerringRoot}#{req.path_info}")).render, {"Content-Type" => "text/css"}]
+      when '.ico'
+        ['', {"Content-Type" => "image/png"}]
       else
         ["",{}]
       end
