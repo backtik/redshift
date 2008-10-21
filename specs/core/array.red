@@ -37,11 +37,10 @@ Spec.describe Array do |it|
     ([1,2] <=> [1,2]).should_equal(0)
   end
   
-  # BROKE
   it.can 'check if its equal to another array' do
-    # (['a','c'] == ['a', 'c', 7]).should_equal(false)
-    # (['a','c', 7] == ['a', 'c', 7]).should_equal(true)
-    # (['a','c', 7] == ['a', 'd', 'f']).should_equal(false)
+    (['a','c'] == ['a', 'c', 7]).should_be_false
+    (['a','c', 7] == ['a', 'c', 7]).should_be_true
+    (['a','c', 7] == ['a', 'd', 'f']).should_be_false
   end
   
   it.can 'retrieve the object at a numeric index' do
@@ -53,10 +52,10 @@ Spec.describe Array do |it|
   end
   
   it.returns 'nil if the object at the numeric index is nil or index is greater than its length' do
-    ['a','b',nil][2].should_equal(nil)
-    ['a','b'][2].should_equal(nil)
-    ['a','b',nil].slice(2).should_equal(nil)
-    ['a','b'].slice(2).should_equal(nil)
+    ['a','b',nil][2].should_be_nil
+    ['a','b'][2].should_be_nil
+    ['a','b',nil].slice(2).should_be_nil
+    ['a','b'].slice(2).should_be_nil
   end
   
   it.returns 'a sub array based on a start position and length' do
@@ -69,8 +68,8 @@ Spec.describe Array do |it|
   end
   
   it.returns 'nil if a position and length are provided and position is past the size of the array' do
-    (['a','b','c','d'][4,2]).should_equal(nil)
-    ['a','b','c','d'].slice(4,2).should_equal(nil)
+    (['a','b','c','d'][4,2]).should_be_nil
+    ['a','b','c','d'].slice(4,2).should_be_nil
   end
   
   it.returns 'a sub array when a range is provided' do
@@ -100,7 +99,7 @@ Spec.describe Array do |it|
     a.should_equal([nil,nil,nil,nil,'4']) 
   end
   
-  it.can 'assign objects from an array to a location in the array based on a start position and legth' do
+  it.can 'assign objects from an array to a location in the array based on a start position and length' do
     ([1,2,3,4,5,6,7][0,3] = ['a','b', 'c']).should_equal(['a','b','c',4,5,6,7])
   end
   
@@ -180,7 +179,7 @@ Spec.describe Array do |it|
   end
   
   it.returns 'nil when fetching an item with a provided index beyond the length' do
-    ['a','b','c'].fetch(5).should_equal(nil)
+    ['a','b','c'].fetch(5).should_be_nil
   end
   
   it.returns 'a default value if one is provided when fetching at an index and there is no object at the index' do
@@ -209,15 +208,15 @@ Spec.describe Array do |it|
   it.can 'flatten and return a new flat array' do
     a = ['a','b',['d','e','f'],'g']
     b = a.flatten
+    a.should_not_equal(['a','b','d','e','f','g'])
     b.should_equal(['a','b','d','e','f','g'])
-    a.should_not_equal(b)
   end
   
   it.can 'flatten itself' do
     a = ['a','b',['d','e','f'],'g']
     b = a.flatten!
+    a.should_equal(['a','b','d','e','f','g'])
     b.should_equal(['a','b','d','e','f','g'])
-    a.should_equal(b)
   end
   
   it.returns 'nil if flattening itself and no changes were made' do
@@ -225,7 +224,8 @@ Spec.describe Array do |it|
   end
   
   it.can 'determine whether it includes an object returning true or false' do
-    # ['a','b','c'].include?('a').should_equal(0)
+    ['a','b','c'].include?('a').should_be_true
+    ['a','b','c'].include?('d').should_be_false
   end
   
   it.returns 'the index of an object when looking for an object and the object is in the array' do
@@ -233,7 +233,7 @@ Spec.describe Array do |it|
   end
   
   it.returns 'nil when looking for an object and the object is not in the array' do
-    ['a','b','c'].index('a').should_equal(nil)
+    ['a','b','c'].index('d').should_be_nil
   end
   
   it.can 'insert an object before paritcular index' do
@@ -308,15 +308,15 @@ Spec.describe Array do |it|
   it.can 'return a reversed array' do
     a = [1,2,3,4,5]
     b = a.reverse
-    b.should_equal([5, 4, 3, 2, 1])
-    a.should_not_equal(b)
+    b.should_equal([5,4,3,2,1])
+    a.should_equal([1,2,3,4,5])
   end
   
   it.can 'reverse itself' do
     a = [1,2,3,4,5]
-    b = a.reverse
-    b.should_equal([5, 4, 3, 2, 1])
-    a.should_equal(b)
+    b = a.reverse!
+    b.should_equal([5,4,3,2,1])
+    a.should_equal([5,4,3,2,1])
   end
   
   it.can 'return a sorted array' do
@@ -348,6 +348,7 @@ Spec.describe Array do |it|
   it.can 'return a new array with repeated elements removed' do
     a = ['a','b','b','c','c','c']
     b = a.uniq
+    a.should_not_equal(["a", "b", "c"])
     b.should_equal(["a", "b", "c"])
     a.should_not_equal(b)
   end
@@ -355,6 +356,7 @@ Spec.describe Array do |it|
   it.can 'remove repeated elements from itself' do
     a = ['a','b','b','c','c','c']
     b = a.uniq!
+    a.should_equal(["a", "b", "c"])
     b.should_equal(["a", "b", "c"])
     a.should_equal(b)
   end
