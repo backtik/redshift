@@ -13,7 +13,7 @@
 #     find the existing extended object
 #
 
-`function $E(element){var E=c$Element.c$Extended.m$new();E.__native__=element;return E.__native__?E:nil;}`
+`function $E(element){if(element==null){return nil;};var E=c$Element.c$Extended.m$new();E.__native__=element;return E;}`
 
 class Element
   class Extended
