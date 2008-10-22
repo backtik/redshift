@@ -13,18 +13,16 @@
 #     find the existing extended object
 #
 
-`function $E(element){if(element==null){return nil;};var E=c$Element.c$Extended.m$new();E.__native__=element;return E;}`
+`function $E(element){if(element==null){return nil;};var E=c$Element.m$new();E.__native__=element;return E;}`
 
-# class Element
-#   class Extended
-#     def inspect
-#       attributes = [`$q(this.__native__.tagName.toUpperCase())`]
-#       attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!=''`
-#       attributes << `$q('class="'+this.__native__.class+'"')` if `this.__native__.class`
-#       "<Element: %s>" % attributes.join(' ')
-#     end
-#   end
-# end
+class Element
+  def inspect
+    attributes = [`$q(this.__native__.tagName.toUpperCase())`]
+    attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!=''`
+    attributes << `$q('class="'+this.__native__.class+'"')` if `this.__native__.class`
+    "<Element: %s>" % attributes.join(' ')
+  end
+end
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
@@ -55,30 +53,32 @@ module Document
   #          :scrollMaxY, :scrollX, :scrollY, {:to => :window})
   
   # call-seq:
-  #   Document[str]     -> element or nil
-  #   Document[str]     -> [element, ...]
-  #   Document[ary]     -> [element, ...]
-  #   Document[element] -> element
+  #   Document[str]      -> element or nil
+  #   Document[str]      -> [element, ...]
+  #   Document[arg, ...] -> [element, ...]
+  #   Document[element]  -> element
   # 
-  # The first form returns the +Element+ identified by the id <i>str</i>, or
-  # +nil+ if no such element is found. The second form returns the array of
-  # elements identified by the selector <i>str</i>. The third form returns the
-  # array of elements found by calling <tt>Document.[]</tt> on each item in
-  # _ary_. The fourth form returns _element_ unchanged.
+  # The first form returns the +Element+ identified by the id <i>str</i> (e.g.
+  # <i>'#my_id'</i>), or +nil+ if no such element is found. The second form
+  # returns the array of elements identified by the selector <i>str</i>. The
+  # third form returns the array of elements found by calling
+  # <tt>Document.[]</tt> on each arg. The fourth form returns _element_
+  # unchanged.
   # 
   #   Document['#content']    #=> #<Element: DIV id="content">
   #   ...
   # 
-  def self.[](obj)
-    case obj
-    when String
-      return self.find_by_string(obj)
-    when Array
-      return self.find_many_with_array(obj)
-    when Element::Extended
-      return obj
+  def self.[](obj, *args)
+    if args.empty?
+      case obj
+      when String
+        return self.find_by_string(obj)
+      when Element
+        return obj
+      end
+    else
+      return self.find_many_with_array(args.unshift(obj))
     end
-    return nil
   end
   
   # call-seq:
