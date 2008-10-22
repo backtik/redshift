@@ -1,9 +1,4 @@
-# Selectors is a module that give RedShift the ability to use complex css3 and xpath selectors
-# in the Document[] and element[] methods. For speed it is nearly pure Javascript, borrowed from MooTools, 
-# and not intended to be publically used.
-
-# Add these methods to Document, Element:
-# 
+# # add these where appropriate
 # Native.implement([Document, Element], {
 #   
 #   getElements: function(expression, nocash){
@@ -32,179 +27,170 @@
 #   
 # });
 
-module Selectors # :nodoc
-  Cache =  {:nth => {}, :parsed => {}}
-  RegExps = {
-  	:id => `(/#([\\w-]+)/)`,
-  	:tag => `(/^(\\w+|\\*)/)`,
-  	:quick => `(/^(\\w+|\\*)$/)`,
-  	:splitter => `(/\\s*([+>~\\s])\\s*([a-zA-Z#.*:\\[])/g)`,
-  	:combined => `(/\\.([\\w-]+)|\\[(\\w+)(?:([!*^$~|]?=)["']?(.*?)["']?)?\\]|:([\\w-]+)(?:\\(["']?(.*?)?["']?\\)|$)/g)`
-  }
+`
+var Selectors = {Cache: {nth: {}, parsed: {}}};
+
+Selectors.RegExps = {
+	id: (/#([\\w-]+)/),
+	tag: (/^(\\w+|\\*)/),
+	quick: (/^(\\w+|\\*)$/),
+	splitter: (/\\s*([+>~\\s])\\s*([a-zA-Z#.*:\\[])/g),
+	combined: (/\\.([\\w-]+)|\\[(\\w+)(?:([!*^$~|]?=)(["']?)([^\\4]*?)\\4)?\\]|:([\\w-]+)(?:\\(["']?(.*?)?["']?\\)|$)/g)
+};
+
+Selectors.Utils = {
+	// added to replace $uid, which mootools has but we do not
+	// 
+	object_uid: function(item){
+    item.__id__||(item.__id__=Red.id++)
+  },
   
-  module Utils
-    def self.chk(item,uniques)
-      `if (!uniques) return true
-  		var uid = $uid(item)
-  		if (!uniques[uid]) return uniques[uid] = true
-  		return false
-  		`
-    end
-    
-    def self.parse_nth_argument(argument)
-      `
-      if (#{Selectors::Cache[:nth][argument]}) return #{Selectors::Cache[:nth][argument]};
-  		var parsed = argument.match(/^([+-]?\\d*)?([a-z]+)?([+-]?\\d*)?$/);
-  		if (!parsed) return false;
-  		var inta = parseInt(parsed[1]);
-  		var a = (inta || inta === 0) ? inta : 1;
-  		var special = parsed[2] || false;
-  		var b = parseInt(parsed[3]) || 0;
-  		if (a != 0){
-  			b--;
-  			while (b < 1) b += a;
-  			while (b >= a) b -= a;
-  		} else {
-  			a = b;
-  			special = 'index';
-  		}
-  		switch (special){
-  			case 'n': parsed = {a: a, b: b, special: 'n'}; break;
-  			case 'odd': parsed = {a: 2, b: 0, special: 'n'}; break;
-  			case 'even': parsed =  {a: 2, b: 1, special: 'n'}; break;
-  			case 'first': parsed = {a: 0, special: 'index'}; break;
-  			case 'last': parsed = {special: 'last-child'}; break;
-  			case 'only': parsed = {special: 'only-child'}; break;
-  			default: parsed = {a: (a - 1), special: 'index'};
-  		}
+	chk: function(item, uniques){
+		if (!uniques) return true;
+		var uid = Selectors.Utils.object_uid(item);
+		if (!uniques[uid]) return uniques[uid] = true;
+		return false;
+	},
+	  
+	parseNthArgument: function(argument){
+		if (Selectors.Cache.nth[argument]) return Selectors.Cache.nth[argument];
+		var parsed = argument.match(/^([+-]?\d*)?([a-z]+)?([+-]?\d*)?$/);
+		if (!parsed) return false;
+		var inta = parseInt(parsed[1]);
+		var a = (inta || inta === 0) ? inta : 1;
+		var special = parsed[2] || false;
+		var b = parseInt(parsed[3]) || 0;
+		if (a != 0){
+			b--;
+			while (b < 1) b += a;
+			while (b >= a) b -= a;
+		} else {
+			a = b;
+			special = 'index';
+		}
+		switch (special){
+			case 'n': parsed = {a: a, b: b, special: 'n'}; break;
+			case 'odd': parsed = {a: 2, b: 0, special: 'n'}; break;
+			case 'even': parsed = {a: 2, b: 1, special: 'n'}; break;
+			case 'first': parsed = {a: 0, special: 'index'}; break;
+			case 'last': parsed = {special: 'last-child'}; break;
+			case 'only': parsed = {special: 'only-child'}; break;
+			default: parsed = {a: (a - 1), special: 'index'};
+		}
+		
+		return Selectors.Cache.nth[argument] = parsed;
+	},
+	
+	parseSelector: function(selector){
+		if (Selectors.Cache.parsed[selector]) return Selectors.Cache.parsed[selector];
+		var m, parsed = {classes: [], pseudos: [], attributes: []};
+		while ((m = Selectors.RegExps.combined.exec(selector))){
+			var cn = m[1], an = m[2], ao = m[3], av = m[5], pn = m[6], pa = m[7];
+			if (cn){
+				parsed.classes.push(cn);
+			} else if (pn){
+				var parser = Selectors.Pseudo.get(pn);
+				if (parser) parsed.pseudos.push({parser: parser, argument: pa});
+				else parsed.attributes.push({name: pn, operator: '=', value: pa});
+			} else if (an){
+				parsed.attributes.push({name: an, operator: ao, value: av});
+			}
+		}
+		if (!parsed.classes.length) delete parsed.classes;
+		if (!parsed.attributes.length) delete parsed.attributes;
+		if (!parsed.pseudos.length) delete parsed.pseudos;
+		if (!parsed.classes && !parsed.attributes && !parsed.pseudos) parsed = null;
+		return Selectors.Cache.parsed[selector] = parsed;
+	},
+	
+	parseTagAndID: function(selector){
+		var tag = selector.match(Selectors.RegExps.tag);
+		var id = selector.match(Selectors.RegExps.id);
+		return [(tag) ? tag[1] : '*', (id) ? id[1] : false];
+	},
+	
+	filter: function(item, parsed, local){
+		var i;
+		if (parsed.classes){
+			for (i = parsed.classes.length; i--; i){
+				var cn = parsed.classes[i];
+				if (!Selectors.Filters.byClass(item, cn)) return false;
+			}
+		}
+		if (parsed.attributes){
+			for (i = parsed.attributes.length; i--; i){
+				var att = parsed.attributes[i];
+				if (!Selectors.Filters.byAttribute(item, att.name, att.operator, att.value)) return false;
+			}
+		}
+		if (parsed.pseudos){
+			for (i = parsed.pseudos.length; i--; i){
+				var psd = parsed.pseudos[i];
+				if (!Selectors.Filters.byPseudo(item, psd.parser, psd.argument, local)) return false;
+			}
+		}
+		return true;
+	},
+	
+	getByTagAndID: function(ctx, tag, id){
+		if (id){
+			var item = (ctx.getElementById) ? ctx.getElementById(id, true) : Element.getElementById(ctx, id, true);
+			return (item && Selectors.Filters.byTag(item, tag)) ? [item] : [];
+		} else {
+			return ctx.getElementsByTagName(tag);
+		}
+	},
+	
+	search: function(self, expression, local){
+		var splitters = [];
+		
+		var selectors = expression.trim().replace(Selectors.RegExps.splitter, function(m0, m1, m2){
+			splitters.push(m1);
+			return ':)' + m2;
+		}).split(':)');
+		
+		var items, filtered, item;
+		
+		for (var i = 0, l = selectors.length; i < l; i++){
+			
+			var selector = selectors[i];
+			
+			if (i == 0 && Selectors.RegExps.quick.test(selector)){
+				items = self.getElementsByTagName(selector);
+				continue;
+			}
+			
+			var splitter = splitters[i - 1];
+			
+			var tagid = Selectors.Utils.parseTagAndID(selector);
+			var tag = tagid[0], id = tagid[1];
 
-  		return #{Selectors::Cache[:nth][argument] = parsed};
-  		`
-    end
-  
-    def parse_selector(selector)
-      `
-      if (#{Selectors::Cache[:parsed][selector]}) return #{Selectors::Cache[:parsed][selector]};
-  		var m, parsed = {classes: [], pseudos: [], attributes: []};
-  		while ((m = #{Selectors::RegExps[:combined]}.exec(selector))){
-  			var cn = m[1], an = m[2], ao = m[3], av = m[4], pn = m[5], pa = m[6];
-  			if (cn){
-  				parsed.classes.push(cn);
-  			} else if (pn){
-  				var parser = #{Selectors::Pseudo.get(pn)};
-  				if (parser) parsed.pseudos.push({parser: parser, argument: pa});
-  				else parsed.attributes.push({name: pn, operator: '=', value: pa});
-  			} else if (an){
-  				parsed.attributes.push({name: an, operator: ao, value: av});
-  			}
-  		}
-  		if (!parsed.classes.length) delete parsed.classes;
-  		if (!parsed.attributes.length) delete parsed.attributes;
-  		if (!parsed.pseudos.length) delete parsed.pseudos;
-  		if (!parsed.classes && !parsed.attributes && !parsed.pseudos) parsed = null;
-  		return Selectors.Cache.parsed[selector] = parsed;
-  		`
-    end
-  
-    def parse_tag_and_id(selector)
-      `
-  		var tag = selector.match(#{Selectors::RegExps[:tag]});
-  		var id = selector.match(#{Selectors::RegExps[:id]});
-  		return [(tag) ? tag[1] : '*', (id) ? id[1] : false];
-  		`
-  	end
-  	
-  	def filter(item, parsed, local)
-  	  `
-  		var i;
-  		if (parsed.classes){
-  			for (i = parsed.classes.length; i--; i){
-  				var cn = parsed.classes[i];
-  				if (!Selectors.Filters.byClass(item, cn)) return false;
-  			}
-  		}
-  		if (parsed.attributes){
-  			for (i = parsed.attributes.length; i--; i){
-  				var att = parsed.attributes[i];
-  				if (!Selectors.Filters.byAttribute(item, att.name, att.operator, att.value)) return false;
-  			}
-  		}
-  		if (parsed.pseudos){
-  			for (i = parsed.pseudos.length; i--; i){
-  				var psd = parsed.pseudos[i];
-  				if (!Selectors.Filters.byPseudo(item, psd.parser, psd.argument, local)) return false;
-  			}
-  		}
-  		return true;
-  		`
-  	end
-  	
-  	def get_by_tag_and_id(ctx,tag,id)
-  	  `
-  	 	if (id){
-  			var item = (ctx.getElementById) ? ctx.getElementById(id, true) : Element.getElementById(ctx, id, true);
-  			return (item && Selectors.Filters.byTag(item, tag)) ? [item] : [];
-  		} else {
-  			return ctx.getElementsByTagName(tag);
-  		}
-  		`
-  	end
-  
-    def search(elem, expression, local)
-      `
-    	var splitters = [];
-
-    	var selectors = expression.trim().replace(#{Selectors::RegExps[:splitter]}, function(m0, m1, m2){
-    		splitters.push(m1);
-    		return ':)' + m2;
-    	}).split(':)');
-
-    	var items, match, filtered, item;
-
-    	for (var i = 0, l = selectors.length; i < l; i++){
-
-    		var selector = selectors[i];
-
-    		if (i == 0 && #{Selectors::RegExps[:quick]}.test(selector)){
-    			items = elem.getElementsByTagName(selector);
-    			continue;
-    		}
-
-    		var splitter = splitters[i - 1];
-
-    		var tagid = #{Selectors::Utils.parse_tag_and_id(selector)};
-    		var tag = tagid[0], id = tagid[1];
-
-    		if (i == 0){
-    			items = #{Selectors::Utils.get_by_tag_and_id(elem, tag, id)};
-    		} else {
-    			var uniques = {}, found = [];
-    			for (var j = 0, k = items.length; j < k; j++) found = Selectors.Getters[splitter](found, items[j], tag, id, uniques);
-    			items = found;
-    		}
-
-    		var parsed = #{Selectors::Utils.parse_selector(selector)};
-
-    		if (parsed){
-    			filtered = [];
-    			for (var m = 0, n = items.length; m < n; m++){
-    				item = items[m];
-    				if (#{Selectors::Utils.filter(item, parsed, local)}) filtered.push(item);
-    			}
-    			items = filtered;
-    		}
-    	}
-    	return items;
-      `
-    end
-  end
-  
-  module Getters
-  end
-  
-  module Filters
-  end
-end
+			if (i == 0){
+				items = Selectors.Utils.getByTagAndID(self, tag, id);
+			} else {
+				var uniques = {}, found = [];
+				for (var j = 0, k = items.length; j < k; j++) found = Selectors.Getters[splitter](found, items[j], tag, id, uniques);
+				items = found;
+			}
+			
+			var parsed = Selectors.Utils.parseSelector(selector);
+			
+			if (parsed){
+				filtered = [];
+				for (var m = 0, n = items.length; m < n; m++){
+					item = items[m];
+					if (Selectors.Utils.filter(item, parsed, local)) filtered.push(item);
+				}
+				items = filtered;
+			}
+			
+		}
+		
+		return items;
+		
+	}
+	
+};
 
 Selectors.Getters = {
 	
@@ -268,7 +254,7 @@ Selectors.Filters = {
 	},
 	
 	byAttribute: function(self, name, operator, value){
-		var result = Element.prototype.getProperty.call(self, name);
+		var result = Element.prototype.call(self, name);
 		if (!result) return false;
 		if (!operator || value == undefined) return true;
 		switch (operator){
@@ -331,13 +317,13 @@ Selectors.Pseudo = new Hash({
 		if (parsed.special != 'n') return Selectors.Pseudo[parsed.special].call(this, parsed.a, local);
 		var count = 0;
 		local.positions = local.positions || {};
-		var uid = $uid(this);
+		var uid = Selectors.Utils.object_uid(this);
 		if (!local.positions[uid]){
 			var self = this;
 			while ((self = self.previousSibling)){
 				if (self.nodeType != 1) continue;
 				count ++;
-				var position = local.positions[$uid(self)];
+				var position = local.positions[Selectors.Utils.object_uid(self)];
 				if (position != undefined){
 					count = position + count;
 					break;
@@ -367,3 +353,4 @@ Selectors.Pseudo = new Hash({
 	}
 	
 });
+`
