@@ -107,7 +107,8 @@ Selectors.Utils = {
 			if (cn){
 				parsed.classes.push(cn);
 			} else if (pn){
-				var parser = Selectors.Pseudo.get(pn);
+        var parser = Selectors.Pseudo[pn];
+        
 				if (parser) parsed.pseudos.push({parser: parser, argument: pa});
 				else parsed.attributes.push({name: pn, operator: '=', value: pa});
 			} else if (an){
@@ -166,23 +167,20 @@ Selectors.Utils = {
 			splitters.push(m1);
 			return ':)' + m2;
 		}).split(':)');
-		
+				
 		var items, filtered, item;
-		
 		for (var i = 0, l = selectors.length; i < l; i++){
-			
 			var selector = selectors[i];
 			
 			if (i == 0 && Selectors.RegExps.quick.test(selector)){
 				items = self.getElementsByTagName(selector);
 				continue;
 			}
-			
+						
 			var splitter = splitters[i - 1];
 			
 			var tagid = Selectors.Utils.parseTagAndID(selector);
 			var tag = tagid[0], id = tagid[1];
-
 			if (i == 0){
 				items = Selectors.Utils.getByTagAndID(self, tag, id);
 			} else {
@@ -190,9 +188,8 @@ Selectors.Utils = {
 				for (var j = 0, k = items.length; j < k; j++) found = Selectors.Getters[splitter](found, items[j], tag, id, uniques);
 				items = found;
 			}
-			
+						
 			var parsed = Selectors.Utils.parseSelector(selector);
-			
 			if (parsed){
 				filtered = [];
 				for (var m = 0, n = items.length; m < n; m++){
@@ -203,7 +200,6 @@ Selectors.Utils = {
 			}
 			
 		}
-		
 		return items;
 		
 	}

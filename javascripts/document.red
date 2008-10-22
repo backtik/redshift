@@ -15,16 +15,16 @@
 
 `function $E(element){if(element==null){return nil;};var E=c$Element.c$Extended.m$new();E.__native__=element;return E;}`
 
-class Element
-  class Extended
-    def inspect
-      attributes = [`$q(this.__native__.tagName.toUpperCase())`]
-      attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!=''`
-      attributes << `$q('class="'+this.__native__.class+'"')` if `this.__native__.class`
-      "<Element: %s>" % attributes.join(' ')
-    end
-  end
-end
+# class Element
+#   class Extended
+#     def inspect
+#       attributes = [`$q(this.__native__.tagName.toUpperCase())`]
+#       attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!=''`
+#       attributes << `$q('class="'+this.__native__.class+'"')` if `this.__native__.class`
+#       "<Element: %s>" % attributes.join(' ')
+#     end
+#   end
+# end
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
@@ -165,8 +165,9 @@ module Document
   end
   
   def self.find_all_by_selector(selector) # :nodoc:
+  `Selectors.Utils.search(document, #{selector}.__value__, {})`
   # return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
-    []
+  # []
   end
   
   def self.find_by_id(str) # :nodoc:
