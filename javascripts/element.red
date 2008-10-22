@@ -1,4 +1,4 @@
-module Element
+module ElementStuff
   
   Attributes = {
   	:properties => {'html' => 'innerHTML', 'class' => 'className', 'for' => 'htmlFor', 'text' => (::Browser::Engine.trident?) ? 'innerText' : 'textContent'},
@@ -22,9 +22,9 @@ module Element
     :borderStyle => {}, :borderColor => {}
   }
     
-  class Extended
+  class ::Element
   	def initialize(tag)
-      # konstructor = Element::Constructors.get(tag)
+      # konstructor = ElementStuff::Constructors.get(tag)
       #       return konstructor(properties)  if konstructor 
       # return Document.new_element(tag, props) if (`typeof tag == 'string'`) 
       # return Document[tag].set(properties)
@@ -41,27 +41,27 @@ module Element
       when ::Object
         nil
       when ::String
-      property = ::Element::Attributes[:properties][prop]
+      property = ::ElementStuff::Attributes[:properties][prop]
       (property && property.respond_to?(:set)) ? property.set(self, value) : self.set_property(prop, value)
       end
       return self
   	end
   	
   	def get(prop)
-	  	property = Element::Properties[prop]
+	  	property = ElementStuff::Properties[prop]
       return (property && property.respond_to?(:get)) ? property.get(self,prop) : self.get_property(prop)
   	end
   	
   	def erase(prop)
-  	 	property = Element::Properties[prop]
+  	 	property = ElementStuff::Properties[prop]
   	 	property ? property.erase(self, prop) : self.remove_property(prop)
   		return self
   	end
     
     def set_property(attribute, value)
-      key = Element::Attributes[:properties][attribute]
+      key = ElementStuff::Attributes[:properties][attribute]
       hasValue = defined?(value)
-      if (key && Element::Attributes[:booleans].include?(attribute)) 
+      if (key && ElementStuff::Attributes[:booleans].include?(attribute)) 
         value = (value || !hasValue) ? true : false
       elsif !hasValue
          return self.remove_property(attribute)
@@ -71,14 +71,14 @@ module Element
     end
     
     def get_property(attribute)
-      key = Element::Attributes[:properties][attribute]
+      key = ElementStuff::Attributes[:properties][attribute]
   		value = (key) ? `#{@native}[key]` : `#{@native}.getAttribute(attribute, 2)`
-  		return Element::Attributes[:booleans].include?(attribute) ? !!value : (key) ? value : value || nil
+  		return ElementStuff::Attributes[:booleans].include?(attribute) ? !!value : (key) ? value : value || nil
     end
     
     def remove_property(attribute)
-      #       key = Element::Attributes[:properties][attribute]
-      #       is_bool = (key && Element::Attributes[:booleans][attribute])
+      #       key = ElementStuff::Attributes[:properties][attribute]
+      #       is_bool = (key && ElementStuff::Attributes[:booleans][attribute])
       # (key) ? `#{self.native}[key]` = (is_bool) ? false : '' : self.remove_attribute(attribute);
       # return self
     end
