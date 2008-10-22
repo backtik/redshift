@@ -13,21 +13,39 @@
 #   }
 #   
 # });
-# 
-# Element.implement({
-#   
-#   match: function(selector){
-#     if (!selector) return true;
-#     var tagid = Selectors.Utils.parseTagAndID(selector);
-#     var tag = tagid[0], id = tagid[1];
-#     if (!Selectors.Filters.byID(this, id) || !Selectors.Filters.byTag(this, tag)) return false;
-#     var parsed = Selectors.Utils.parseSelector(selector);
-#     return (parsed) ? Selectors.Utils.filter(this, parsed, {}) : true;
-#   }
-#   
-# });
+
 
 `
+// only used once. good candiate for just being put inside that function
+Element.prototype.match = function(selector){
+  if (!selector) return true;
+  var tagid = Selectors.Utils.parseTagAndID(selector);
+  var tag = tagid[0], id = tagid[1];
+  if (!Selectors.Filters.byID(this, id) || !Selectors.Filters.byTag(this, tag)) return false;
+  var parsed = Selectors.Utils.parseSelector(selector);
+  return (parsed) ? Selectors.Utils.filter(this, parsed, {}) : true;
+};
+
+Element.Attributes = {
+	Props: {'html': 'innerHTML', 'class': 'className', 'for': 'htmlFor', 'text': (#{trident?}) ? 'innerText' : 'textContent'},
+	Bools: ['compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'disabled', 'readonly', 'multiple', 'selected', 'noresize', 'defer'],
+	Camels: ['value', 'accessKey', 'cellPadding', 'cellSpacing', 'colSpan', 'frameBorder', 'maxLength', 'readOnly', 'rowSpan', 'tabIndex', 'useMap']
+};
+
+Element.prototype.getProperty = function(attribute){
+	var EA = Element.Attributes, key = EA.Props[attribute];
+	var value = (key) ? this[key] : this.getAttribute(attribute, 2);
+	return (EA.Bools[attribute]) ? !!value : (key) ? value : value || null;
+},
+
+String.prototype.contains = function(string, separator){
+  return (separator) ? (separator + this + separator).indexOf(separator + string + separator) > -1 : this.indexOf(string) > -1;
+};
+
+String.prototype.trim = function(){
+	return this.replace(/^\s+|\s+$/g, '');
+};
+
 var Selectors = {Cache: {nth: {}, parsed: {}}};
 
 Selectors.RegExps = {
@@ -39,8 +57,8 @@ Selectors.RegExps = {
 };
 
 Selectors.Utils = {
-	// added to replace $uid, which mootools has but we do not
-	// 
+	// added to replace $uid
+	// uses internal Red.id
 	object_uid: function(item){
     item.__id__||(item.__id__=Red.id++)
   },
@@ -54,7 +72,7 @@ Selectors.Utils = {
 	  
 	parseNthArgument: function(argument){
 		if (Selectors.Cache.nth[argument]) return Selectors.Cache.nth[argument];
-		var parsed = argument.match(/^([+-]?\d*)?([a-z]+)?([+-]?\d*)?$/);
+		var parsed = argument.match(/^([+-]?\\d*)?([a-z]+)?([+-]?\\d*)?$/);
 		if (!parsed) return false;
 		var inta = parseInt(parsed[1]);
 		var a = (inta || inta === 0) ? inta : 1;
@@ -254,7 +272,7 @@ Selectors.Filters = {
 	},
 	
 	byAttribute: function(self, name, operator, value){
-		var result = Element.prototype.call(self, name);
+		var result = Element.prototype.getProperty.call(self, name);
 		if (!result) return false;
 		if (!operator || value == undefined) return true;
 		switch (operator){
@@ -271,7 +289,7 @@ Selectors.Filters = {
 	
 };
 
-Selectors.Pseudo = new Hash({
+Selectors.Pseudo = {
 	
 	// w3c pseudo selectors
 	
@@ -352,5 +370,5 @@ Selectors.Pseudo = new Hash({
 		return Selectors.Pseudo['nth-child'].call(this, '2n', local);
 	}
 	
-});
+};
 `
