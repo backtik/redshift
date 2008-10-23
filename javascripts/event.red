@@ -1,4 +1,4 @@
-``
+`function $v(nativeEvent){c$Event.prototype.m$initialize(nativeEvent);}`
 
 # A wrapper class for the browser's built-in event objects.
 class Event
@@ -69,7 +69,7 @@ class Event
     @meta           = `nativeEvent.metaKey`
   end
   
-  attr :event, :type, :page, :client,
+  attr :event, :type,
        :related_target, :target, :code, :key
   
   # call-seq:
@@ -118,7 +118,7 @@ class Event
   # call-seq:
   #   evnt.kill! -> evnt
   # 
-  # Stops the event in place, preventing the original action as well as any
+  # Stops the event in place, preventing the default action as well as any
   # further propagation, then returns _evnt_.
   # 
   def kill!
