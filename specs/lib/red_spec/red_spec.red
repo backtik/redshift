@@ -28,6 +28,13 @@
 
 
 module DSL
+  # +DSL::Base+ represents the basic syntax that all Red objects should have to
+  # work properly with RedSpec. It also includes stub methods for methods that 
+  # only object of a specific type should have. These methods will raise Specs::Failure when
+  # called because calling them on any object that does not include their
+  # fully implemented versions implies a specification that behaves 
+  # differently than expected.
+  # 
   module Base
     def should_equal(other)
       raise ::Specs::Failure unless self == other
@@ -55,7 +62,11 @@ module DSL
   
     # here for polymorphic purposes. all objects will need to respond
     # to these but having these methods called implies you are
-    # are not getting a object you intended
+    # are not getting a object you intended. 
+    #
+    # For example, calling .should_be_true on an object that is 
+    # not _true_ implies a specification failure by defintaiton
+    # and will raise Specs::Failure
     def should_be_nil;      raise ::Specs::Failure; end
     def should_be_true;     raise ::Specs::Failure; end
     def should_be_false;    raise ::Specs::Failure; end
@@ -63,6 +74,7 @@ module DSL
     def items;              raise ::Specs::Failure; end
   end
   
+  # 
   module Nil
     def should_be_nil
       raise ::Specs::Failure unless self == nil
@@ -98,7 +110,8 @@ module DSL
       raise ::Specs::Failure unless self.size == n
     end
     
-    # just for looks
+    # just for looks to allow sugary syntax like
+    # @foo.bar.should_have(2).items
     def items
       true
     end
@@ -198,13 +211,37 @@ class Spec
 end
 
 module Specs
+  # class +Failure+ is raise when an +Example+ fails to behave as intended. 
+  # +Failure+ is rescued by the +Runner+ which notes the failure and
+  # continues to run subsequent Examples.
   class Failure < Exception; end
   
-  # # each block within a spec is an example.  typicall referenced with 'it' and one
-  # # of the action verb methods ('should', 'can', 'has', etc)
+  # class +Error+ is raise when an +Example+ throws an error. Typically this
+  # is caused by errors of javascript syntax, missing variables, etc. 
+  # Many Ruby syntax errors will be discovered by Red at compile time when
+  # ParseTree cannot parse the file.
+  # +Error+ is rescued by the +Runner+ which notes the error and
+  # continues to run subsequent Examples.
+  class Error   < Exception; end
+  
+  # each block within a spec is an example.  typicall referenced with 'it' and one
+  # of the action verb methods ('should', 'can', 'has', etc)
+  # 
+  # for example:
+  # Spec.describe Foo do |it|
+  # 
+  #   it.has 'pretty damn awesome bars' do
+  #     # I am an Example object and will be called by the Runner
+  #   end
+  # 
+  # end
+  #
   class Example
     attr_accessor :block, :name, :result, :spec
     def initialize(name, spec, &block)
+      
+      # Examples without blocks will be listed as 'pending'
+      # and will not be executed by the Runner.
       self.result = "pending" if block.nil?
       @name  = name
       @spec  = spec
@@ -341,7 +378,7 @@ module Specs
     end
   end
   
-  # Logger write the pretty to the screen
+  # Logger writes the pretty to the screen
   class Logger
     attr_accessor :runner, :started_at, :ended_at
     
@@ -351,6 +388,11 @@ module Specs
       title = `document.title`
       self.started_at = Time.now
       # self.runnetotal_failures = 0
+      
+      # if container already exists it implies we are rerunning the 
+      # specs and the contents of the div should be cleared.
+      # Otherwise we added a containing div to the page
+      # to hold our Logger printout.
       container = `document.getElementById('redspec_container')`
       if container
         `container.innerHTML = ""`
@@ -359,10 +401,12 @@ module Specs
         `container.id = "redspec_container"`
         `document.body.appendChild(container)`
       end
-    
-      `title = document.createElement("DIV")`
-      `title.id = "dashboard"`
-      `title.innerHTML = [
+      
+      # The dashboard contains at-a-glace information about the running/competed specs
+      # allowing a tester to see see a summary of 
+      `dashboard = document.createElement("DIV")`
+      `dashboard.id = "dashboard"`
+      `dashboard.innerHTML = [
         '<h1>RedSpec</h1>',
         '<ul>',
         // JSSpec.options.rerun ? '<li>[<a href="?" title="rerun all specs">X</a>] ' + JSSpec.util.escapeTags(decodeURIComponent(JSSpec.options.rerun)) + '</li>' : '',
@@ -376,7 +420,7 @@ module Specs
         '<p><a href="">RedSpec documentation</a></p>',
         ].join("");`
         
-      `container.appendChild(title);`
+      `container.appendChild(dashboard);`
       
        # convert all of the specs for this runner into native js strings for writing
        all_runner_specs = []
@@ -385,6 +429,7 @@ module Specs
        end
        `all_runner_specs_as_list_items = #{all_runner_specs.join("")}.__value__`
        
+      # List the Specs by name to act as a table of contents
       `list = document.createElement("DIV")`
       `list.id = "list"`
       `list.innerHTML = [
@@ -395,6 +440,10 @@ module Specs
          ].join("")`
       `container.appendChild(list)`
       
+      
+      # List all the examples, nested within their Spec name
+      # so we can later manipulate their element to display
+      # results of running a particular example.
       `log = document.createElement("DIV")`
       `log.id = "log"`
       
@@ -425,6 +474,8 @@ module Specs
       end
     end
     
+    # called automatically when a runner ends, updating the dashboard with result information for
+    # the entire spec suite.
     def on_runner_end
       `document.getElementById("total_elapsed").innerHTML = (#{Time.now - self.started_at })`
       `document.getElementById("total_failures").innerHTML = #{self.runner.total_errors}`
@@ -444,11 +495,14 @@ module Specs
       
     end
     
+    # called before an example runs
     def self.on_example_start(example)
       `li = document.getElementById("example_" + #{example.object_id.to_s})`
       `li.className = "ongoing"`
     end
     
+    # called after an example runs, manipulating the examples representation on the page
+    # to reflect the result of the execution. 
     def self.on_example_end(example)
       puts example.result
       `li = document.getElementById("example_" + #{example.object_id.to_s})`
@@ -457,6 +511,7 @@ module Specs
     
   end
 end
+
 
 main = lambda {
   if RedSpec.specs.size > 0
