@@ -466,4 +466,6 @@ main = lambda {
 }
 
 # Wait for the window to load and then determing run the specs
-`window.onload = #{main}.__block__`
+# `window.onload = #{main}.__block__`
+
+`document.addEventListener('DOMContentLoaded', function(){document.__loaded__=true;#{main.call};}.m$(this), false)`
