@@ -1,20 +1,3 @@
-# # add these where appropriate
-# Native.implement([Document, Element], {
-#   
-#   getElements: function(expression, nocash){
-#     expression = expression.split(',');
-#     var items, local = {};
-#     for (var i = 0, l = expression.length; i < l; i++){
-#       var selector = expression[i], elements = Selectors.Utils.search(this, selector, local);
-#       if (i != 0 && elements.item) elements = $A(elements);
-#       items = (i == 0) ? elements : (items.item) ? $A(items).concat(elements) : items.concat(elements);
-#     }
-#     return new Elements(items, {ddup: (expression.length > 1), cash: !nocash});
-#   }
-#   
-# });
-
-
 `
 // only used once. good candiate for just being put inside that function
 Element.prototype.match = function(selector){
@@ -60,7 +43,7 @@ Selectors.Utils = {
 	// added to replace $uid
 	// uses internal Red.id
 	object_uid: function(item){
-    item.__id__||(item.__id__=Red.id++)
+    return item.__id__||(item.__id__=Red.id++)
   },
   
 	chk: function(item, uniques){
@@ -167,7 +150,8 @@ Selectors.Utils = {
 			splitters.push(m1);
 			return ':)' + m2;
 		}).split(':)');
-				
+		
+		
 		var items, filtered, item;
 		for (var i = 0, l = selectors.length; i < l; i++){
 			var selector = selectors[i];
@@ -334,7 +318,7 @@ Selectors.Pseudo = {
 		var uid = Selectors.Utils.object_uid(this);
 		if (!local.positions[uid]){
 			var self = this;
-			while ((self = self.previousSibling)){
+			while ((self = self.previousSibling)){			  
 				if (self.nodeType != 1) continue;
 				count ++;
 				var position = local.positions[Selectors.Utils.object_uid(self)];

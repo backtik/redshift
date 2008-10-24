@@ -6,48 +6,34 @@ require 'javascripts/chainable.red'
 require 'javascripts/cookie.red'
 require 'javascripts/request.red'
 
-# this will go away
-`$z = function(ob){
-  for (var i = 0, a = [], j = ob.length; i < j; i++){
-    a.push($E(ob[i]))
-  }
-  return a
-};`
-
 Document.ready? do
   # CSS3 Seleclors
-  # `console.log((#{          Document['#a_id']                   }))`
-  # `console.log($z(#{        Document['.a_class']                }))`
-  # `console.log($z(#{        Document['span']                    }))`
-  # `console.log($z(#{        Document['abbr.b_class']            }))`
-  # `console.log($z(#{        Document['div abbr']                }))`
-  # `console.log($z(#{        Document['div p.c_class em']        }))`
-  # `console.log($z(#{        Document['div#b_id p.c_class em']   }))`
-  # `console.log($z(#{        Document['input[name=dialog]']      }))`
-  # `console.log($z(#{        Document['input[name$=log]']        }))`
-  # `console.log($z(#{        Document['input[name^=shmi]']       }))`
-  # `console.log($z(#{        Document['input[name!=dialog]']     }))`
-  # `console.log($z(#{        Document['strong:empty']            }))`
-  # `console.log($z(#{                    }))`
-  # `console.log($z(#{                    }))`
-  # `console.log($z(#{                    }))`
-  # `console.log($z(#{                    }))`
-  # `console.log($z(#{                    }))`
-  # `console.log($z(#{                    }))`
+  puts Document['#a_id']                      
+  puts Document['.a_class']                   
+  puts Document['span']                       
+  puts Document['abbr.b_class']               
+  puts Document['div abbr']                   
+  puts Document['div p.c_class em']           
+  puts Document['div#b_id p.c_class em']      
+  puts Document['input[name=dialog]']         
+  puts Document['input[name$=log]']           
+  puts Document['input[name^=shmi]']          
+  puts Document['input[name!=dialog]']        
+  puts Document['strong:empty']               
+  puts Document['#c_id div:even']             
+  puts Document['#c_id div:odd']              
+  puts Document['#c_id div:nth-child(odd)']   
+  puts Document['#c_id div:nth-child(first)'] 
+  puts Document['#c_id div:nth-child(2n)']    
+  puts Document['#c_id div:nth-child(last)']  
+  puts Document['#c_id div:nth-child(n)']     
+  puts Document['#c_id div:nth-child(even)']  
+  puts Document['#c_id div:nth-child(2n+1)']  
+  puts Document['#c_id div:nth-child(4n+3)']  
+  puts Document['#c_id div:nth-child(4n+3)']  
+  puts Document['#d_id div:nth-child(only)']  
   
-  # not working at all
-  # `console.log($z(#{        Document['contains:("find me")']      }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(2n+1)']     }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(4n+3)']     }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(odd)']      }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(only)']     }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(first)']    }))`
-  
-  
-  # not working properly
-  # `console.log($z(#{        Document['#c_id:nth-child(2n)']       }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(last)']     }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(n)']        }))`
-  # `console.log($z(#{        Document['#c_id:nth-child(even)']     }))`
+  # no work
+  # `console.log($z(#{        Document['strong:contains("find me")']      }))`
   
 end

@@ -2,6 +2,7 @@
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <title>Red Herring: These aren't the formats you're looking for</title>
+  <!-- <script src="/javascripts/moo.js" type="text/javascript" charset="utf-8"></script> -->
   <script src="/javascripts/test_selectors.red" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
@@ -41,10 +42,10 @@
     </p>
   </div>
   
-  <!-- Document['input[name=dialog]'] --> <!-- Document['input[name$=log]'] -->
+  <!-- Document['input[name=dialog]']  --> <!-- Document['input[name$=log]'] -->
   <input name='dialog'>
   
-  <!-- Document['input[name$=log]'] -->   <!-- Document['input[name^=shmi]'] -->
+  <!-- Document['input[name$=log]']    --> <!-- Document['input[name^=shmi]'] -->
   <!-- Document['input[name!=dialog]'] -->
   <input name='shmialog'>
   
@@ -60,23 +61,41 @@
   <!-- Document['#c_id:nth-child(2n+1)')      every odd child   -->
   <!-- Document['#c_id:nth-child(4n+3)')      3, 7, 11, 15, etc -->
   <div id='c_id'>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
-    <h1></h1>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
   </div>
   
+  <div id="d_id">
+    <div id="only"></div>
+  </div>
   
+  <script type="text/javascript" charset="utf-8">
+    // console.log($$('#c_id div:even'));
+    // console.log($$('#c_id div:odd'));
+    // console.log($$('#c_id div:nth-child(odd)'    ));
+    // console.log($$('#c_id div:nth-child(only)'   ));
+    // console.log($$('#c_id div:nth-child(first)'  ));
+    // console.log($$('#c_id div:nth-child(2n)'     ));
+    // console.log($$('#c_id div:nth-child(last)'   ));
+    // console.log($$('#c_id div:nth-child(n)'      ));
+    // console.log($$('#c_id div:nth-child(even)'   ));
+    // console.log($$('strong:contains("findme")'  ));
+    // console.log($$('#c_id div:nth-child(2n+1)'   ));
+    // console.log($$('#c_id div:nth-child(4n+3)'   ));
+    // console.log($$('#c_id div:nth-child(4n+3)'   ));
+  </script>
 </body>
 </html>

@@ -165,9 +165,13 @@ module Document
   end
   
   def self.find_all_by_selector(selector) # :nodoc:
-  `Selectors.Utils.search(document, #{selector}.__value__, {})`
-  # return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
-  # []
+    # return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
+    `function(ob){
+      for (var i = 0, a = [], j = ob.length; i < j; i++){
+        a.push($E(ob[i]))
+      }
+      return a
+    }(Selectors.Utils.search(document, selector.__value__, {}));`
   end
   
   def self.find_by_id(str) # :nodoc:
