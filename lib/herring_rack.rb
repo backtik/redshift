@@ -21,7 +21,6 @@ module Rack
       when '.ajax'
         update_page(req.POST['red']) if req.post?
       when '.red'
-        # [herring_out(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
         [translate_to_string_including_ruby(::File.read("#{HerringRoot}#{req.path_info}")), {"Content-Type" => "text/js"}]
       when '.html'
         [::File.read("#{HerringRoot}#{req.path_info}"), {"Content-Type" => "text/html"}]
@@ -32,7 +31,7 @@ module Rack
       when '.sass'
         [Sass::Engine.new(::File.read("#{HerringRoot}#{req.path_info}")).render, {"Content-Type" => "text/css"}]
       when '.ico'
-        ['', {"Content-Type" => "image/png"}]
+        ['', {"Content-Type" => "image/ico"}]
       else
         ["",{}]
       end
