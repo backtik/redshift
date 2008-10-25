@@ -32,6 +32,10 @@ Document.ready? do
   puts Document['#c_id div:nth-child(4n+3)'].inspect  
   puts Document['#c_id div:nth-child(4n+3)'].inspect  
   puts Document['#d_id div:nth-child(only)'].inspect  
+  puts Document['div em'].inspect
+  puts Document['div > em'].inspect
+  puts Document['h4 + p'].inspect
+  
   
   # no work
   # `console.log($z(#{        Document['strong:contains("find me")      }))`
