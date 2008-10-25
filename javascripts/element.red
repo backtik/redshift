@@ -1,5 +1,33 @@
 class Element
   
+  def insert_before(element) # :nodoc:
+    `if (#{self}.__native__.parentNode) #{self}.__native__.parentNode.insertBefore(#{element}.__native__, #{self}.__native__)`
+    return true
+  end
+  
+  def insert_after(element) # :nodoc
+    `if (!element.parentNode) return`
+    `next = #{self}.__native__.nextSibling`
+    `(next) ? #{self}.__native__.parentNode.insertBefore(#{element}.__native__, next) : #{self}__native__.parentNode.appendChild(#{element}.__native__)`
+    return true
+  end
+  
+  def insert_bottom(element) # :nodoc
+    `#{self}.__native__.appendChild(#{element}.__native__)`
+    return true
+  end
+  alias :insert_inside :insert_bottom
+  
+  def insert_top(element) # :nodoc:
+    `first = #{self}.__native__.firstChild`
+    `(first) ? #{self}.__native__.insertBefore(#{element}.__native__, first) : #{self}.__native__.appendChild(#{element}.__native__)`
+    return true
+  end
+  
+  def insert(element, where = :bottom)
+    self.send("insert#{where.to_s.capitalize}", element)
+    self
+  end
   
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
