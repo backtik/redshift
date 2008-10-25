@@ -29,6 +29,18 @@ class Element
     self
   end
   
+  # call-seq:
+  #   elem.is_body? -> true or false
+  # 
+  # Returns +true+ if the element is the body element, +false+ otherwise.
+  # 
+  #   Document['#my_id'].is_body?    #=> false
+  #   Document.body.is_body?         #=> true
+  #
+  def is_body?
+    `return (/^(?:body|html)$/i).test(#{element}.__native__.tagName)`
+  end
+  
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
   #   #       return konstructor(properties)  if konstructor 
