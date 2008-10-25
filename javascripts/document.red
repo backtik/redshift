@@ -60,13 +60,26 @@ module Document
   # 
   # The first form returns the +Element+ identified by the id <i>str</i> (e.g.
   # <i>'#my_id'</i>), or +nil+ if no such element is found. The second form
-  # returns the array of elements identified by the selector <i>str</i>. The
-  # third form returns the array of elements found by calling
+  # returns the array of elements identified by the selector <i>str</i> (see Available Selectors below).
+  # The third form returns the array of elements found by calling
   # <tt>Document.[]</tt> on each arg. The fourth form returns _element_
   # unchanged.
   # 
   #   Document['#content']    #=> #<Element: DIV id="content">
   #   ...
+  # Available Selectors
+  # Document[str] in its second form takes a selector string and scans the document
+  # returing an array of any elements that match the selector string. 
+  # 
+  # The selectors string takes the format of a CSS3 selector: http://www.w3.org/TR/css3-selectors/
+  # 
+  # Class Selector
+  # Returns an array of elements that have the specified class name
+  # Document['.my_class'] #=> [#<Element: DIV class="my_class">, #<Element: DIV class="my_class">, #<Element: SPAN class="my_class">]
+  # 
+  # Tag Selector
+  # Returns an array of elements that have the specified tag
+  # Document['a'] #=> [#<Element: A href="/foo/bar">, #<Element: A href="/foo/baz">, #<Element: A href="/foo/bat">]
   # 
   def self.[](obj, *args)
     if args.empty?
@@ -186,10 +199,6 @@ module Document
     `for(var i=0,l=ary.length,result=[];i<l;++i){var el=#{Document[`ary[i]`]};if($T(el)){result.push(el);};}`
     return `result`.flatten
   end
-  
-  # def self.native # :nodoc:
-  #   `document`
-  # end
   
   def self.window # :nodoc:
     Window
