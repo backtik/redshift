@@ -1,5 +1,5 @@
 `
-// only used once. good candiate for just being put inside that function
+// used in several places where element/selecotor comparisson is used
 Element.prototype.match = function(selector){
   if (!selector) return true;
   var tagid = Selectors.Utils.parseTagAndID(selector);

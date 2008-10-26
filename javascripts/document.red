@@ -227,18 +227,22 @@ module Document
   # and retrun an array of all elements on the nextSibling path from that starting point that
   # have the class 'my_class'
   # 
-  def self.walk(element, path, start_relation, match_selector, all, nocash) # :nodoc
-    `el = element.__native__[start_relation.__value__ || path.__value__]
+  def self.walk(element, path, startRelation, matchSelector, all, nocash) # :nodoc
+    `
+    if(startRelation) startRelation = startRelation.__value__
+    el = element.__native__[startRelation || path.__value__]
     elements = []
       while (el){
-        if (el.nodeType == 1 && (!match || Element.match(el, match))){
-          if (!all) return $E(el);
-          elements.push(el);
+        if (el.nodeType == 1 && (#{!matchSelector} || Element.match(el, #{matchSelector}))){
+          if (!all) {
+            return $E(el)
+          }
+          elements.push($E(el));
         }
         el = el[path];
       }
-      return (all) ? new Elements(elements, {ddup: false, cash: !nocash}) : null;
     `
+    `(all) ? elements : #{nil}`
   end
   
   def self.window # :nodoc:
