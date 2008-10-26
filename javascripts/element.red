@@ -1,7 +1,6 @@
 class Element
   
   def [](expression, *args)
-    puts 'looking!'
   	expression = expression.split(',')
   	items = []
   	`
