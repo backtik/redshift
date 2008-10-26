@@ -178,7 +178,6 @@ module Document
   end
   
   def self.find_all_by_selector(selector) # :nodoc:
-    # return this.document.get_elements(selector) if (`arguments.length == 1 && typeof selector == 'string'`)
     `function(ob){
       for (var i = 0, a = [], j = ob.length; i < j; i++){
         a.push($E(ob[i]))

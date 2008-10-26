@@ -1,5 +1,6 @@
 `
-// used in several places where element/selecotor comparisson is used
+// used in several places where element/selector comparison is used
+// tells whether an element matches another element or selector
 Element.prototype.match = function(selector){
   if (!selector) return true;
   var tagid = Selectors.Utils.parseTagAndID(selector);
@@ -8,6 +9,17 @@ Element.prototype.match = function(selector){
   var parsed = Selectors.Utils.parseSelector(selector);
   return (parsed) ? Selectors.Utils.filter(this, parsed, {}) : true;
 };
+
+// Provides polymorphic access to getElementById to Elements as well as documents, both of which
+// can be passed into Selectors.Utils.search as location for searching for subelements.
+Element.prototype.getElementById = function(id, nocash){
+	var el = this.ownerDocument.getElementById(id);
+	if (!el) return null;
+	for (var parent = el.parentNode; parent != this; parent = parent.parentNode){
+		if (!parent) return null;
+	}
+	return $E(el);
+},
 
 Element.Attributes = {
 	Props: {'html': 'innerHTML', 'class': 'className', 'for': 'htmlFor', 'text': (#{trident?}) ? 'innerText' : 'textContent'},

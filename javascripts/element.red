@@ -1,4 +1,24 @@
 class Element
+  
+  def [](expression, *args)
+    puts 'looking!'
+  	expression = expression.split(',')
+  	items = []
+  	`
+  	var local = {};
+  	for (var i = 0, l = expression.length; i < l; i++){
+  		var selector = expression[i].__value__, elements = Selectors.Utils.search(#{self}.__native__, selector, local);
+  		// if (i != 0 && elements.item) elements = $A(elements);
+  		items = (i == 0) ? elements : items.concat(elements);
+  	}
+  	`
+  	`function(ob){
+      for (var i = 0, a = [], j = ob.length; i < j; i++){
+        a.push($E(ob[i]))
+      }
+      return a
+    }(items);`
+  end
 
   def insert_before(element) # :nodoc:
     `if (#{self}.__native__.parentNode) #{self}.__native__.parentNode.insertBefore(#{element}.__native__, #{self}.__native__)`
