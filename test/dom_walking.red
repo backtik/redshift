@@ -4,6 +4,7 @@ require 'javascripts/selectors.red'
 require 'javascripts/document.red'
 
 Document.ready? do
+  puts Document['#c_element'].has_class?('boo')
   puts Document['#c_element'].previous_element.inspect
   puts Document['#c_element'].previous_elements.inspect
   puts Document['#b_element'].next_element.inspect

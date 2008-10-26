@@ -216,6 +216,14 @@ class Element
     ::Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
   end
   
+  # call-seq:
+  #   elem.has_class?('my_class') -> true or false
+  #
+  # Returns +true+ if the element has the class, +false+ otherwise.
+  #
+  def has_class?(name)
+    !!(`$q(#{self}.__native__.className)`).match(name)
+  end
   
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
@@ -306,9 +314,6 @@ class Element
   # #   return self
   # # end
   # 
-  # def has_class?(name)
-  #   !!(`$q(#{@native}.className)`).match(name)
-  # end
   # 
   # def add_class(name)
   #   `#{@native}.className = (#{@native}.className + ' ' + name)` unless self.has_class?(name)
