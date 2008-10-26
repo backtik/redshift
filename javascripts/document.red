@@ -200,6 +200,47 @@ module Document
     return `result`.flatten
   end
   
+  # Walks the DOM from a particular element.  The first step it talks in the walk with either
+  # be the specified start_relation or the specified path.  If 'all' is set to false, the walk
+  # will termiante and return the single element. Otherwise, it will continue the walk until it 
+  # has reached the end of the specified path.
+  # The walk will then termiante and return an array of all elements on the path.
+  #
+  # if an optional <tt>match_selector<tt> is provided, only element(s) that match
+  # the selector can be returned
+  # 
+  # Examples:
+  # Document.walk(my_element, 'parentNode', nil, nil, false)
+  # will go down the parentNode path of my_element, starting at the my_element, and
+  # return just a single element
+  # 
+  # Document.walk(my_element, 'parentNode', nil, nil, true)
+  # will go down the parentNode path of my_element, starting at my_element, and 
+  # return an array of all elements on the parentNode path
+  # 
+  # Document.walk(my_element, 'nextSibling', 'firstChild', nil, true)
+  # will go down the nextSibling path of my_element, starting at my_element's firstChild
+  # and retrun an array of all elements on the nextSibling path from that starting point.
+  # 
+  # Document.walk(my_element, 'nextSibling', 'firstChild', '.my_class', true)
+  # will go down the nextSibling path of my_element, starting at my_element's firstChild
+  # and retrun an array of all elements on the nextSibling path from that starting point that
+  # have the class 'my_class'
+  # 
+  def self.walk(element, path, start_relation, match_selector, all, nocash) # :nodoc
+    `el = element.__native__[start_relation.__value__ || path.__value__]
+    elements = []
+      while (el){
+        if (el.nodeType == 1 && (!match || Element.match(el, match))){
+          if (!all) return $E(el);
+          elements.push(el);
+        }
+        el = el[path];
+      }
+      return (all) ? new Elements(elements, {ddup: false, cash: !nocash}) : null;
+    `
+  end
+  
   def self.window # :nodoc:
     Window
   end
