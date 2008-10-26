@@ -34,12 +34,188 @@ class Element
   # 
   # Returns +true+ if the element is the body element, +false+ otherwise.
   # 
-  #   Document['#my_id'].is_body?    #=> false
+  #   Document['#my_div'].is_body?   #=> false
   #   Document.body.is_body?         #=> true
   #
   def is_body?
-    `return (/^(?:body|html)$/i).test(#{element}.__native__.tagName)`
+    `(/^(?:body|html)$/i).test(#{self}.__native__.tagName)`
   end
+  
+  # call-seq:
+  #   elem.previous_element -> elem
+  #
+  # Returns the previous element on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#b_element']
+  # elem.previous_element #=> #<Element: DIV id="a_element" >
+  #
+  def previous_element(match_selector = nil)
+    Document.walk(self, 'previousSibling', nil, match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.previous_elements -> ary
+  #
+  # Returns all the previous sibling elements on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#c_element']
+  # elem.previous_elements #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
+  #
+  def previous_elements(match_selector = nil)
+    Document.walk(self, 'previousSibling', nil, match_selector, true)
+  end
+  
+  # call-seq:
+  #   elem.next_element -> elem
+  #
+  # Returns the subsequent sibling element on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#b_element']
+  # elem.next_element #=> #<Element: DIV id="c_element" >
+  #
+  def next_element(match_selector = nil)
+    Document.walk(self, 'nextSibling', nil, match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.next_elements -> ary
+  #
+  # Returns all the subsequent sibling elements on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#b_element']
+  # elem.previous_elements #=> [#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
+  #
+  def next_elements(match_selector = nil)
+    Document.walk(self, 'nextSibling', nil, match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.first_child -> elem
+  #
+  # Returns the first child element on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#container']
+  # elem.first_child #=> #<Element: DIV id="a_element" >
+  #
+  def first_child(match_selector = nil)
+    Document.walk(self, 'nextSibling', 'firstChild', match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.last_child -> elem
+  #
+  # Returns the last child element on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#container']
+  # elem.first_child #=> #<Element: DIV id="d_element" >
+  #
+  def last_child(match_selector = nil)
+    Document.walk(self, 'previousSibling', 'lastChild', match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.parent -> elem
+  #
+  # Returns the parent element on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#c_element']
+  # elem.parent #=> #<Element: DIV id="container" >
+  #
+  def parent(match_selector = nil)
+    Document.walk(self, 'parentNode', nil, match_selector, false)
+  end
+  
+  # call-seq:
+  #   elem.parents -> ary
+  #
+  # Returns an array of parent elements on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'>
+  #     <div id='b_inner_element'></div>
+  #   </div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#b_inner_element']
+  # elem.parents #=> [#<Element: DIV id="b_element">, #<Element: DIV id="container">]
+  #
+  def parents(match_selector = nil)
+    Document.walk(self, 'parentNode', nil, match_selector, true)
+  end
+  
+  # call-seq:
+  #   elem.children -> ary
+  #
+  # Returns an array of child elements on the DOM tree
+  #
+  # <div id='container'>
+  #   <div id='a_element'></div>
+  #   <div id='b_element'>
+  #     <div id='b_inner_element'></div>
+  #   </div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  #
+  # elem = Document['#container']
+  # elem.parents #=> [#<Element: DIV id="a_element">,#<Element: DIV id="b_element">,#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
+  #
+  def children(match_selector = nil)
+    Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
+  end
+  
   
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
