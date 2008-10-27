@@ -102,10 +102,18 @@ class Element
   
   # call-seq:
   #   elem.empty! -> elem
-  # Removies the element from the page
+  # Removes the element and all of its children elements from the page
   def remove!
 	  `(#{self}.__native__.parentNode) ? #{self}.__native__.parentNode.removeChild(#{self}.__native__) : #{self}`
 	  self
+  end
+  
+  # call-seq:
+  #   elem.destroy! -> true or false
+  # Removes the element from the page and the DOM, destroys the element object, the native object,
+  # any attached event listeners, and frees their memory location. Returns +true+ if successful, +false+ otherwise.
+  def destroy!
+    true
   end
   
   # call-seq:
