@@ -225,7 +225,7 @@ module Document
   # and retrun an array of all elements on the nextSibling path from that starting point that
   # have the class 'my_class'
   # 
-  def self.walk(element, path, startRelation, matchSelector, all, nocash) # :nodoc
+  def self.walk(element, path, startRelation, matchSelector, all) # :nodoc
     `
     if(startRelation) startRelation = startRelation.__value__
     el = element.__native__[startRelation || path.__value__]

@@ -96,7 +96,7 @@ class Element
   # </div>
   # 
   def insert(element, where = :bottom)
-    self.send("insert#{where.to_s.capitalize}", element)
+    self.send("insert_#{where.to_s}", element)
     self
   end
   

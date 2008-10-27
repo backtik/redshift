@@ -184,7 +184,7 @@ class Spec
   end
   
   def to_heading_html
-    "<li id=\"spec_#{self.object_id.to_s}_list\"><h3><a href=\"#spec_#{self.object_id.to_s}\"> #{RedSpec.escapeTags(self.name)}</a> [<a href=\"?rerun=#{self.name}\">rerun</a>]</h3></li>"
+    "<li id=\"spec_#{self.object_id.to_s}_list\"><h3><a href=\"#spec_#{self.object_id.to_s}\"> #{RedSpec.escape_tags(self.name)}</a> [<a href=\"?rerun=#{self.name}\">rerun</a>]</h3></li>"
   end
   
   def examples_to_html
@@ -504,7 +504,6 @@ module Specs
     # called after an example runs, manipulating the examples representation on the page
     # to reflect the result of the execution. 
     def self.on_example_end(example)
-      puts example.result
       `li = document.getElementById("example_" + #{example.object_id.to_s})`
       `li.className = #{example.result}.__value__`
     end
