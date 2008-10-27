@@ -39,6 +39,63 @@ class Element
     return true
   end
   
+  # call-seq:
+  #   elem.insert(other, :location)
+  #
+  # Inserts other into elem at location (default :bottom) and returns elem. 
+  #
+  # Example: Inserting (default of :bottom)
+  # <div id='a_element'>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  # </div>
+  # <div id='d_element'></div>
+  # 
+  # elem  = Document['#a_element']
+  # other = Document['#d_element']
+  # elem.insert(other)
+  # 
+  # <div id='a_element'>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  #   <div id='d_element'></div>
+  # </div>
+  # 
+  # Example: Inserting into :top
+  # <div id='a_element'>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  # </div>
+  # <div id='d_element'></div>
+  # 
+  # elem  = Document['#a_element']
+  # other = Document['#d_element']
+  # elem.insert(other, :top)
+  # 
+  # <div id='a_element'>
+  #   <div id='d_element'></div>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  # </div>
+  # 
+  # Example: Inserting :before
+  # <div id='a_element'>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  # </div>
+  # <div id='d_element'></div>
+  # 
+  # elem  = Document['#a_element']
+  # other = Document['#d_element']
+  # elem.insert(other, :before)
+  # 
+  # <div id='d_element'></div>
+  # <div id='a_element'>
+  #   <div id='b_element'></div>
+  #   <div id='c_element'></div>
+  # </div>
+  # 
+  
   def insert(element, where = :bottom)
     self.send("insert#{where.to_s.capitalize}", element)
     self
@@ -240,21 +297,6 @@ class Element
     !!(`$q(#{self}.__native__.className)`).match(name)
   end
   
-  # def to_query_string
-  #   `
-  #   var queryString = [];
-  #     #{self['input, select, textarea']}.each(function(el){
-  #       if (!el.name || el.disabled) return;
-  #       var value = (el.tagName.toLowerCase() == 'select') ? Element.getSelected(el).map(function(opt){
-  #         return opt.value;
-  #       }) : ((el.type == 'radio' || el.type == 'checkbox') && !el.checked) ? null : el.value;
-  #       $splat(value).each(function(val){
-  #         if (typeof val != 'undefined') queryString.push(el.name + '=' + encodeURIComponent(val));
-  #       });
-  #     });
-  #     `
-  #     `return queryString.join('&')`
-  # end
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
   #   #       return konstructor(properties)  if konstructor 

@@ -177,14 +177,18 @@ module Document
     `$q(document.title)`
   end
   
+  # Uses the Selector library to find native elements and retrun an array of extended elements
   def self.find_all_by_selector(selector) # :nodoc:
     `Array.fromCollection(Selectors.Utils.search(document, selector.__value__, {}));`
   end
   
+  # Uses the browser's native getElementById to find an element. Returns an extended element.
   def self.find_by_id(str) # :nodoc:
     `$E(document.getElementById(str.__value__))`
   end
   
+  # Finds an element from a provided string. If the string is a represents a single id ('#my_id') calls
+  # self.find_all_by_id, otherwise calls self.find_all_by_selector
   def self.find_by_string(str) # :nodoc:
     `str.__value__.match(/^#[a-zA-z_]*$/)` ? self.find_by_id(`$q(str.__value__.replace('#',''))`) : self.find_all_by_selector(str)
   end
