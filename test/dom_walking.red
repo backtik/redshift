@@ -1,6 +1,6 @@
 require 'javascripts/browser.red'
-require 'javascripts/element.red'
 require 'javascripts/selectors.red'
+require 'javascripts/element.red'
 require 'javascripts/document.red'
 
 Document.ready? do
@@ -14,4 +14,6 @@ Document.ready? do
   puts Document['#c_element'].parent.inspect
   puts Document['#b_inner_element'].parents.inspect
   puts Document['#container'].children.inspect
+  puts Document['#container']['#b_inner_element'].inspect
+  puts Document['#container']['div'].inspect
 end

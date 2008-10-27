@@ -1,6 +1,7 @@
 class Element
   
   def [](expression, *args)
+    `if (expression.__value__.match(/^#[a-zA-z_]*$/) && #{args.empty?}) return #{self}.__native__.getElementById(expression.__value__.replace('#',''))`
   	expression = expression.split(',')
   	items = []
   	`
@@ -10,6 +11,7 @@ class Element
   		// if (i != 0 && elements.item) elements = $A(elements);
   		items = (i == 0) ? elements : items.concat(elements);
   	}
+  	
   	`
   	`function(ob){
       for (var i = 0, a = [], j = ob.length; i < j; i++){

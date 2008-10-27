@@ -16,7 +16,7 @@
 * Document
   * []
   * new_element
-  * nexx_text_node
+  * next_text_node
   * get_document
   * get_window
   * purge
