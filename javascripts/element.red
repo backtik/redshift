@@ -95,10 +95,17 @@ class Element
   #   <div id='c_element'></div>
   # </div>
   # 
-  
   def insert(element, where = :bottom)
     self.send("insert#{where.to_s.capitalize}", element)
     self
+  end
+  
+  # call-seq:
+  #   elem.empty! -> elem
+  # Removies the element from the page
+  def remove!
+	  `(#{self}.__native__.parentNode) ? #{self}.__native__.parentNode.removeChild(#{self}.__native__) : #{self}`
+	  self
   end
   
   # call-seq:

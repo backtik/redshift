@@ -9,4 +9,5 @@ Document.ready? do
   green     = Document['#green']
   container.insert(green,  :inside)
   container.insert(blue,   :before)
+  container.remove!
 end
