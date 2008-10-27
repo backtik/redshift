@@ -1,4 +1,10 @@
 `
+Array.fromCollection = function(collection){
+  for (var i = 0, a = [], j = collection.length; i < j; i++){
+     a.push($E(collection[i]))
+   }
+   return a
+};
 // used in several places where element/selector comparison is used
 // tells whether an element matches another element or selector
 Element.prototype.match = function(selector){

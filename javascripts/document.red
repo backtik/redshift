@@ -178,12 +178,7 @@ module Document
   end
   
   def self.find_all_by_selector(selector) # :nodoc:
-    `function(ob){
-      for (var i = 0, a = [], j = ob.length; i < j; i++){
-        a.push($E(ob[i]))
-      }
-      return a
-    }(Selectors.Utils.search(document, selector.__value__, {}));`
+    `Array.fromCollection(Selectors.Utils.search(document, selector.__value__, {}));`
   end
   
   def self.find_by_id(str) # :nodoc:

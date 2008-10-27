@@ -8,17 +8,11 @@ class Element
   	var local = {};
   	for (var i = 0, l = expression.length; i < l; i++){
   		var selector = expression[i].__value__, elements = Selectors.Utils.search(#{self}.__native__, selector, local);
-  		// if (i != 0 && elements.item) elements = $A(elements);
-  		items = (i == 0) ? elements : items.concat(elements);
+  		elements = Array.fromCollection(elements);
+  		items = (i == 0) ? elements : items.concat(elements);  		
   	}
-  	
   	`
-  	`function(ob){
-      for (var i = 0, a = [], j = ob.length; i < j; i++){
-        a.push($E(ob[i]))
-      }
-      return a
-    }(items);`
+  	items
   end
 
   def insert_before(element) # :nodoc:
@@ -246,6 +240,21 @@ class Element
     !!(`$q(#{self}.__native__.className)`).match(name)
   end
   
+  # def to_query_string
+  #   `
+  #   var queryString = [];
+  #     #{self['input, select, textarea']}.each(function(el){
+  #       if (!el.name || el.disabled) return;
+  #       var value = (el.tagName.toLowerCase() == 'select') ? Element.getSelected(el).map(function(opt){
+  #         return opt.value;
+  #       }) : ((el.type == 'radio' || el.type == 'checkbox') && !el.checked) ? null : el.value;
+  #       $splat(value).each(function(val){
+  #         if (typeof val != 'undefined') queryString.push(el.name + '=' + encodeURIComponent(val));
+  #       });
+  #     });
+  #     `
+  #     `return queryString.join('&')`
+  # end
   # def initialize(tag)
   #   # konstructor = ElementStuff::Constructors.get(tag)
   #   #       return konstructor(properties)  if konstructor 
