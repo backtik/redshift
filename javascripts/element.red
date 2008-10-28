@@ -101,6 +101,24 @@ class Element
   end
   
   # call-seq:
+  #   elem.inspect -> string
+  # 
+  # Returns a string representation of _elem_ including its tag name, classes,
+  # and id.
+  # 
+  #   <div style="width:300px" id="a_element" class="draggable container">
+  #   
+  #   Document['#a_element'].inspect    #=> "#<Element: DIV id=\"a_element\" class=\"draggable container\">"
+  #   
+  # 
+  def inspect
+    attributes = [`$q(this.__native__.tagName.toUpperCase())`]
+    attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!==''`
+    attributes << `$q('class="'+this.__native__.className+'"')` if `this.__native__.className!==''`
+    "#<Element: %s>" % attributes.join(' ')
+  end
+  
+  # call-seq:
   #   elem.empty! -> elem
   # Removes the element and all of its children elements from the page
   def remove!
@@ -148,20 +166,20 @@ class Element
   end
   
   # call-seq:
-  #   elem.previous_elements -> ary
-  #
-  # Returns all the previous sibling elements on the DOM tree
-  #
-  # <div id='container'>
-  #   <div id='a_element'></div>
-  #   <div id='b_element'></div>
-  #   <div id='c_element'></div>
-  #   <div id='d_element'></div>
-  # </div>
-  #
-  # elem = Document['#c_element']
-  # elem.previous_elements #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
-  #
+  #   elem.previous_elements -> array
+  # 
+  # Returns the array of sibling elements that precede _elem_ on the DOM tree.
+  # 
+  #   <div id='container'>
+  #     <div id='a_element'></div>
+  #     <div id='b_element'></div>
+  #     <div id='c_element'></div>
+  #     <div id='d_element'></div>
+  #   </div>
+  #   
+  #   elem = Document['#c_element']   #=> #<Element: DIV id="c_element">
+  #   elem.previous_elements          #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
+  # 
   def previous_elements(match_selector = nil)
     ::Document.walk(self, 'previousSibling', nil, match_selector, true)
   end
