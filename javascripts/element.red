@@ -304,12 +304,19 @@ class Element
   end
   
   # call-seq:
-  #   elem.has_class?('my_class') -> true or false
-  #
-  # Returns +true+ if the element has the class, +false+ otherwise.
-  #
-  def has_class?(name)
-    !!(`$q(#{self}.__native__.className)`).match(name)
+  #   elem.has_class?(sym) -> true or false
+  # 
+  # Returns +true+ if _elem_ is class _sym_, +false+ otherwise.
+  # 
+  #   <div id='div_a' class='container drop_target'></div>
+  #   
+  #   elem = Document['#div_a']       #=> #<Element: DIV id="div_element" class="container drop_target">
+  #   elem.has_class?('container')    #=> true
+  #   elem.has_class?(:draggable)     #=> false
+  # 
+  def has_class?(class_name)
+    `var str=' '+this.__native__.className+' ',match=' '+class_name.__value__+' '`
+    `str.indexOf(match) > -1`
   end
   
   # def initialize(tag)
