@@ -1,5 +1,25 @@
 class Element
   
+  def self.empty(elem) # :nodoc
+    `var el = elem.__native__ ? elem.__native__ : elem`
+    `for (var i = 0, c = el.childNodes, l = c.length; i < l; i++){
+			c$Element.m$destroy(c[i]);
+		};`
+		return true
+  end
+  
+  def self.destroy(elem) # :nodoc
+    `var el = elem.__native__ ? elem.__native__ : elem`
+    `c$Element.m$empty(el);`
+	  `c$Element.m$remove(el);`
+	  return true
+  end
+  
+  def self.remove(elem) # :nodoc
+    `var el = elem.__native__ ? elem.__native__ : elem`
+    `(el.parentNode) ? el.parentNode.removeChild(el) : this`
+  end
+  
   def [](expression, *args)
     `if (expression.__value__.match(/^#[a-zA-z_]*$/) && #{args.empty?}){return #{self}.__native__.getElementById(expression.__value__.replace('#',''));}`
     expression = expression.split(',')
@@ -27,7 +47,7 @@ class Element
   #   Document['#container'].children   #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
   #
   def children(match_selector = nil)
-    Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
+    ::Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
   end
   
   # call-seq:
@@ -35,7 +55,8 @@ class Element
   # Removes the element from the page and the DOM, destroys the element object, the native object,
   # any attached event listeners, and frees their memory location. Returns +true+ if successful, +false+ otherwise.
   def destroy!
-    true
+    Element.destroy(self)
+    return true
   end
   
   # call-seq:
@@ -54,7 +75,7 @@ class Element
   #   Document['#container'].first_child #=> #<Element: DIV id="a_element">
   # 
   def first_child(match_selector = nil)
-    Document.walk(self, 'nextSibling', 'firstChild', match_selector, false)
+    ::Document.walk(self, 'nextSibling', 'firstChild', match_selector, false)
   end
   
   # call-seq:
@@ -161,6 +182,15 @@ class Element
   end
   
   # call-seq:
+  #   elem.empty! -> true or false
+  # Removes every child element from elem
+  # 
+  def empty!
+    Element.empty(self)
+    return self
+  end
+  
+  # call-seq:
   #   elem.is_body? -> true or false
   # 
   # Returns +true+ if the element is the body element, +false+ otherwise.
@@ -188,7 +218,7 @@ class Element
   #   Document['#container'].last_child   #=> #<Element: DIV id="d_element">
   # 
   def last_child(match_selector = nil)
-    Document.walk(self, 'previousSibling', 'lastChild', match_selector, false)
+    ::Document.walk(self, 'previousSibling', 'lastChild', match_selector, false)
   end
   
   # call-seq:
@@ -206,7 +236,7 @@ class Element
   #   Document['#b_element'].next_element   #=> #<Element: DIV id="c_element">
   # 
   def next_element(match_selector = nil)
-    Document.walk(self, 'nextSibling', nil, match_selector, false)
+    ::Document.walk(self, 'nextSibling', nil, match_selector, false)
   end
   
   # call-seq:
@@ -225,7 +255,7 @@ class Element
   #   elem.previous_elements          #=> [#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
   # 
   def next_elements(match_selector = nil)
-    Document.walk(self, 'nextSibling', nil, match_selector, true)
+    ::Document.walk(self, 'nextSibling', nil, match_selector, true)
   end
   
   # call-seq:
@@ -246,7 +276,7 @@ class Element
   #   Document.body.parent.parent     #=> nil
   # 
   def parent(match_selector = nil)
-    Document.walk(self, 'parentNode', nil, match_selector, false)
+    ::Document.walk(self, 'parentNode', nil, match_selector, false)
   end
   
   # call-seq:
@@ -267,7 +297,7 @@ class Element
   #   Document.html.parents                   #=> []
   # 
   def parents(match_selector = nil)
-    Document.walk(self, 'parentNode', nil, match_selector, true)
+    ::Document.walk(self, 'parentNode', nil, match_selector, true)
   end
   
   # call-seq:
@@ -285,7 +315,7 @@ class Element
   #   Document['#b_element'].previous_element   #=> #<Element: DIV id="a_element">
   # 
   def previous_element(match_selector = nil)
-    Document.walk(self, 'previousSibling', nil, match_selector, false)
+    ::Document.walk(self, 'previousSibling', nil, match_selector, false)
   end
   
   # call-seq:
@@ -304,7 +334,7 @@ class Element
   #   elem.previous_elements          #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
   # 
   def previous_elements(match_selector = nil)
-    Document.walk(self, 'previousSibling', nil, match_selector, true)
+    ::Document.walk(self, 'previousSibling', nil, match_selector, true)
   end
   
   # call-seq:
@@ -313,8 +343,7 @@ class Element
   # Removes the element and all of its children elements from the page
   # 
   def remove!
-    `var el=this.__native__`
-    `(el.parentNode) ? el.parentNode.removeChild(el) : this`
+    Element.remove(self)
     return self
   end
   
