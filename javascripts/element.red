@@ -94,9 +94,9 @@ class Element
     `str.indexOf(match) > -1`
   end
   
-  def self.create(tag, attributes = {})
-    tag = tag.to_s
-    `$E(document.createElement(tag.__value__))`
+  def initialize(tag, attributes = {})
+    `if(!tag){ return nil; }`
+    `this.__native__ = document.createElement(tag.__value__)`
   end
   
   # call-seq:

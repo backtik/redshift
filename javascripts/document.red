@@ -13,7 +13,7 @@
 #     find the existing extended object
 #
 
-`function $E(element){if(element==null){return nil;};var E=c$Element.m$new();E.__native__=element;return E;}`
+`function $E(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`
 
 class Element
   def inspect
