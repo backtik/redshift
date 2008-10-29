@@ -47,7 +47,7 @@ class Element
   #   Document['#container'].children   #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
   #
   def children(match_selector = nil)
-    ::Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
+    Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
   end
   
   # call-seq:
@@ -75,7 +75,7 @@ class Element
   #   Document['#container'].first_child #=> #<Element: DIV id="a_element">
   # 
   def first_child(match_selector = nil)
-    ::Document.walk(self, 'nextSibling', 'firstChild', match_selector, false)
+    Document.walk(self, 'nextSibling', 'firstChild', match_selector, false)
   end
   
   # call-seq:
@@ -92,6 +92,11 @@ class Element
   def has_class?(class_name)
     `var str=' '+this.__native__.className+' ',match=' '+class_name.__value__+' '`
     `str.indexOf(match) > -1`
+  end
+  
+  def self.create(tag, attributes = {})
+    tag = tag.to_s
+    `$E(document.createElement(tag.__value__))`
   end
   
   # call-seq:
@@ -218,7 +223,7 @@ class Element
   #   Document['#container'].last_child   #=> #<Element: DIV id="d_element">
   # 
   def last_child(match_selector = nil)
-    ::Document.walk(self, 'previousSibling', 'lastChild', match_selector, false)
+    Document.walk(self, 'previousSibling', 'lastChild', match_selector, false)
   end
   
   # call-seq:
@@ -236,7 +241,7 @@ class Element
   #   Document['#b_element'].next_element   #=> #<Element: DIV id="c_element">
   # 
   def next_element(match_selector = nil)
-    ::Document.walk(self, 'nextSibling', nil, match_selector, false)
+    Document.walk(self, 'nextSibling', nil, match_selector, false)
   end
   
   # call-seq:
@@ -255,7 +260,7 @@ class Element
   #   elem.previous_elements          #=> [#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
   # 
   def next_elements(match_selector = nil)
-    ::Document.walk(self, 'nextSibling', nil, match_selector, true)
+    Document.walk(self, 'nextSibling', nil, match_selector, true)
   end
   
   # call-seq:
@@ -276,7 +281,7 @@ class Element
   #   Document.body.parent.parent     #=> nil
   # 
   def parent(match_selector = nil)
-    ::Document.walk(self, 'parentNode', nil, match_selector, false)
+    Document.walk(self, 'parentNode', nil, match_selector, false)
   end
   
   # call-seq:
@@ -297,7 +302,7 @@ class Element
   #   Document.html.parents                   #=> []
   # 
   def parents(match_selector = nil)
-    ::Document.walk(self, 'parentNode', nil, match_selector, true)
+    Document.walk(self, 'parentNode', nil, match_selector, true)
   end
   
   # call-seq:
@@ -315,7 +320,7 @@ class Element
   #   Document['#b_element'].previous_element   #=> #<Element: DIV id="a_element">
   # 
   def previous_element(match_selector = nil)
-    ::Document.walk(self, 'previousSibling', nil, match_selector, false)
+    Document.walk(self, 'previousSibling', nil, match_selector, false)
   end
   
   # call-seq:
@@ -334,7 +339,7 @@ class Element
   #   elem.previous_elements          #=> [#<Element: DIV id="a_element">, #<Element: DIV id="b_element">]
   # 
   def previous_elements(match_selector = nil)
-    ::Document.walk(self, 'previousSibling', nil, match_selector, true)
+    Document.walk(self, 'previousSibling', nil, match_selector, true)
   end
   
   # call-seq:
@@ -380,9 +385,6 @@ class Element
   #   @native = tag
   # end
   # 
-  # def native
-  #   `this.__native__`
-  # end
   # 
   # def set(prop, value)
   #   case prop.class

@@ -1,7 +1,7 @@
 require 'javascripts/browser.red'
 require 'javascripts/selectors.red'
-require 'javascripts/element.red'
 require 'javascripts/document.red'
+require 'javascripts/element.red'
 
 Document.ready? do
   puts Document['#c_element'].has_class?('boo')

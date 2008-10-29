@@ -36,7 +36,6 @@ Document.ready? do
   puts Document['div > em'].inspect
   puts Document['h4 + p'].inspect
   
-  
   # no work
   # `console.log($z(#{        Document['strong:contains("find me")      }))`
   

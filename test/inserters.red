@@ -10,4 +10,6 @@ Document.ready? do
   container.insert(green,  :inside)
   container.insert(blue,   :before)
   container.empty!
+  pink      = Element.create(:ul)
+  container.insert(pink)
 end

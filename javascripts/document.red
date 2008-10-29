@@ -93,7 +93,7 @@ module Document
       return self.find_many_with_array(args.unshift(obj))
     end
   end
-  
+    
   # call-seq:
   #   Document.body -> element
   # 
