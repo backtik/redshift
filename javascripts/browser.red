@@ -4,8 +4,6 @@
 module Browser
   Plugins = {}
   
-  @platform = `$q(window.orientation==undefined?(navigator.platform.match(/mac|win|linux/i)||['other'])[0].toLowerCase():'ipod')`
-  
   # call-seq:
   #   Browser.engine -> hash
   # 
@@ -26,7 +24,7 @@ module Browser
   #   Browser.platform    #=> "mac"
   # 
   def self.platform
-    @platform
+    @platform ||= `$q(window.orientation==undefined?(navigator.platform.match(/mac|win|linux/i)||['other'])[0].toLowerCase():'ipod')`
   end
   
   # The +Features+ module mixes in methods to check for browser features such

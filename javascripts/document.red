@@ -15,15 +15,6 @@
 
 `function $E(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`
 
-class Element
-  def inspect
-    attributes = [`$q(this.__native__.tagName.toUpperCase())`]
-    attributes << `$q('id="'+this.__native__.id+'"')` if `this.__native__.id!=''`
-    attributes << `$q('class="'+this.__native__.class+'"')` if `this.__native__.class`
-    "<Element: %s>" % attributes.join(' ')
-  end
-end
-
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
 # 
@@ -93,7 +84,7 @@ module Document
       return self.find_many_with_array(args.unshift(obj))
     end
   end
-    
+  
   # call-seq:
   #   Document.body -> element
   # 
@@ -110,7 +101,7 @@ module Document
   # 
   # Executes _str_ as JavaScript, then returns _str_.
   # 
-  def Document.execute_js(str)
+  def self.execute_js(str)
     return str if str == ''
     if `window.execScript`
       `window.execScript(str.__value__)`
@@ -218,29 +209,24 @@ module Document
   # 
   # Document.walk(my_element, 'nextSibling', 'firstChild', nil, true)
   # will go down the nextSibling path of my_element, starting at my_element's firstChild
-  # and retrun an array of all elements on the nextSibling path from that starting point.
+  # and return an array of all elements on the nextSibling path from that starting point.
   # 
   # Document.walk(my_element, 'nextSibling', 'firstChild', '.my_class', true)
   # will go down the nextSibling path of my_element, starting at my_element's firstChild
-  # and retrun an array of all elements on the nextSibling path from that starting point that
+  # and return an array of all elements on the nextSibling path from that starting point that
   # have the class 'my_class'
   # 
   def self.walk(element, path, startRelation, matchSelector, all) # :nodoc
-    `
-    if(startRelation) startRelation = startRelation.__value__
-    el = element.__native__[startRelation || path.__value__]
-    elements = []
-      while (el){
-        if (el.nodeType == 1 && (#{!matchSelector} || Element.match(el, #{matchSelector}))){
-          if (!all) {
-            return $E(el)
-          }
-          elements.push($E(el));
-        }
-        el = el[path];
+    `if(startRelation){startRelation = startRelation.__value__;};
+    var el = element.__native__[startRelation || path.__value__],elements = [];
+    while (el){
+      if (el.nodeType == 1 && (#{!matchSelector} || Element.match(el, #{matchSelector}))){
+        if (!all) {return $E(el);}
+        elements.push($E(el));
       }
-    `
-    `(all) ? elements : #{nil}`
+      el = el[path.__value__];
+    }`
+    return `(all) ? elements : nil`
   end
   
   def self.window # :nodoc:
