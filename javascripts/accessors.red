@@ -1,7 +1,15 @@
 class Element
   `c$Element.__keyed_attributes__={class:'className',for:'htmlFor'}`
   `c$Element.__boolean_attributes__={checked:'checked',declare:'declare',defer:'defer',disabled:'disabled',ismap:'ismap',multiple:'multiple',noresize:'noresize',noshade:'noshade',readonly:'readonly',selected:'selected'}`
-  `window.styleString=function(el,prop){if(el.currentStyle){return el.currentStyle[prop.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();})];};var computed=document.defaultView.getComputedStyle(el,null);return(computed?computed.getPropertyValue([prop.__value__.replace(/[A-Z]/g, function(match){return('-'+match.charAt(0).toLowerCase());});]):null);}`
+  `window.styleString=function(el,prop){
+    if(el.currentStyle){return el.currentStyle[prop.__value__.replace(/[_-]\\D/g, function(match){
+      return match.charAt(1).toUpperCase();
+      })];
+      };
+      var computed=document.defaultView.getComputedStyle(el,null);
+      return(computed?computed.getPropertyValue([prop.__value__.replace(/[A-Z]/g, function(match){
+        return('-'+match.charAt(0).toLowerCase());
+        })]):null);}`
   
   # call-seq:
   #   elem.add_class(sym) -> elem

@@ -90,13 +90,13 @@ module Situated
     
     def scrolls
       element = self
-      position = {:x => 0, :y => 0}
+      `position = {x : 0, y : 0}`
   		while element && !element.is_body? do
-  			position[:x] += `#{element}.__native__.scrollLeft`
-  			position[:y] += `#{element}.__native__.scrollTop`
-  			element = `$E(#{element}.__native__.parentNode)`
+  			`position.x += #{element}.__native__.scrollLeft`
+  			`position.y += #{element}.__native__.scrollTop`
+  			`element = $E(#{element}.__native__.parentNode)`
   		end
-  		return position
+  		return {:x => `position.x`, :y => `position.y`}
     end
     
     # call-seq:
@@ -170,47 +170,52 @@ module Situated
     end
     
     def offsets
-      element = self
-      position = {:x => 0, :y => 0}
-      return position if self.is_body?
+      #       if trident?
+      #   `bound = this.__native__.getBoundingClientRect()`
+      #   `html  = this.m$document.__native__.documentElement`
+      #   return {
+      #     :x => `bound.left + html.scrollLeft - html.clientLeft`,
+      #     :y => `bound.top  + html.scrollTop  - html.clientTop`
+      #   }
+      # end
 
-  		while (element && !element.is_body?) do
-  			position[:x] += `#{element}.__native__.offsetLeft`
-  			position[:y] += `#{element}.__native__.offsetTop`
+      # `var position = {x: 0, y: 0}`
+      # return {:x => `position.x`, :y => `position.y`} if self.is_body?
+      `
+      
+      element = this.__native__;
+  		while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
+  			position.x += element.offsetLeft;
+  			position.y += element.offsetTop;
 
-  			if gecko?
-  				if !element.styles['border-box']
-  					position[:x] += element.styles['border-left-width']
-  					position[:y] += element.styles['border-top-width']
-  				end
-  				
-  				parent = `$E(#{element}.__native__.parentNode)`
-  				
-  				if parent && parent.styles[:overflow] != 'visible'
-  					position[:x] += parent.styles['border-left-width']
-  					position[:y] += parent.styles['border-top-width']
-  			  elsif element != self && (trident? || webkit?)
-  				  position[:x] += element.styles['border-left-width']
-  				  position[:y] += element.styles['border-top-width']
-				  end
-  			end
+  			if (#{gecko?}){
+  				if (!c$Situated.c$Utilities.m$border_box(element)){
+  					position.x += c$Situated.c$Utilities.m$left_border(element);
+  					position.y += c$Situated.c$Utilities.m$top_border(element);
+  				}
+  				var parent = element.parentNode;
+  				if (parent && window.styleString(parent, 'overflow') != 'visible'){
+  					position.x += c$Situated.c$Utilities.m$left_border(parent);
+  					position.y += c$Situated.c$Utilities.m$top_border(parent);
+  				}
+  			} else if (element != this && #{webkit?}){
+  				position.x += c$Situated.c$Utilities.m$left_border(element);
+  				position.y += c$Situated.c$Utilities.m$top_border(element);
+  			}
 
-  			element = element.offset_parent #`$E(#{element}.__native__.offsetParent)`
-  			
-  			if trident?
-  				element = element.offset_parent while (element && !`#{element}.__native__.currentStyle.hasLayout`) 
-  			end
-  		end
+  			element = element.offsetParent;
+  		}
   		
-  		if (gecko? && !self.styles['border-box'])
-  			position[:x] -= self.styles['border-left-width']
-  			position[:y] -= self.styles['border-top-width']
-  		end
-  		
-  		return position
+  		if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(this)){
+  			position.x -= c$Situated.c$Utilities.m$left_border(this);
+  			position.y -= c$Situated.c$Utilities.m$top_border(this);
+  		}
+  		`
+  		true
+  		# return {:x => `position.x`, :y => `position.y`}
     end
-    
-    def position(hash)
+        
+    def position_at(hash)
       return self.styles << self.calculate_position(hash)
     end
     
@@ -218,17 +223,17 @@ module Situated
       {:left => hash[:x] - self.styles['margin-left'], :top => hash[:y] - self.styles['margin-top']}
     end
     
-    def coordinates
-      # if (isBody(this)) return this.getWindow().getCoordinates();
-      # var position = this.getPosition(element), size = this.getSize();
-      # var obj = {left: position.x, top: position.y, width: size.x, height: size.y};
-      # obj.right = obj.left + obj.width;
-      # obj.bottom = obj.top + obj.height;
-      # return obj;
+    def position(relative_to = nil)
+      # if (isBody(this)) return {x: 0, y: 0};
+      offset = self.offsets
+      scroll = self.scrolls
+      position = {:x => offset[:x] - scroll[:x], :y => offset[:y] - scroll[:y]}
+      relative_position = {:x => 0, :y => 0}
+      # relativePosition = (relative_to && (relative_to = $(relative_to)) ? relative_to.position : {x: 0, y: 0};
+     a = {:x => position[:x] - relative_position[:x], :y => position[:y] - relative_position[:y]}
     end
   end
-  
-  
+    
   module Viewport
     include PositionAndSize
     
@@ -284,4 +289,34 @@ module Situated
   		return {:top => 0, :left => 0, :bottom => size[:y], :right => size[:x], :height => size[:y], :width => size[:x]}
     end
   end
+
+  module Utilities
+    def self.is_body?(element)
+      `(/^(?:body|html)$/i).test(element.tagName)`
+    end
+    
+    def self.styleNumber(element, style)
+    	`window.styleString(element, style).toInt() || 0`
+    end
+  
+    def self.border_box(element)
+    	`window.styleString(element, '-moz-box-sizing') == 'border-box'`
+    end
+
+    def self.top_border(element)
+    	`c$Situated.c$Utilities.m$styleNumber(element, 'border-top-width')`
+    end
+
+    def self.left_border(element)
+    	`c$Situated.c$Utilities.m$styleNumber(element, 'border-left-width')`
+    end
+  end
+end
+
+class Element
+  include Situated::Element
+end
+
+module Document
+  include Situated::Viewport
 end
