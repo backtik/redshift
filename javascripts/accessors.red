@@ -1,6 +1,7 @@
 class Element
   `c$Element.__keyed_attributes__={class:'className',for:'htmlFor'}`
   `c$Element.__boolean_attributes__={checked:'checked',declare:'declare',defer:'defer',disabled:'disabled',ismap:'ismap',multiple:'multiple',noresize:'noresize',noshade:'noshade',readonly:'readonly',selected:'selected'}`
+  `window.styleString=function(el,prop){if(el.currentStyle){return el.currentStyle[prop.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();})];};var computed=document.defaultView.getComputedStyle(el,null);return(computed?computed.getPropertyValue([prop.__value__.replace(/[A-Z]/g, function(match){return('-'+match.charAt(0).toLowerCase());});]):null);}`
   
   # call-seq:
   #   elem.add_class(sym) -> elem
@@ -70,7 +71,7 @@ class Element
   #   elem.get_style(sym) -> object or nil
   # 
   def get_style(attribute)
-    `var el=this.__native__,attr=attribute.__value__,result=el.style[attr]`
+    `var el=this.__native__,attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();}),result=el.style[attr]`
     `result===undefined?nil:$q(result)`
   end
   
@@ -150,7 +151,8 @@ class Element
   #   elem.remove_style(sym) -> elem
   # 
   def remove_style(attribute)
-    `this.__native__.style[attribute.__value__]=null`
+    `var attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();})`
+    `this.__native__.style[attr]=null`
     return self
   end
   
@@ -183,7 +185,7 @@ class Element
   #   elem.set_style(sym, value) -> elem
   # 
   def set_style(attribute, value)
-    `var attr=attribute.__value__,val=value.__value__`
+    `var attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();}),val=value.__value__`
     `if(attr==='float'){val=#{trident?}?'styleFloat':'cssFloat'}`
     `if(attr==='opacity'){m$raise("nobody wrote the opacity setter yet!");}`
     `if(val===String(Number(val))){val=Math.round(val)}`
