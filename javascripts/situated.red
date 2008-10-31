@@ -240,9 +240,9 @@ module Situated
     
     def size
       win = self.window
-  	  return {:x => `#{win}.innerWidth`, :y => `#{win}.innerHeight`} if (presto? || webkit?)
+  	  return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
   		doc = Situated::Utilities.native_compat_element(self)
-  		return {:x => `#{doc}.clientWidth`, :y => `#{doc}.clientHeight`}
+  		return {:x => `#{doc}.__native__.clientWidth`, :y => `#{doc}.__native__.clientHeight`}
     end
     
     def scroll
@@ -313,9 +313,8 @@ module Situated
     end
     
     def self.native_compat_element(element)
-      puts element
     	`var doc = #{element.document}.__native__`
-    	`((!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body)`
+    	`$E((!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body)`
     end
   end
 end
@@ -325,3 +324,4 @@ class Element
 end
 
 Document.extend(Situated::Viewport)
+Window.extend(Situated::Viewport)

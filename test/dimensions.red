@@ -1,4 +1,5 @@
 require 'javascripts/browser.red'
+require 'javascripts/window.red'
 require 'javascripts/document.red'
 require 'javascripts/element.red'
 require 'javascripts/accessors.red'
@@ -33,16 +34,32 @@ Document.ready? do
   # 
   puts Document.height
   puts Document.width
-  # puts Document.scroll_top
-  # puts Document.scroll_left
-  # puts Document.scroll_height
-  # puts Document.scroll_width
-  # puts Document.top
-  # puts Document.left
-  # 
-  # puts Document.size
-  # puts Document.scroll
-  # puts Document.scroll_size
-  # puts Document.position
-  # puts Document.coordinates
+  puts Document.scroll_top
+  puts Document.scroll_left
+  puts Document.scroll_height
+  puts Document.scroll_width
+  puts Document.top
+  puts Document.left
+  
+  puts Document.size
+  puts Document.scroll
+  puts Document.scroll_size
+  puts Document.position
+  puts Document.coordinates.inspect
+  
+  
+  puts Window.height
+  puts Window.width
+  puts Window.scroll_top
+  puts Window.scroll_left
+  puts Window.scroll_height
+  puts Window.scroll_width
+  puts Window.top
+  puts Window.left
+  
+  puts Window.size
+  puts Window.scroll
+  puts Window.scroll_size
+  puts Window.position
+  puts Window.coordinates.inspect
 end
