@@ -33,6 +33,7 @@ module Browser
   module Features
     @xpath = `!!(document.evaluate)`
     @air   = `!!(window.runtime)`
+    @query = `!!(document.querySelector)`
     
     # call-seq:
     #   xpath? -> true or false
@@ -51,6 +52,15 @@ module Browser
     def air?
       Features.instance_variable_get('@air')
     end
+    
+    # call-seq:
+    #   query? -> true or false
+    # 
+    # Returns +true+ if the W3C Selectors API is available, +false+ otherwise.
+    #
+    def query?
+      Features.instance_variable_get('@query')
+    end
   end
   
   # The +Engine+ module mixes in methods to check the current browser's
@@ -65,7 +75,7 @@ module Browser
       @version = `window.XMLHttpRequest` ? 5 : 4
     elsif `!navigator.taintEnabled`
       @name    = 'webkit'
-      @version = Browser::Features[:xpath] ? 420 : 419
+      @version = Browser::Features[:xpath] ? (Browser::Features[:query] ? 525 : 420) : 419
     elsif `document.getBoxObjectFor != null`
       @name    = 'gecko'
       @version = `document.getElementsByClassName` ? 19 : 18

@@ -7,9 +7,12 @@ Document.ready? do
   container = Document['#container']
   blue      = Document['#blue']
   green     = Document['#green']
+  `console.log(green.__native__.className)`
+  
   container.insert(green,  :inside)
   container.insert(blue,   :before)
-  container.empty!
-  pink      = Element.new()
+  # container.empty!
+  pink      = Element.new(:div)
   Document.body.insert(pink)
+  
 end
