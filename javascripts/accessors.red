@@ -189,8 +189,6 @@ class Element
     `if(attr==='opacity'){m$raise("nobody wrote the opacity setter yet!");}`
     `if(val===String(Number(val))){val=Math.round(val)}`
     `this.__native__.style[attr]=val`
-    `console.log(attr)`
-    `console.log(val)`
     return self
   end
   

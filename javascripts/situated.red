@@ -142,8 +142,8 @@ module Situated
       if self.is_body?
         self.window.scroll_to(x, y)
       else
-        self.scroll_left = x
-        self.scoll_top   = y
+        `this.__native__.scrollLeft = x`
+        `this.__native__.scrollTop   = y`
       end
   		return self
     end
@@ -160,6 +160,7 @@ module Situated
       return nil if element.is_body?
       
       # All engines except trident have a native offsetParent property
+      `var e = #{element}.__native__.offsetParent`
       return `$E(#{element}.__native__.offsetParent)` unless trident?
       
       # For trident we walk the DOM until we have a static positioned element or reach the body
@@ -216,12 +217,10 @@ module Situated
       return {:x => `position.x`, :y => `position.y`}
     end
         
-    def position_at(hash)
-      return self.styles << self.calculate_position(hash)
-    end
-    
-    def calculate_position(hash)
-      {:left => hash[:x] - self.styles['margin-left'], :top => hash[:y] - self.styles['margin-top']}
+    def position_at(x,y)
+      native = `this.__native__`
+      h = {:left => x - Situated::Utilities.styleNumber(native, `'margin-left'`), :top => y - Situated::Utilities.styleNumber(native, `'margin-top'`), :position => 'absolute'}
+      self.set_styles(h)
     end
     
     def position(relative_to = nil)
@@ -296,8 +295,8 @@ module Situated
       `(/^(?:body|html)$/i).test(element.tagName)`
     end
     
-    def self.styleNumber(element, style)
-    	`parseInt(window.styleString(element, style)) || 0`
+    def self.styleNumber(native_element, style)
+    	`parseInt(window.styleString(native_element, style)) || 0`
     end
   
     def self.border_box(element)
