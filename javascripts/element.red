@@ -71,6 +71,10 @@ class Element
     return true
   end
   
+  def document
+    `this.__native__.ownerDocument`
+  end
+  
   # call-seq:
   #   elem.empty! -> true or false
   # Removes every child element from elem

@@ -232,4 +232,8 @@ module Document
   def self.window # :nodoc:
     Window
   end
+  
+  def self.document # :nodoc
+    self
+  end
 end

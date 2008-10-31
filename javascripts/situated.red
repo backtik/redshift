@@ -3,6 +3,7 @@
 # representation within the browser.
 #
 module Situated
+  `window.styleString=function(el,prop){if(el.currentStyle){return el.currentStyle[prop.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();})];};var computed=document.defaultView.getComputedStyle(el,null);return(computed?computed.getPropertyValue([prop.replace(/[A-Z]/g, function(match){return('-'+match.charAt(0).toLowerCase());})]):null);}`
   module PositionAndSize
     
     # call-seq:
@@ -170,20 +171,21 @@ module Situated
     end
     
     def offsets
-      #       if trident?
-      #   `bound = this.__native__.getBoundingClientRect()`
-      #   `html  = this.m$document.__native__.documentElement`
-      #   return {
-      #     :x => `bound.left + html.scrollLeft - html.clientLeft`,
-      #     :y => `bound.top  + html.scrollTop  - html.clientTop`
-      #   }
-      # end
+      `var native = this.__native__`
+      if trident?
+        `var bound = native.getBoundingClientRect()`
+        `var html  = this.m$document.__native__.documentElement`
+        return {
+          :x => `bound.left + html.scrollLeft - html.clientLeft`,
+          :y => `bound.top  + html.scrollTop  - html.clientTop`
+        }
+      end
 
-      # `var position = {x: 0, y: 0}`
-      # return {:x => `position.x`, :y => `position.y`} if self.is_body?
+      `var position = {x: 0, y: 0}`
+      return {:x => `position.x`, :y => `position.y`} if self.is_body?
       `
       
-      element = this.__native__;
+      element = native
   		while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
   			position.x += element.offsetLeft;
   			position.y += element.offsetTop;
@@ -206,13 +208,12 @@ module Situated
   			element = element.offsetParent;
   		}
   		
-  		if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(this)){
-  			position.x -= c$Situated.c$Utilities.m$left_border(this);
-  			position.y -= c$Situated.c$Utilities.m$top_border(this);
+  		if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(native)){
+  			position.x -= c$Situated.c$Utilities.m$left_border(native);
+  			position.y -= c$Situated.c$Utilities.m$top_border(native);
   		}
   		`
-  		true
-  		# return {:x => `position.x`, :y => `position.y`}
+      return {:x => `position.x`, :y => `position.y`}
     end
         
     def position_at(hash)
@@ -239,19 +240,19 @@ module Situated
     
     def size
       win = self.window
-  	  return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
-  		doc = getCompatElement(self)
-  		return {:x => `#{doc}.__native__.clientWidth`, :y => `#{doc}.__native__.clientHeight`}
+  	  return {:x => `#{win}.innerWidth`, :y => `#{win}.innerHeight`} if (presto? || webkit?)
+  		doc = Situated::Utilities.native_compat_element(self)
+  		return {:x => `#{doc}.clientWidth`, :y => `#{doc}.clientHeight`}
     end
     
     def scroll
       win = self.window
-  		doc = getCompatElement(self)
+  		doc = Situated::Utilities.native_compat_element(self)
   		return {:x => `#{win}.__native__.pageXOffset` || `#{doc}.__native__.scrollLeft`, :y => `#{win}.__native__pageYOffset` || `#{doc}.__native__.scrollTop`}
     end
     
     def scroll_size
-      doc = getCompatElement(self);
+      doc = Situated::Utilities.native_compat_element(self)
   		min = self.size
   		return {:x => `Math.max(#{doc}.__native__.scrollWidth, #{min[:x]})`, :y => `Math.max(#{doc}.__native__.scrollHeight,#{ min[:y]})`}
     end
@@ -296,7 +297,7 @@ module Situated
     end
     
     def self.styleNumber(element, style)
-    	`window.styleString(element, style).toInt() || 0`
+    	`parseInt(window.styleString(element, style)) || 0`
     end
   
     def self.border_box(element)
@@ -310,6 +311,12 @@ module Situated
     def self.left_border(element)
     	`c$Situated.c$Utilities.m$styleNumber(element, 'border-left-width')`
     end
+    
+    def self.native_compat_element(element)
+      puts element
+    	`var doc = #{element.document}.__native__`
+    	`((!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body)`
+    end
   end
 end
 
@@ -317,6 +324,4 @@ class Element
   include Situated::Element
 end
 
-module Document
-  include Situated::Viewport
-end
+Document.extend(Situated::Viewport)

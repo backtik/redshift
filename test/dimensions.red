@@ -1,9 +1,9 @@
 require 'javascripts/browser.red'
+require 'javascripts/document.red'
 require 'javascripts/element.red'
 require 'javascripts/accessors.red'
 require 'javascripts/situated.red'
 require 'javascripts/selectors.red'
-require 'javascripts/document.red'
 
 Document.ready? do
   container = Document['#container']
@@ -16,8 +16,8 @@ Document.ready? do
   puts green.scroll_left
   puts green.scroll_height
   puts green.scroll_width
-  # puts green.top
-  # puts green.left
+  puts green.top
+  puts green.left
   #
   puts green.size
   puts green.scroll
@@ -28,11 +28,11 @@ Document.ready? do
   puts green.offsets
   # puts green.position_at(x,y)
   # puts green.calculate_position
-  # puts green.position
+  puts green.position
   # 
   # 
-  # puts Document.height
-  # puts Document.width
+  puts Document.height
+  puts Document.width
   # puts Document.scroll_top
   # puts Document.scroll_left
   # puts Document.scroll_height
