@@ -90,13 +90,12 @@ module Situated
     end
     
     def scrolls
-      element = self
-      `position = {x : 0, y : 0}`
-  		while element && !element.is_body? do
-  			`position.x += #{element}.__native__.scrollLeft`
-  			`position.y += #{element}.__native__.scrollTop`
-  			`element = $E(#{element}.__native__.parentNode)`
-  		end
+      `var element = this.__native__, position = {x : 0, y : 0};
+  		while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
+  			position.x += element.scrollLeft;
+  			position.y += element.scrollTop;
+  			element = element.parentNode;
+  		}`
   		return {:x => `position.x`, :y => `position.y`}
     end
     
@@ -143,7 +142,7 @@ module Situated
         self.window.scroll_to(x, y)
       else
         `this.__native__.scrollLeft = x`
-        `this.__native__.scrollTop   = y`
+        `this.__native__.scrollTop  = y`
       end
   		return self
     end

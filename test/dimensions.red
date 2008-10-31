@@ -22,7 +22,7 @@ Document.ready? do
     
    puts green.size
    puts green.scroll
-   puts green.scrolls
+   puts container.scrolls
    puts green.scroll_size
    
    container.scroll_to(100,40)
