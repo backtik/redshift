@@ -184,11 +184,13 @@ class Element
   #   elem.set_style(sym, value) -> elem
   # 
   def set_style(attribute, value)
-    `var attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();}),val=value.__value__`
+    `var attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();}),val=value.__value__||value`
     `if(attr==='float'){val=#{trident?}?'styleFloat':'cssFloat'}`
     `if(attr==='opacity'){m$raise("nobody wrote the opacity setter yet!");}`
     `if(val===String(Number(val))){val=Math.round(val)}`
     `this.__native__.style[attr]=val`
+    `console.log(attr)`
+    `console.log(val)`
     return self
   end
   
