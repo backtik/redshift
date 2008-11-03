@@ -1,4 +1,7 @@
 class Element
+  include UserEvents
+  include CodeEvents
+  
   def self.destroy(elem) # :nodoc
     `var el = elem.__native__ || elem`
     `c$Element.m$empty(el);`
