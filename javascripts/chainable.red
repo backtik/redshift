@@ -30,9 +30,9 @@ module Chainable
   #   chainable.call_chain(4,5,6)   #=> 44
   #   chainable.call_chain          #=> false
   # 
-  def call_chain
+  def call_chain(*args)
     @chain ||= []
-    return `#{@chain.shift}.__block__.apply(this,arguments)` unless @chain.empty?
+    return `#{@chain.shift}.__block__.apply(this,args)` unless @chain.empty?
     return false
   end
   
@@ -41,10 +41,11 @@ module Chainable
   # 
   # Adds _block_ to the end of _chainable_'s chain, then returns _chainable_.
   # 
-  #   chainable.chain { puts 1 }.chain { puts 2 }
+  #   chainable.chain { puts 1; return 'called 1' }.chain { puts 2; return 'called 2' }
   #   
-  #   chainable.call_chain    #=> nil
-  #   chainable_call_chain    #=> nil
+  #   chainable.call_chain    #=> "called 1"
+  #   chainable.call_chain    #=> "called 2"
+  #   chainable.call_chain    #=> false
   # 
   # produces:
   # 
