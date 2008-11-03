@@ -31,9 +31,9 @@ module Browser
   # as XPath and Adobe AIR.
   # 
   module Features
-    @xpath = `!!(document.evaluate)`
-    @air   = `!!(window.runtime)`
-    @query = `!!(document.querySelector)`
+    `c$Browser.c$Features.__xpath__=!!(document.evaluate)`
+    `c$Browser.c$Features.__air__=!!(window.runtime)`
+    `c$Browser.c$Features.__query__=!!(document.querySelector)`
     
     # call-seq:
     #   xpath? -> true or false
@@ -41,7 +41,7 @@ module Browser
     # Returns +true+ if XPath is available, +false+ otherwise.
     # 
     def xpath?
-      Features.instance_variable_get('@xpath')
+      `c$Browser.c$Features.__xpath__`
     end
     
     # call-seq:
@@ -50,7 +50,7 @@ module Browser
     # Returns +true+ if Adobe AIR is available, +false+ otherwise.
     # 
     def air?
-      Features.instance_variable_get('@air')
+      `c$Browser.c$Features.__air__`
     end
     
     # call-seq:
@@ -59,7 +59,7 @@ module Browser
     # Returns +true+ if the W3C Selectors API is available, +false+ otherwise.
     #
     def query?
-      Features.instance_variable_get('@query')
+      `c$Browser.c$Features.__query__`
     end
   end
   
