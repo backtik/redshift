@@ -1,4 +1,49 @@
-# Module +CodeEvents+ mixes in methods for handling custom events.
+# Module +CodeEvents+ enables event-driven programming by giving objects of
+# the including class the ability to define custom observers and callbacks.
+# 
+#   class Looper
+#     include CodeEvents
+#     
+#     def initialize(range)
+#       @range = range
+#     end
+#     
+#     def run(min, max)
+#       self.fire(:start)
+#       @range.each do |i|
+#         self.fire(:minimum, 0, i) && next if i == min
+#         self.fire(:maximum, 0, i) && next if i == max
+#         puts i
+#       end
+#       return self
+#     end
+#   end
+#   
+#   looper = Looper.new(1..10)                                          #=> #<Looper:0x34fe78>
+#   
+#   looper.upon :start do
+#     puts "The loop has begun"
+#   end
+#   
+#   min_proc = Proc.new {|i| puts "Minimum amount reached: %s" % i }    #=> #<Proc:0x3e72a9>
+#   max_proc = Proc.new {|i| puts "Maximum amount reached: %s" % i }    #=> #<Proc:0x3ea147>
+#   looper.upon(:minimum => min_proc, :maximum => max_proc)             #=> #<Looper:0x34fe78>
+#   
+#   looper.run(3,8)                                                     #=> #<Looper:0x34fe78>
+# 
+# produces:
+# 
+#   The loop has begun
+#   1
+#   2
+#   Minimum amount reached: 3
+#   4
+#   5
+#   6
+#   7
+#   Maximum amount reached: 8
+#   9
+#   10
 # 
 module CodeEvents
   # call-seq:
@@ -11,9 +56,9 @@ module CodeEvents
   # event's +Proc+ objects, but if any arguments are passed, the first must be
   # the _delay_ argument.
   # 
-  #   obj.upon(:A) {|x| puts x }       #=> obj
-  #   obj.upon(:B) {|y| puts y }       #=> obj
-  #   obj.upon(:C) { puts 'fire 3' }   #=> obj
+  #   obj.upon(:A) {|x| puts x }        #=> obj
+  #   obj.upon(:B) {|y| puts y }        #=> obj
+  #   obj.upon(:C) { puts 'fire 3' }    #=> obj
   #   
   #   obj.fire(:A, 500, 'fire 1').fire(:B, 0, 'fire 2').fire(:C)
   # 
@@ -40,12 +85,12 @@ module CodeEvents
   # In the first form, all event-related +Proc+ objects not marked
   # as "unignorable" are removed from _obj_.
   # 
-  #   obj.upon(:A, true) { puts '1st executed' }   #=> obj
-  #   obj.upon(:A)       { puts '2nd executed' }   #=> obj
-  #   obj.upon(:B)       { puts '3rd executed' }   #=> obj
+  #   obj.upon(:A, true) { puts '1st executed' }    #=> obj
+  #   obj.upon(:A)       { puts '2nd executed' }    #=> obj
+  #   obj.upon(:B)       { puts '3rd executed' }    #=> obj
   #   
-  #   obj.ignore                                   #=> obj
-  #   obj.fire(:A).fire(:B)                        #=> obj
+  #   obj.ignore                                    #=> obj
+  #   obj.fire(:A).fire(:B)                         #=> obj
   # 
   # produces:
   # 
@@ -54,12 +99,12 @@ module CodeEvents
   # In the second form, only the ignorable +Proc+ objects associated with the
   # event _sym_ are removed.
   # 
-  #   obj.upon(:A, true) { puts '1st executed' }   #=> obj
-  #   obj.upon(:A)       { puts '2nd executed' }   #=> obj
-  #   obj.upon(:B)       { puts '3rd executed' }   #=> obj
+  #   obj.upon(:A, true) { puts '1st executed' }    #=> obj
+  #   obj.upon(:A)       { puts '2nd executed' }    #=> obj
+  #   obj.upon(:B)       { puts '3rd executed' }    #=> obj
   #   
-  #   obj.ignore(:A)                               #=> obj
-  #   obj.fire(:A).fire(:B)                        #=> obj
+  #   obj.ignore(:A)                                #=> obj
+  #   obj.fire(:A).fire(:B)                         #=> obj
   # 
   # produces:
   # 
@@ -69,18 +114,18 @@ module CodeEvents
   # In the third form, only the +Proc+ object passed in as <i>&proc</i> is
   # removed.
   # 
-  #   block_1 = Proc.new { puts '1st executed' }    #=> #<Proc:0x3e78ee>
-  #   block_2 = Proc.new { puts '2nd executed' }    #=> #<Proc:0x3e888a>
+  #   proc_1 = Proc.new { puts 'Proc 1 executed' }    #=> #<Proc:0x3e78ee>
+  #   proc_2 = Proc.new { puts 'Proc 2 executed' }    #=> #<Proc:0x3e888a>
   #   
-  #   obj.upon(:A, &block_1)                   #=> obj
-  #   obj.upon(:A, &block_2)                   #=> obj
+  #   obj.upon(:A, &proc_1)                           #=> obj
+  #   obj.upon(:A, &proc_2)                           #=> obj
   #   
-  #   obj.ignore(:A, &block_1)                 #=> obj
-  #   obj.fire(:A)                             #=> obj
+  #   obj.ignore(:A, &proc_1)                         #=> obj
+  #   obj.fire(:A)                                    #=> obj
   # 
   # produces:
   # 
-  #   2nd executed
+  #   Proc 2 executed
   # 
   def ignore(sym, &block)
     if sym
@@ -109,12 +154,12 @@ module CodeEvents
   # +true+, the _block_ will be executed when _sym_ fires, regardless of
   # whether it has been ignored.
   # 
-  #   obj.upon(:A, true) { puts '1st executed' }   #=> obj
-  #   obj.upon(:A, true) { puts '2nd executed' }   #=> obj
-  #   obj.upon(:A)       { puts '3rd executed' }   #=> obj
+  #   obj.upon(:A, true) { puts '1st executed' }    #=> obj
+  #   obj.upon(:A, true) { puts '2nd executed' }    #=> obj
+  #   obj.upon(:A)       { puts '3rd executed' }    #=> obj
   #   
-  #   obj.ignore(:A)                               #=> obj
-  #   obj.fire(:A)                                 #=> obj
+  #   obj.ignore(:A)                                #=> obj
+  #   obj.fire(:A)                                  #=> obj
   # 
   # produces:
   # 
@@ -122,14 +167,14 @@ module CodeEvents
   #   2nd executed
   # 
   # The second form takes a hash of +Proc+ objects keyed by event name,
-  # running <tt>eventful.listen(name, &proc)</tt> on each key-value pair, then
-  # returns _eventful_.
+  # running <tt>obj.upon(name, &proc)</tt> on each key-value pair, then
+  # returns _obj_.
   # 
-  #   block_1 = Proc.new { puts '1st executed' }    #=> #<Proc:0x3e78ee>
-  #   block_2 = Proc.new { puts '2nd executed' }    #=> #<Proc:0x3e888a>
+  #   proc_1 = Proc.new { puts '1st executed' }   #=> #<Proc:0x3e78ee>
+  #   proc_2 = Proc.new { puts '2nd executed' }   #=> #<Proc:0x3e888a>
   #   
-  #   obj.upon(:A => block_1, :B => block_2)   #=> obj
-  #   obj.fire(:B)                             #=> obj
+  #   obj.upon(:A => proc_1, :B => proc_2)        #=> obj
+  #   obj.fire(:B)                                #=> obj
   # 
   # produces
   # 
