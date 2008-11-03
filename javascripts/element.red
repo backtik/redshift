@@ -107,22 +107,6 @@ class Element
   end
   
   # call-seq:
-  #   elem.has_class?(sym) -> true or false
-  # 
-  # Returns +true+ if _elem_ is class _sym_, +false+ otherwise.
-  # 
-  #   <div id='div_a' class='container drop_target'></div>
-  #   
-  #   elem = Document['#div_a']       #=> #<Element: DIV id="div_element" class="container drop_target">
-  #   elem.has_class?('container')    #=> true
-  #   elem.has_class?(:draggable)     #=> false
-  # 
-  def has_class?(class_name)
-    `var str=' '+this.__native__.className+' ',match=' '+class_name.__value__+' '`
-    `str.indexOf(match) > -1`
-  end
-  
-  # call-seq:
   #   elem.insert(other, sym = :bottom) -> elem
   # 
   # Returns _elem_ with _other_ inserted at location _sym_.
