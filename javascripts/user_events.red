@@ -51,8 +51,8 @@ module UserEvents
   }
   
   DEFINED_EVENTS = {
-    :mouse_enter => {:base => 'mouseover', :condition => `m$proc(c$UserEvents.mousecheck)` },
-    :mouse_leave => {:base => 'mouseout',  :condition => `m$proc(c$UserEvents.mousecheck)` },
+    :mouse_enter => {:base => 'mouseover', :condition => proc(`c$UserEvents.mousecheck`) },
+    :mouse_leave => {:base => 'mouseout',  :condition => proc(`c$UserEvents.mousecheck`) },
     :mouse_wheel => {:base => gecko? ? 'DOMMouseScroll' : 'mousewheel' }
   }
   
