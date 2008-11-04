@@ -1,3 +1,6 @@
+require 'javascripts/element.red'
+require 'javascripts/window.red'
+
 # Classes mixing in <tt>Situated</tt> and its submodules gain the ability
 # to provide locational and dimensional data about their visual DOM 
 # representation within the browser.
@@ -73,7 +76,7 @@ module Situated
     
     def size
       return self.window.size if self.is_body?
-  		return {:x => `#{self}.__native__.offsetWidth`, :y => `#{self}.__native__.offsetHeight`}
+      return {:x => `#{self}.__native__.offsetWidth`, :y => `#{self}.__native__.offsetHeight`}
     end
     
     # call-seq:
@@ -86,17 +89,17 @@ module Situated
     # situated.scroll #=> {:x => 10, :y => 5}
     def scroll
       return self.window.scroll if self.is_body? 
-  		return {:x => `#{self}.__native__.scrollLeft`, :y => `#{self}.__native__.scrollTop`}
+      return {:x => `#{self}.__native__.scrollLeft`, :y => `#{self}.__native__.scrollTop`}
     end
     
     def scrolls
       `var element = this.__native__, position = {x : 0, y : 0};
-  		while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
-  			position.x += element.scrollLeft;
-  			position.y += element.scrollTop;
-  			element = element.parentNode;
-  		}`
-  		return {:x => `position.x`, :y => `position.y`}
+      while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
+        position.x += element.scrollLeft;
+        position.y += element.scrollTop;
+        element = element.parentNode;
+      }`
+      return {:x => `position.x`, :y => `position.y`}
     end
     
     # call-seq:
@@ -111,7 +114,7 @@ module Situated
     #
     def scroll_size
       return self.window.scroll_size if self.is_body?
-  		return {:x => `#{self}.__native__.scrollWidth`, :y => `#{self}.__native__.scrollHeight`}
+      return {:x => `#{self}.__native__.scrollWidth`, :y => `#{self}.__native__.scrollHeight`}
     end
     
     # call-seq:
@@ -144,7 +147,7 @@ module Situated
         `this.__native__.scrollLeft = x`
         `this.__native__.scrollTop  = y`
       end
-  		return self
+      return self
     end
     
     # call-seq:
@@ -163,11 +166,11 @@ module Situated
       return `$E(#{element}.__native__.offsetParent)` unless trident?
       
       # For trident we walk the DOM until we have a static positioned element or reach the body
-  		while ((element = `$E(#{element}.__native__.parentNode)`) && !element.is_body?) do 
-  		  return element unless element.styles[:position] == 'static'
-  		end
-  		
-  		return nil
+      while ((element = `$E(#{element}.__native__.parentNode)`) && !element.is_body?) do 
+        return element unless element.styles[:position] == 'static'
+      end
+      
+      return nil
     end
     
     def offsets
@@ -186,33 +189,33 @@ module Situated
       `
       
       element = native
-  		while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
-  			position.x += element.offsetLeft;
-  			position.y += element.offsetTop;
+      while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
+        position.x += element.offsetLeft;
+        position.y += element.offsetTop;
 
-  			if (#{gecko?}){
-  				if (!c$Situated.c$Utilities.m$border_box(element)){
-  					position.x += c$Situated.c$Utilities.m$left_border(element);
-  					position.y += c$Situated.c$Utilities.m$top_border(element);
-  				}
-  				var parent = element.parentNode;
-  				if (parent && window.styleString(parent, 'overflow') != 'visible'){
-  					position.x += c$Situated.c$Utilities.m$left_border(parent);
-  					position.y += c$Situated.c$Utilities.m$top_border(parent);
-  				}
-  			} else if (element != this && #{webkit?}){
-  				position.x += c$Situated.c$Utilities.m$left_border(element);
-  				position.y += c$Situated.c$Utilities.m$top_border(element);
-  			}
+        if (#{gecko?}){
+          if (!c$Situated.c$Utilities.m$border_box(element)){
+            position.x += c$Situated.c$Utilities.m$left_border(element);
+            position.y += c$Situated.c$Utilities.m$top_border(element);
+          }
+          var parent = element.parentNode;
+          if (parent && window.styleString(parent, 'overflow') != 'visible'){
+            position.x += c$Situated.c$Utilities.m$left_border(parent);
+            position.y += c$Situated.c$Utilities.m$top_border(parent);
+          }
+        } else if (element != this && #{webkit?}){
+          position.x += c$Situated.c$Utilities.m$left_border(element);
+          position.y += c$Situated.c$Utilities.m$top_border(element);
+        }
 
-  			element = element.offsetParent;
-  		}
-  		
-  		if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(native)){
-  			position.x -= c$Situated.c$Utilities.m$left_border(native);
-  			position.y -= c$Situated.c$Utilities.m$top_border(native);
-  		}
-  		`
+        element = element.offsetParent;
+      }
+      
+      if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(native)){
+        position.x -= c$Situated.c$Utilities.m$left_border(native);
+        position.y -= c$Situated.c$Utilities.m$top_border(native);
+      }
+      `
       return {:x => `position.x`, :y => `position.y`}
     end
         
@@ -238,21 +241,21 @@ module Situated
     
     def size
       win = self.window
-  	  return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
-  		doc = Situated::Utilities.native_compat_element(self)
-  		return {:x => `#{doc}.__native__.clientWidth`, :y => `#{doc}.__native__.clientHeight`}
+      return {:x => `#{win}.__native__.innerWidth`, :y => `#{win}.__native__.innerHeight`} if (presto? || webkit?)
+      doc = Situated::Utilities.native_compat_element(self)
+      return {:x => `#{doc}.__native__.clientWidth`, :y => `#{doc}.__native__.clientHeight`}
     end
     
     def scroll
       win = self.window
-  		doc = Situated::Utilities.native_compat_element(self)
-  		return {:x => `#{win}.__native__.pageXOffset` || `#{doc}.__native__.scrollLeft`, :y => `#{win}.__native__pageYOffset` || `#{doc}.__native__.scrollTop`}
+      doc = Situated::Utilities.native_compat_element(self)
+      return {:x => `#{win}.__native__.pageXOffset` || `#{doc}.__native__.scrollLeft`, :y => `#{win}.__native__pageYOffset` || `#{doc}.__native__.scrollTop`}
     end
     
     def scroll_size
       doc = Situated::Utilities.native_compat_element(self)
-  		min = self.size
-  		return {:x => `Math.max(#{doc}.__native__.scrollWidth, #{min[:x]})`, :y => `Math.max(#{doc}.__native__.scrollHeight,#{ min[:y]})`}
+      min = self.size
+      return {:x => `Math.max(#{doc}.__native__.scrollWidth, #{min[:x]})`, :y => `Math.max(#{doc}.__native__.scrollHeight,#{ min[:y]})`}
     end
     
     # call-seq:
@@ -285,7 +288,7 @@ module Situated
     #
     def coordinates
       size = self.size
-  		return {:top => 0, :left => 0, :bottom => size[:y], :right => size[:x], :height => size[:y], :width => size[:x]}
+      return {:top => 0, :left => 0, :bottom => size[:y], :right => size[:x], :height => size[:y], :width => size[:x]}
     end
   end
 
@@ -295,24 +298,24 @@ module Situated
     end
     
     def self.styleNumber(native_element, style)
-    	`parseInt(window.styleString(native_element, style)) || 0`
+      `parseInt(window.styleString(native_element, style)) || 0`
     end
   
     def self.border_box(element)
-    	`window.styleString(element, '-moz-box-sizing') == 'border-box'`
+      `window.styleString(element, '-moz-box-sizing') == 'border-box'`
     end
 
     def self.top_border(element)
-    	`c$Situated.c$Utilities.m$styleNumber(element, 'border-top-width')`
+      `c$Situated.c$Utilities.m$styleNumber(element, 'border-top-width')`
     end
 
     def self.left_border(element)
-    	`c$Situated.c$Utilities.m$styleNumber(element, 'border-left-width')`
+      `c$Situated.c$Utilities.m$styleNumber(element, 'border-left-width')`
     end
     
     def self.native_compat_element(element)
-    	`var doc = #{element.document}.__native__`
-    	`$E((!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body)`
+      `var doc = #{element.document}.__native__`
+      `$E((!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body)`
     end
   end
 end

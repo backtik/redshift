@@ -1,5 +1,8 @@
+require 'javascripts/chainable.red'
+require 'javascripts/code_events.red'
+
 class Request
-  # include Event
+  include CodeEvents
   include Chainable
   
   METHODS = %w(GET POST PUT DELETE)

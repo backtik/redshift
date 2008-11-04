@@ -1,18 +1,16 @@
-require 'javascripts/browser.red'
-require 'javascripts/document.red'
-require 'javascripts/chainable.red'
-require 'javascripts/cookie.red'
-require 'javascripts/request.red'
+require 'javascripts/redshift.red'
 
-Document.ready? do
-  class Foo
-    include Chainable
+class Foo
+  def name
+    "worked"
   end
   
-  foo = Foo.new
-  foo.chain {|x,y,z| x * (y + z) }
-  
-  puts foo.call_chain(4,5,6)
-  puts foo.call_chain
+  def procout
+    proc { |element| puts element.name }
+  end
 end
 
+Document.ready? do
+  foo = Foo.new
+  foo.procout.call(foo)
+end

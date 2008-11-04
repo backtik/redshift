@@ -1,4 +1,10 @@
+require 'javascripts/document.red'
+require 'javascripts/user_events.red'
+require 'javascripts/code_events.red'
+
 class Element
+  `window.$E=function(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`
+  
   include UserEvents
   include CodeEvents
   
@@ -375,82 +381,4 @@ class Element
     Element.remove(self)
     return self
   end
-  
-  # def initialize(tag)
-  #   # konstructor = ElementStuff::Constructors.get(tag)
-  #   #       return konstructor(properties)  if konstructor 
-  #   # return Document.new_element(tag, props) if (`typeof tag == 'string'`) 
-  #   # return Document[tag].set(properties)
-  #   # return Document[tag]
-  #   @native = tag
-  # end
-  # 
-  # # def set_style(style, value)
-  # #   case style
-  # #   when 'opacity': return self.set('opacity', `parseFloat(value)`)
-  # #   when 'float': property = Browser::Engine.trident? ? 'styleFloat' : 'cssFloat'
-  # #   end
-  # # #   # property = property.camelCase();
-  # # #   if !value.is_a?(::String)
-  # # #     map = (Element::Styles[property] || '@').split(' ');
-  # # #     value = $splat(value).map(function(val, i){
-  # # #       if (!map[i]) return '';
-  # # #       return ($type(val) == 'number') ? map[i].replace('@', Math.round(val)) : val;
-  # # #     }).join(' ');
-  # # #   elsif (value == String(Number(value))){
-  # # #     value = Math.round(value);
-  # # #   end
-  # # #   `#{@native}.style[property] = value`
-  # #   return self
-  # # end
-  # 
-  # 
-  # module ElementStuff
-  #   
-  #   Styles = {
-  #     :left => '@px', :top => '@px', :bottom => '@px', :right => '@px',
-  #     :width => '@px', :height => '@px', :maxWidth => '@px', :maxHeight => '@px', :minWidth => '@px', :minHeight => '@px',
-  #     :backgroundColor => 'rgb(@, @, @)', :backgroundPosition => '@px @px', :color => 'rgb(@, @, @)',
-  #     :fontSize => '@px', :letterSpacing => '@px', :lineHeight => '@px', :clip => 'rect(@px @px @px @px)',
-  #     :margin => '@px @px @px @px', :padding => '@px @px @px @px', :border => '@px @ rgb(@, @, @) @px @ rgb(@, @, @) @px @ rgb(@, @, @)',
-  #     :borderWidth => '@px @px @px @px', :borderStyle => '@ @ @ @', :borderColor => 'rgb(@, @, @) rgb(@, @, @) rgb(@, @, @) rgb(@, @, @)',
-  #     :zIndex => '@', :zoom => '@', :fontWeight => '@', :textIndent => '@px', :opacity => '@'
-  #   }
-  #   
-  #   ShortStyles = {
-  #     :margin => {}, :padding => {}, 
-  #     :border => {}, :borderWidth => {}, 
-  #     :borderStyle => {}, :borderColor => {}
-  #   }
-  #   
-  #   Properties = {
-  #     'style' => Object.new,
-  #     'tag'   => Object.new,
-  #     'href'  => Object.new,
-  #     'html'  => Object.new,
-  #     'events'=> Object.new
-  #   }
-  #   
-  #   def (Properties['style']).set(element, style)
-  #     `#{element.native}.style.cssText = style`
-  #   end
-  #   
-  #   def (Properties['style']).get(element)
-  #     `#{element.native}.style.cssText`
-  #   end
-  #   
-  #   def (Properties['style']).erase(element)
-  #     `#{element.native}.style.cssText = ''`
-  #   end
-  #   
-  #   def (Properties['tag']).get(element)
-  #     `#{element.native}.tagName.toLowerCase()`
-  #   end
-  #   
-  #   # TODO: REGEXP PORT REQUIRED
-  #   # def (Properties['href']).get(element)
-  #   #   r = Regexp.new('^' + `$q(document.location.protocol)` + '\/\/' + `$q(document.location.host)`)
-  #   #   (`#{element.native}.href`) ? nil : `#{element.native}.href`.replace(r, '')
-  #   # end
-  # end
 end

@@ -1,19 +1,4 @@
-
-# Document[string]
-#   Document['#foo']
-#     find element with id of foo
-#     returns an Element::Extended object
-#   Document['a']
-#     finds all elements of tag a
-#     returns array of Element::Extended objects
-#   Document['a.special']
-#      finds all elements of tag a with class 'special'
-#
-# Document[element]
-#     find the existing extended object
-#
-
-`function $E(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`
+require 'javascripts/selectors.red'
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
@@ -29,35 +14,29 @@ module Document
   `document.window=(document.defaultView||document.parentWindow)`
   `c$Document.__native__= document`
   
-  # def self.delegate(*properties) # :nodoc:
-  #   to = properties.pop[:to]
-  #   `for(var i=0,l=properties.length;i<l;++i){
-  #     var a=properties[i].__value__,t=to.__value__;
-  #     var f1=function(){var result=this['m$'+t]()[arguments.callee.__propertyName__];return result==null?nil:result;};f1.__propertyName__=a;this['m$'+a]=f1;
-  #     var f2=function(x){return this['m$'+t]()[arguments.callee.__propertyName__]=x;};f2.__propertyName__=a;this['m$'+a+'Eql']=f2;
-  #   }`
-  #   return nil
-  # end
-  # 
-  # delegate(:innerHeight, :innerWidth, :outerWidth, :pageXOffset,
-  #          :pageYOffset, :screenX, :screenY, :scrollMaxX,
-  #          :scrollMaxY, :scrollX, :scrollY, {:to => :window})
-  
   # call-seq:
-  #   Document[str]      -> element or nil
-  #   Document[str]      -> [element, ...]
-  #   Document[arg, ...] -> [element, ...]
-  #   Document[element]  -> element
+  #   Document["#id"]      -> element or nil
+  #   Document["selector"] -> [element, ...]
+  #   Document[str, ...]   -> [element, ...]
   # 
   # The first form returns the +Element+ identified by the id <i>str</i> (e.g.
   # <i>'#my_id'</i>), or +nil+ if no such element is found. The second form
-  # returns the array of elements identified by the selector <i>str</i> (see Available Selectors below).
+  # returns the array of elements identified by the selector <i>str</i>.
   # The third form returns the array of elements found by calling
   # <tt>Document.[]</tt> on each arg. The fourth form returns _element_
   # unchanged.
   # 
+  # The first form returns the +Element+ identified by the string
+  # <i>"#id"</i>, or +nil+ if no such element is found.
+  # 
   #   Document['#content']    #=> #<Element: DIV id="content">
-  #   ...
+  # 
+  # The second form returns the array of +Element+ objects that match the
+  # string <i>"selector"</i>, which takes the format of a CSS3 selector. See
+  # http://www.w3.org/TR/css3-selectors/ for details.
+  # 
+  #   
+  # 
   # Available Selectors
   # Document[str] in its second form takes a selector string and scans the document
   # returing an array of any elements that match the selector string. 
@@ -72,16 +51,14 @@ module Document
   # Returns an array of elements that have the specified tag
   # Document['a'] #=> [#<Element: A href="/foo/bar">, #<Element: A href="/foo/baz">, #<Element: A href="/foo/bat">]
   # 
-  def self.[](obj, *args)
-    if args.empty?
-      case obj
-      when String
-        return self.find_by_string(obj)
-      when Element
-        return obj
-      end
+  def self.[](*args)
+    if args.length == 1
+      return self.find_by_string(args[0])
     else
-      return self.find_many_with_array(args.unshift(obj))
+      args.map do |str|
+        Document[str]
+      end.compact
+      #return self.find_many_with_array(args.unshift(obj))
     end
   end
   

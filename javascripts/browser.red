@@ -75,7 +75,7 @@ module Browser
       @version = `window.XMLHttpRequest` ? 5 : 4
     elsif `!navigator.taintEnabled`
       @name    = 'webkit'
-      @version = Browser::Features[:xpath] ? (Browser::Features[:query] ? 525 : 420) : 419
+      @version = `#{Browser::Features}.__xpath__` ? (`#{Browser::Features}.__query__` ? 525 : 420) : 419
     elsif `document.getBoxObjectFor != null`
       @name    = 'gecko'
       @version = `document.getElementsByClassName` ? 19 : 18

@@ -1,13 +1,4 @@
-require 'javascripts/browser.red'
-require 'javascripts/document.red'
-require 'javascripts/chainable.red'
-require 'javascripts/cookie.red'
-require 'javascripts/request.red'
-require 'javascripts/event.red'
-require 'javascripts/code_events.red'
-require 'javascripts/user_events.red'
-require 'javascripts/element.red'
-require 'javascripts/accessors.red'
+require 'javascripts/redshift.red'
 
 Document.ready? do
   UserEvents.define(:alt_meta_shift_click, :base => 'click', :condition => proc {|element,event| event.alt? && event.meta? && event.shift? })

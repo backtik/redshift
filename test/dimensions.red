@@ -1,10 +1,4 @@
-require 'javascripts/browser.red'
-require 'javascripts/window.red'
-require 'javascripts/document.red'
-require 'javascripts/element.red'
-require 'javascripts/accessors.red'
-require 'javascripts/situated.red'
-require 'javascripts/selectors.red'
+require 'javascripts/redshift.red'
 
 Document.ready? do
   container = Document['#container']
