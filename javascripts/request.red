@@ -31,26 +31,26 @@ class Request
   # Returns a new _request_ with the given options.
   # 
   def initialize(options = {})
-    @xhr = `typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
+    `this.__xhr__ = typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
     @options = OPTIONS.merge(options)
-    `#{@options[:headers]}.__xhr__=#{@xhr}`  # MooTools sets the ResponseHeaders in the xhr
-    def (@options[:headers]).[](name)        # only during execution, but allows you to get
-      `this.__xhr__.getResponseHeader(name)` # at them at any time. I'm not sure whether it
-    end                                      # is necessary for us to emulate this exactly.
+    `#{@options[:headers]}.__xhr__=this.__xhr__`  # MooTools sets the ResponseHeaders in the xhr
+    def (@options[:headers]).[](name)             # only during execution, but allows you to get
+      `this.__xhr__.getResponseHeader(name)`      # at them at any time. I'm not sure whether it
+    end                                           # is necessary for us to emulate this exactly.
   end
   
   # call-seq:
   #   req.cancel -> req
   # 
-  # Cancels the request, fires its "cancel" event, and returns _req_.
+  # Cancels the request, fires its "cancel" callback, and returns _req_.
   # 
   def cancel
     return self unless @running
     @running = false
-    `#{@xhr}.abort`
-    `#{@xhr}.onreadystatechange=function(){;}`
-    @xhr = `typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
-    self.fire_event('cancel')
+    `this.__xhr__.abort`
+    `this.__xhr__.onreadystatechange=function(){;}`
+    `this.__xhr__=typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
+    self.fire(:cancel)
     return self
   end
   
@@ -113,16 +113,16 @@ class Request
       data      = nil
     end
     
-    `#{@xhr}.open(#{method}.__value__, #{url}.__value__, #{@options[:async]})`
-    `#{@xhr}.onreadystatechange = #{self.on_state_change}.__block__`
+    `this.__xhr__.open(method.__value__, url.__value__, #{@options[:async]})`
+    `this.__xhr__.onreadystatechange = #{self.on_state_change}.__block__`
     
     @options[:headers].each do |k,v|
-      `#{@xhr}.setRequestHeader(k.__value__,v.__value__)`
+      `this.__xhr__.setRequestHeader(k.__value__,v.__value__)`
     # raise(HeaderError, "#{k} => #{v}")
     end
     
-    self.fire_event('request')
-    `#{@xhr}.send($T(data)?data.__value__:'')`
+    self.fire(:request)
+    `this.__xhr__.send($T(data)?data.__value__:'')`
     self.on_state_change.call unless @options[:async]
     return self
   end
@@ -130,10 +130,10 @@ class Request
   # call-seq:
   #   req.failure! -> req
   # 
-  # Fires _req_'s "complete" and "failure" events, then returns _req_.
+  # Fires _req_'s "response" and "failure" callbacks, then returns _req_.
   # 
   def failure!
-    self.fire_event('complete').fire_event('failure', @xhr);
+    self.fire(:response).fire(:failure, @xhr);
   end
   
   # call-seq:
@@ -146,28 +146,29 @@ class Request
   end
   
   # call-seq:
-  #   req.on_state_chang -> proc
+  #   req.on_state_change -> proc
   # 
   # Returns a +Proc+ object
   # 
   def on_state_change
-    proc do
-      `if(#{@xhr}.readyState!=4||!#{@running}){return nil;}`
+    Proc.new do
+      `var xhr=this.__xhr__`
+      `if(xhr.readyState!=4||!#{@running}){return nil;}`
       
       @running = false
       @status  = 0
       
-      `try{#{@status}=#{@xhr}.status}catch(e){;}`
+      `try{#{@status}=xhr.status}catch(e){;}`
       
       if self.success?
-        @response = {:text => `$q(#{@xhr}.responseText)`, :xml => `#{@xhr}.responseXML`}
+        @response = {:text => `$q(xhr.responseText)`, :xml => `xhr.responseXML`}
         self.success!(self.process_scripts(@response[:text]), @response[:xml])
       else
         @response = {:text => nil, :xml => nil};
         self.failure!
       end
       
-      `#{@xhr}.onreadystatechange=function(){;}`
+      `xhr.onreadystatechange=function(){;}`
       
       return nil
     end
@@ -185,17 +186,17 @@ class Request
   # +true+, evaluates the removed scripts.
   # 
   def process_scripts(str)
-    return Document.execute_js(str) if @options[:eval_response] || `/(ecma|java)script/.test(this.i$xhr.getResponseHeader('Content-Type'))`
+    return Document.execute_js(str) if @options[:eval_response] || `/(ecma|java)script/.test(this.__xhr__.getResponseHeader('Content-Type'))`
     return str.strip_scripts(@options[:eval_scripts])
   end
   
   # call-seq:
   #   req.success!(text, xml) -> req
   # 
-  # Fires _req_'s "complete" and "success" events, then returns _req_.
+  # Fires _req_'s "response" and "success" callbacks, then returns _req_.
   # 
   def success!(text, xml)
-    self.fire_event('complete', [text, xml]).fire_event('success', [text, xml]).call_chain
+    self.fire(:response, [text, xml]).fire(:success, [text, xml]).call_chain
   end
   
   # call-seq:
@@ -205,11 +206,6 @@ class Request
   # 
   def success?
     `#{@status}>=200&&#{@status}<300`
-  end
-  
-  # This is a stub
-  def fire_event # :nodoc:
-    return self
   end
   
   # +HeaderError+ is raised when a +Request+ is executed with headers that are
@@ -271,8 +267,10 @@ class Request
   end
   
   class HTML
+    
   end
   
   class JSON
+    
   end
 end
