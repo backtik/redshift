@@ -1,4 +1,4 @@
-require 'javascripts/redshift.red'
+require '../redshift.red'
 
 Document.ready? do
   UserEvents.define(:alt_meta_shift_click, :base => 'click', :condition => proc {|element,event| event.alt? && event.meta? && event.shift? })

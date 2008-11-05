@@ -1,4 +1,4 @@
-require 'javascripts/redshift.red'
+require '../redshift.red'
 
 Document.ready? do
   puts Document['#c_element'].has_class?('boo')

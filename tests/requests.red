@@ -1,4 +1,4 @@
-require 'javascripts/redshift.red'
+require '../redshift.red'
 
 Document.ready? do
   req = Request.new(:url => 'http://localhost:9292/html/requests.html', :method => 'get')
