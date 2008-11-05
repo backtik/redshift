@@ -1,5 +1,5 @@
-require 'javascripts/element.red'
-require 'javascripts/window.red'
+require 'element.red'
+require 'window.red'
 
 # Classes mixing in <tt>Situated</tt> and its submodules gain the ability
 # to provide locational and dimensional data about their visual DOM 

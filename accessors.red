@@ -1,4 +1,4 @@
-require 'javascripts/element.red'
+require 'element.red'
 
 class Element
   `c$Element.__keyed_attributes__={class:'className',for:'htmlFor'}`
