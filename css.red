@@ -47,7 +47,7 @@ module CSS
       def self.parse(value)
         `value = value.__value__ || String(value)`
         `parsed = parseFloat(value)`
-        `parsed ? parsed : false`
+        `(parsed || parsed == 0) ? parsed : false`
       end
       
       def self.serve(value, unit)
@@ -60,12 +60,12 @@ module CSS
       def self.parse(value)
         false
       end
-      def self.compute(a,b,c)
-        return b        
+      def self.compute(from, to, delta)
+        return to        
       end
       
-      def self.serve(a,b,c)
-        return a
+      def self.serve(value, unit)
+        return value
       end
     end
   end
