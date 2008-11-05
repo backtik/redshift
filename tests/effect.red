@@ -6,8 +6,8 @@ Document.ready? do
   
   e = Tween.new(Document['#blue'])
   e.start(:height, 220)
-  
-  e = Tween.new(Document['#green'])
-  e.start(:background_color, '#fff')
+  # 
+  # e = Tween.new(Document['#green'])
+  # e.start(:background_color, '#fff')
   
 end

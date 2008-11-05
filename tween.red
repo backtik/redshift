@@ -1,3 +1,5 @@
+require 'transform'
+
 class Tween < Transform
   def initialize(element, options)
     @element = @subject = element

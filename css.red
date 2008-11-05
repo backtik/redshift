@@ -1,3 +1,5 @@
+require 'transform'
+
 module CSS
   module Parser
     class Color
