@@ -1,0 +1,100 @@
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>Red Herring: These aren't the formats you're looking for</title>
+  <script src="/test/selectors.red" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+  
+  <!-- Document['#a_id'] -->
+  <div id="a_id"></div>
+  
+  <!-- Document['.a_class'] -->
+  <div class="a_class"></div>
+  <div class="a_class"></div>
+  
+  <!-- Document['span'] -->
+  <span></span>
+  <span></span>
+  <span></span>
+  
+  <!-- Document['abbr.b_class'] -->
+  <abbr class='b_class'></abbr>
+  <abbr class='b_class'></abbr>
+  
+  <!-- Document['div abbr'] -->
+  <div>
+      <abbr></abbr>
+  </div>
+  
+  <!-- Document['div p.c_class em'] -->
+  <div>
+    <p class='c_class'>
+      <em></em>
+    </p>
+  </div>
+  
+  <!-- Document['div#b_id p.c_class em'] -->
+  <div id='b_id'>
+    <p class='c_class'>
+      <em></em>
+    </p>
+  </div>
+  
+  <!-- Document['input[name=dialog]']  --> <!-- Document['input[name$=log]'] -->
+  <input name='dialog'>
+  
+  <!-- Document['input[name$=log]']    --> <!-- Document['input[name^=shmi]'] -->
+  <!-- Document['input[name!=dialog]'] -->
+  <input name='shmialog'>
+  
+  <!-- Document['strong:empty'] -->
+  <strong></strong>
+  
+  <!-- Document['contains:("find me")'] -->
+  <strong>find me</strong>
+  
+  
+  <!-- Document['#c_id:nth-child(2n)']        every even child  -->
+  <!-- Document['#c_id:nth-child(n)']         all children      -->
+  <!-- Document['#c_id:nth-child(2n+1)']      every odd child   -->
+  <!-- Document['#c_id:nth-child(4n+3)']      3, 7, 11, 15, etc -->
+  <div id='c_id'>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  
+  <!-- Document['#d_id div:nth-child(only)']  -->
+  <div id="d_id">
+    <div id="only"></div>
+  </div>
+  
+  
+  <!-- Document['div em'] --> <!-- Document['div > em'] -->
+  
+  <div>
+    <em></em>
+    <p>
+      <em></em>
+    </p>
+  </div>
+  
+  <!-- Document['h4 p'] -->
+  <h4></h4>
+  <p>
+  
+</body>
+</html>
