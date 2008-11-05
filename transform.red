@@ -1,4 +1,7 @@
+require 'code_events'
+
 class Transform
+  include CodeEvents
   OPTIONS = {:fps => 50,
 	           :unit => false,
 	           :duration => 500,
@@ -86,20 +89,20 @@ class Transform
 			return -(Math.cos(Math.PI * p) - 1) / 2;
 		}`
     self.start_timer
-		self.on_start
+		
+		self.fire(:start)
+		
 		return self
 	end
-	
-	def on_start
-	  true
-	end
-	
+		
 	def complete
+	 self.fire(:completion)
 	 self.stop_timer
 	 self
 	end
 	
 	def cancel
+	 self.fire(:cancellation)
 	 self.stop_timer
  	 self
 	end
