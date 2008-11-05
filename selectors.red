@@ -1,4 +1,4 @@
-require 'javascripts/browser.red'
+require 'browser.red'
 
 `
 Array.fromCollection = function(collection){

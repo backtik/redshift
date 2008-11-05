@@ -1,6 +1,6 @@
-require 'javascripts/document.red'
-require 'javascripts/user_events.red'
-require 'javascripts/code_events.red'
+require 'document.red'
+require 'user_events.red'
+require 'code_events.red'
 
 class Element
   `window.$E=function(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`

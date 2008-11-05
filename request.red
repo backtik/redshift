@@ -1,5 +1,5 @@
-require 'javascripts/chainable.red'
-require 'javascripts/code_events.red'
+require 'chainable.red'
+require 'code_events.red'
 
 class Request
   include CodeEvents
