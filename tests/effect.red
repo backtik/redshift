@@ -1,12 +1,18 @@
 require '../redshift'
 
 Document.ready? do
-  e = Tween.new(Document['#black'])
-  e.start(:background_color, '#000', '#f00')
+  black = Document['#black']
+  e = Tween.new(black)
+  black.listen :click do |element,event|
+    e.start(:background_color, '#000', '#F00')
+  end
   
-  e = Tween.new(Document['#blue'])
-  e.start(:height, 0)
+  blue = Document['#blue']
+  f = Tween.new(blue)
+  blue.listen :click do |element,event|
+    f.start(:height, 0)
+  end
   
-  e = Tween.new(Document['#green'])
-  e.start(:background_color, '#001212','#fff')
+  g = Tween.new(Document['#green'])
+  g.start(:background_color, '#001212','#fff')
 end
