@@ -1,7 +1,12 @@
 require 'event.red'
 
 # The +UserEvents+ module mixes in methods for handling user-generated events
-# such as mouse gestures and keystrokes.
+# such as mouse gestures and keystrokes. +UserEvents+ is also responsible for
+# defining new event types based on native events.
+# 
+# Only +Document+, +Window+, and objects of class +Element+ respond to
+# +UserEvents+ methods. See module +CodeEvents+ for information on defining
+# and handling custom callback events.
 # 
 module UserEvents
   `c$UserEvents.mousecheck=function(element,event){
@@ -58,17 +63,72 @@ module UserEvents
     :mouse_wheel => {:base => gecko? ? 'DOMMouseScroll' : 'mousewheel' }
   }
   
-  # UserEvents.define(:shift_click, {:base => 'click', :condition => proc {|element, event| event.shift? }, :on_add => proc {|element, a_proc| }, :on_remove => proc {|element, a_proc| } })
-  
   # call-seq:
-  #   UserEvents.define(sym, hsh) -> hsh
+  #   UserEvents.define(sym, { :base => symbol [, ...] }) -> true
   # 
-  def self.define(sym, hash)
+  # Adds a new event type _sym_ to the UserEvents::DEFINED_EVENTS hash with
+  # the given options. The following options can be set:
+  # 
+  # *Required*
+  # <i>base</i>::        A symbol representing the native event type upon
+  #                      which _sym_ will be based.
+  # 
+  # *Optional*
+  # <i>condition</i>::   A +Proc+ object with an +event+ parameter which, if
+  #                      returning +false+ when evaluated for a given event,
+  #                      kills the event.
+  # <i>on_listen</i>::   A +Proc+ object with parameters
+  #                      <tt>|element, listener_proc|</tt> that is evaluated
+  #                      when _sym_ is passed to <tt>UserEvents#listen</tt>.
+  # <i>on_unlisten</i>:: A +Proc+ object with parameters
+  #                      <tt>|element, listener_proc|</tt> that is evaluated
+  #                      when _sym_ is passed to <tt>UserEvents#unlisten</tt>.
+  # 
+  # --------------------------------------------------------------------------
+  # 
+  #   condition = proc {|event| event.shift? }                                                                                    #=> #<Proc:0x393825>
+  #   on_listen = proc {|element,listener_proc| puts "%s responds to shift-click with %s" % [element.inspect, listener_proc] }    #=> #<Proc:0x3935da>
+  #   
+  #   UserEvents.define(:shift_click, :base => 'click', :condition => condition, :on_listen => on_listen)                         #=> true
+  #   
+  #   Document['#example'].listen :shift_click do |event|
+  #     puts "%s was shift-clicked" % event.target.inspect
+  #   end
+  # 
+  # produces:
+  # 
+  #   #<Element: DIV id="example"> responds to shift-click with #<Proc:0x3962ae>
+  # 
+  # shift-clicking element '#example' produces:
+  # 
+  #   #<Element: DIV id="example"> was shift-clicked
+  # 
+  def self.define(sym, hash = {})
     DEFINED_EVENTS[sym.to_sym] = hash
+    return true
+  end
+  
+  def self.included(base) # :nodoc:
+    raise(TypeError, 'only class Element and the singleton objects Window and Document may include UserEvents; use CodeEvents instead') unless base == `c$Element`
+  end
+  
+  def self.extended(base) # :nodoc:
+    raise(TypeError, 'only Document and Window may be extended with UserEvents; use CodeEvents instead') unless [`c$Document`, `c$Window`].include?(base)
   end
   
   # call-seq:
-  #   obj.listen(sym) { |element, event| block } -> obj
+  #   obj.listen(sym) { |event| block } -> obj
+  # 
+  # Adds a listener to _obj_ for a native or defined user event type _sym_,
+  # then returns _obj_.
+  # 
+  #   Document['#example'].listen :click do |event|
+  #     puts "%s was clicked" % event.target.inspect
+  #   end
+  # 
+  # clicking element '#example' produces:
+  # 
+  #   #<Element: DIV id="example"> was clicked
   # 
   def listen(sym, &block)
     type = sym.to_sym
@@ -83,19 +143,19 @@ module UserEvents
     if custom
       custom[:on_listen].call(self, block) if custom[:on_listen]
       if custom[:condition]
-        condition = lambda {|element, event| custom[:condition].call(element, event) ? block.call(element, event) : true }
+        condition = lambda {|event| custom[:condition].call(event) ? block.call(event) : true }
       end
       real_type = (custom[:base] || real_type).to_sym
     end
     
-    listener     = lambda { block.call(self, nil); }
+    listener     = lambda { block.call(nil); }
     native_event = NATIVE_EVENTS[real_type]
     
     if native_event
       if native_event == 2
         listener = lambda do |native_event|
           event = `$v(native_event)`
-          event.kill! if condition.call(self, event) == false
+          event.kill! if condition.call(event) == false
         end
       end
       self.add_listener(real_type, &listener)
@@ -114,6 +174,21 @@ module UserEvents
   
   # call-seq:
   #   obj.unlisten(sym, &proc) -> obj
+  # 
+  # Unsets the function _proc_ as a listener for event type _sym_, then
+  # returns _obj_. _proc_ must be the self-same object originally assigned as
+  # a listener.
+  # 
+  #   proc_1 = proc {|event| puts "%s was clicked" % event.target.inspect }
+  #   proc_2 = proc {|event| puts "%s has two listeners" % event.target.inspect }
+  #   elem = Document['#example']
+  #   
+  #   elem.listen(:click, proc_1).listen(:click, proc_2)    #=> #<Element: DIV id="example">
+  #   elem.unlisten(:click, proc_2)                         #=> #<Element: DIV id="example">
+  # 
+  # clicking element '#example' produces:
+  # 
+  #   #<Element: DIV id="example"> was clicked
   # 
   def unlisten(sym, &block)
     type   = sym.to_sym
