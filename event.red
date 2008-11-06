@@ -15,7 +15,7 @@
   }else{
     if(type.match(/(click|mouse|menu)/i)){
       doc=(!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
-      wheel=(type.match(/DOMMouseScroll|mousewheel/) ? (event.wheelDelta ? event.wheelDelta/120 : -(event.detail||0) / 3) : nil);
+      wheel=(type.match(/DOMMouseScroll|mousewheel/) ? (event.wheelDelta ? event.wheelDelta/40 : -(event.detail||0)) : nil);
       right_click=event.which==3||event.button==2;
       page={x:(event.pageX || event.clientX + doc.scrollLeft),y:(event.pageY || event.clientY + doc.scrollTop)};
       client={x:(event.pageX ? event.pageX - window.pageXOffset : event.clientX),y:(event.pageY ? event.pageY - window.pageYOffset : event.clientY)};
@@ -36,7 +36,12 @@
   return result;
 }`
 
-# A wrapper class for the browser's built-in event objects.
+# +Event+ objects represent user interactions with the browser. Attempting to
+# create an +Event+ object by calling <tt>Event.new</tt> results in
+# +NewEventError+.
+# 
+# +Event+ objects are handled by the methods in the +UserEvents+ module.
+# 
 class Event
   KEYS = {
     8  => :backspace,
@@ -51,11 +56,26 @@ class Event
     46 => :delete
   }
   
+  # Exception raised by calling <tt>Event.new</tt>.
+  # 
+  class NewEventError < Exception
+  end
+  
+  def initialize(raise_error) # :nodoc:
+    raise(NewEventError, 'Events can only be initialized by user interactions with the browser') unless `raise_error === null`
+  end
+  
   # call-seq:
   #   evnt.alt? -> true or false
   # 
   # Returns +true+ if the alt key was depressed during the event, +false+
   # otherwise.
+  # 
+  #   Document['#example'].listen(:click) {|element, event| puts "alt-clicked" if event.alt? }
+  # 
+  # alt-clicking element '#example' produces:
+  # 
+  #   alt-clicked
   # 
   def alt?
     `this.__alt__`
@@ -67,16 +87,29 @@ class Event
   # Returns a symbol representing _evnt_'s event type, or +:base+ type if
   # _evnt_ is a defined event.
   # 
+  #   UserEvents.define(:shift_click, :base => 'click', :condition => proc {|element,event| event.shift? })
+  #   Document['#example'].listen(:click)       {|element, event| puts event.base_type }
+  #   Document['#example'].listen(:shift_click) {|element, event| puts event.base_type }
+  # 
+  # clicking or shift-clicking on element '#example' produces:
+  # 
+  #   click
+  # 
   def base_type
     `$s(this.__type__)`
   end
   
   # call-seq:
-  #   evnt.client -> hash
+  #   evnt.client -> {:x => integer, :y => integer}
   # 
-  # Returns a hash keyed by <tt>:x<tt> and <tt>:y</tt>, which represent
-  # _evnt_'s distance in pixels from the left and top edges of the browser
-  # viewport.
+  # Returns a hash representing _evnt_'s distance in pixels from the left
+  # (_x_) and top (_y_) edges of the browser viewport.
+  # 
+  #   Document['#example'].listen(:click) {|element,event| puts event.client.inspect }
+  # 
+  # clicking element '#example' at position (35,45) produces:
+  # 
+  #   {:x => 35, :y => 45}
   # 
   def client
     {:x => `this.__client__.x`, :y => `this.__client__.y`}
@@ -88,6 +121,16 @@ class Event
   # If _evnt_ involved a keystroke, returns the ASCII code of the key pressed,
   # otherwise returns +nil+.
   # 
+  #   Document['#example'].listen(:keypress) {|element, event| puts event.code }
+  # 
+  # typing "test\n" into textarea '#example produces:
+  # 
+  #   116
+  #   101
+  #   115
+  #   116
+  #   13
+  # 
   def code
     `this.__code__ || nil`
   end
@@ -98,6 +141,12 @@ class Event
   # Returns +true+ if the control key was depressed during the event, +false+
   # otherwise.
   # 
+  #   Document['#example'].listen(:click) {|element, event| puts "ctrl-clicked" if event.ctrl? }
+  # 
+  # ctrl-clicking element '#example' produces:
+  # 
+  #   ctrl-clicked
+  # 
   def ctrl?
     `this.__ctrl__`
   end
@@ -107,6 +156,16 @@ class Event
   # 
   # If _evnt_ involved a keystroke, returns a symbol representing the key
   # pressed, otherwise returns +nil+.
+  # 
+  #   Document['#example'].listen(:keypress) {|element, event| puts event.key.inspect }
+  # 
+  # typing "test\n" into textarea '#example produces:
+  # 
+  #   :t
+  #   :e
+  #   :s
+  #   :t
+  #   :enter
   # 
   def key
     `this.__key__ || nil`
@@ -128,16 +187,29 @@ class Event
   # Returns +true+ if the meta key was depressed during the event, +false+
   # otherwise.
   # 
+  #   Document['#example'].listen(:click) {|element, event| puts "meta-clicked" if event.meta? }
+  # 
+  # meta-clicking element '#example' produces:
+  # 
+  #   meta-clicked
+  # 
   def meta?
     `this.__meta__`
   end
   
   # call-seq:
-  #   evnt.page -> hash
+  #   evnt.page -> {:x => numeric, :y => numeric}
   # 
-  # Returns a hash keyed by <tt>:x<tt> and <tt>:y</tt>, which represent
-  # _evnt_'s distance in pixels from the left and top edges of the current
-  # page, including pixels that may have scrolled out of view.
+  # Returns a hash representing _evnt_'s distance in pixels from the left
+  # (_x_) and top (_y_) edges of the current page, including pixels that may
+  # have scrolled out of view.
+  # 
+  #   Document['#example'].listen(:click) {|element,event| puts event.page.inspect }
+  # 
+  # clicking element '#example' at position (35,45) after scrolling down 100
+  # pixels produces:
+  # 
+  #   {:x => 35, :y => 145}
   # 
   def page
     {:x => `this.__page__.x`, :y => `this.__page__.y`}
@@ -160,6 +232,12 @@ class Event
   # 
   # Returns +true+ if the event was a right click.
   # 
+  #   elem = Document['#example'].listen(:click) {|element, event| puts "right-clicked" if event.right_click? }
+  # 
+  # right-clicking element '#example' produces:
+  # 
+  #   right-clicked
+  # 
   def right_click?
     `this.__right_click__`
   end
@@ -169,6 +247,12 @@ class Event
   # 
   # Returns +true+ if the shift key was depressed during the event, +false+
   # otherwise.
+  # 
+  #   Document['#example'].listen(:click) {|element, event| puts "shift-clicked" if event.shift? }
+  # 
+  # shift-clicking element '#example' produces:
+  # 
+  #   shift-clicked
   # 
   def shift?
     `this.__shift__`
@@ -191,6 +275,12 @@ class Event
   # Returns the DOM element targeted by _evnt_, or +nil+ if no element was
   # targeted.
   # 
+  #   Document['#example'].listen(:click) {|element, event| puts event.target.inspect }
+  # 
+  # clicking element '#example' produces:
+  # 
+  #   #<Element: DIV id="example">
+  # 
   def target
     `$E(this.__target__)`
   end
@@ -198,10 +288,17 @@ class Event
   # call-seq:
   #   evnt.wheel -> numeric or nil
   # 
-  # Returns a floating point number representing the number of wheel
-  # "revolutions" executed during _evnt_. Positive values indicate upward
+  # Returns a floating point number representing the velocity of the wheel
+  # movement executed during _evnt_. Positive values indicate upward
   # scrolling, negative values indicate downward scrolling. Returns +nil+ if
-  #∑ _evnt_ did not involve the mouse wheel.
+  # _evnt_ did not involve the mouse wheel.
+  # 
+  #   Document['#example'].listen(:mouse_wheel) {|element, event| puts event.wheel }
+  # 
+  # wheeling the mousewheel downward by a single "click" over element
+  # '#example' produces:
+  # 
+  #   -1
   # 
   def wheel
     `this.__wheel__`
