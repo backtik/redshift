@@ -27,16 +27,17 @@ class Tween < Transform
     return {:from => parsed_from_to[0], :to => parsed_from_to[1]}
   end
   
-  # parses a value by its Parse, returning a hash of the parsed value and parser
+  # parses a value by its Parser, returning a hash of the parsed value and parser
   def parse(value)
     value = value.to_s.split(' ')
     returns = []
     value.each do |val|
-      ::CSS::Parsers.each do |parser|
+      ::Transform::Parsers.each do |parser|
        parsed = parser.parse(val)
+       `console.log(parsed)`
        found = {:value => parsed, :parser => parser}  if (parsed)
       end
-      found = found || {:value => val, :parser => ::CSS::Parser::String}
+      found = found || {:value => val, :parser => ::Transform::Parser::String}
       returns << found
     end
     return returns
@@ -53,10 +54,6 @@ class Tween < Transform
   
   def serve(value, unit)
     value[:parser].serve(value[:value], unit)
-    #   value.each(function(bit){
-    #   returned = returned.concat(bit.parser.serve(bit.value, unit));
-    # });
-    # return returned;
   end
   
   def compute(from,to,delta)
