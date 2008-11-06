@@ -1,4 +1,4 @@
-require 'selectors.red'
+require 'selectors'
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.

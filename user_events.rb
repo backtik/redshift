@@ -1,4 +1,4 @@
-require 'event.red'
+require 'event'
 
 # The +UserEvents+ module mixes in methods for handling user-generated events
 # such as mouse gestures and keystrokes. +UserEvents+ is also responsible for
