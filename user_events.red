@@ -74,9 +74,9 @@ module UserEvents
   #                      which _sym_ will be based.
   # 
   # *Optional*
-  # <i>condition</i>::   A +Proc+ object with an +event+ parameter which, if
-  #                      returning +false+ when evaluated for a given event,
-  #                      kills the event.
+  # <i>condition</i>::   A +Proc+ object with parameters
+  #                      <tt>|element, event|</tt> which, if returning +false+
+  #                      when evaluated for a given event, kills the event.
   # <i>on_listen</i>::   A +Proc+ object with parameters
   #                      <tt>|element, listener_proc|</tt> that is evaluated
   #                      when _sym_ is passed to <tt>UserEvents#listen</tt>.
@@ -86,13 +86,13 @@ module UserEvents
   # 
   # --------------------------------------------------------------------------
   # 
-  #   condition = proc {|event| event.shift? }                                                                                    #=> #<Proc:0x393825>
+  #   condition = proc {|element,event| event.shift? }                                                                            #=> #<Proc:0x393825>
   #   on_listen = proc {|element,listener_proc| puts "%s responds to shift-click with %s" % [element.inspect, listener_proc] }    #=> #<Proc:0x3935da>
   #   
   #   UserEvents.define(:shift_click, :base => 'click', :condition => condition, :on_listen => on_listen)                         #=> true
   #   
-  #   Document['#example'].listen :shift_click do |event|
-  #     puts "%s was shift-clicked" % event.target.inspect
+  #   Document['#example'].listen :shift_click do |element,event|
+  #     puts "%s was shift-clicked" % element.inspect
   #   end
   # 
   # produces:
@@ -117,13 +117,13 @@ module UserEvents
   end
   
   # call-seq:
-  #   obj.listen(sym) { |event| block } -> obj
+  #   obj.listen(sym) { |element,event| block } -> obj
   # 
   # Adds a listener to _obj_ for a native or defined user event type _sym_,
   # then returns _obj_.
   # 
-  #   Document['#example'].listen :click do |event|
-  #     puts "%s was clicked" % event.target.inspect
+  #   Document['#example'].listen :click do |element, event|
+  #     puts "%s was clicked" % element.inspect
   #   end
   # 
   # clicking element '#example' produces:
@@ -143,19 +143,19 @@ module UserEvents
     if custom
       custom[:on_listen].call(self, block) if custom[:on_listen]
       if custom[:condition]
-        condition = lambda {|event| custom[:condition].call(event) ? block.call(event) : true }
+        condition = lambda {|element,event| custom[:condition].call(element,event) ? block.call(element,event) : true }
       end
       real_type = (custom[:base] || real_type).to_sym
     end
     
-    listener     = lambda { block.call(nil); }
+    listener     = lambda { block.call(self,nil); }
     native_event = NATIVE_EVENTS[real_type]
     
     if native_event
       if native_event == 2
         listener = lambda do |native_event|
           event = `$v(native_event)`
-          event.kill! if condition.call(event) == false
+          event.kill! if condition.call(self,event) == false
         end
       end
       self.add_listener(real_type, &listener)
@@ -179,8 +179,8 @@ module UserEvents
   # returns _obj_. _proc_ must be the self-same object originally assigned as
   # a listener.
   # 
-  #   proc_1 = proc {|event| puts "%s was clicked" % event.target.inspect }
-  #   proc_2 = proc {|event| puts "%s has two listeners" % event.target.inspect }
+  #   proc_1 = proc {|element,event| puts "%s was clicked" % element.inspect }
+  #   proc_2 = proc {|element,event| puts "%s has two listeners" % element.inspect }
   #   elem = Document['#example']
   #   
   #   elem.listen(:click, proc_1).listen(:click, proc_2)    #=> #<Element: DIV id="example">

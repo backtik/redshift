@@ -273,13 +273,19 @@ class Event
   #   evnt.target -> element
   # 
   # Returns the DOM element targeted by _evnt_, or +nil+ if no element was
-  # targeted.
+  # targeted. The target of an event may be a different element than _elem_.
   # 
-  #   Document['#example'].listen(:click) {|element, event| puts event.target.inspect }
+  #   elem = Document['#outer']
+  #   
+  #   elem.listen :click do |element, event|
+  #     puts "%s was clicked" % event.target.inspect
+  #     puts "%s was indirectly clicked" % element.inspect
+  #   end
   # 
-  # clicking element '#example' produces:
+  # clicking element '#inner' inside '#outer' produces:
   # 
-  #   #<Element: DIV id="example">
+  #   #<Element: DIV id="inner"> was clicked
+  #   #<Element: DIV id="outer"> was indirectly clicked
   # 
   def target
     `$E(this.__target__)`
