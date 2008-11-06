@@ -3,23 +3,17 @@ require 'transform'
 module CSS
   module Parser
     class Color
-      def self.hex_to_rgb(color)
-        `var hex = color.match(/^#?(\\w{1,2})(\\w{1,2})(\\w{1,2})$/)`
-    		`(hex) ? this.m$hex_array_to_rgb(hex.slice(1)) : nil`
-      end
-      
-      def self.hex_array_to_rgb(array)
-        `
-        if (array.length != 3) return nil;
-    		var rgb = []
-    		for(i = 0, l = array.length; i < array.length; i++){
-    		  value = array[i]
+      def self.hex_to_array(color)
+        `var hex = color.match(/^#?(\\w{1,2})(\\w{1,2})(\\w{1,2})$/).slice(1)`
+        `var rgb = []
+    		for(i = 0, l = hex.length; i < hex.length; i++){
+    		  value = hex[i]
     		  if (value.length == 1) value += value;
     		  rgb[i] = parseInt(value,16);
     		}`
     		`rgb`
       end
-
+      
       def self.compute(from, to, delta)
   			rgb = []
   			from.each do |i|
@@ -30,7 +24,7 @@ module CSS
       
       def self.parse(value)
         `value = value.__value__ || String(value)`
-        `if (value.match(/^#[0-9a-f]{3,6}$/i)) return #{CSS::Parser::Color.hex_to_rgb(value)}`
+        `if (value.match(/^#[0-9a-f]{3,6}$/i)) return #{CSS::Parser::Color.hex_to_array(value)}`
   			`((value = value.match(/(\\d+),\\s*(\\d+),\\s*(\\d+)/))) ? #{[value[1], value[2], value[3]]} : false`
       end
       
