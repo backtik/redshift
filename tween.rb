@@ -34,7 +34,6 @@ class Tween < Transform
     value.each do |val|
       ::Transform::Parsers.each do |parser|
        parsed = parser.parse(val)
-       `console.log(parsed)`
        found = {:value => parsed, :parser => parser}  if (parsed)
       end
       found = found || {:value => val, :parser => ::Transform::Parser::String}

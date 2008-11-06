@@ -8,5 +8,5 @@ Document.ready? do
   e.start(:height, 0)
   
   e = Tween.new(Document['#green'])
-  e.start(:background_color, '#001212','#fff')
+  e.start(:background_color, '#080','#fff')
 end

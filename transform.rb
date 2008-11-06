@@ -14,8 +14,19 @@ class Transform
 	             :normal => 500,
 	             :long => 1000
 	            }
+	            
+	ALGORITHMS = {'linear' => `function(p){return -(Math.cos(Math.PI * p) - 1) / 2;}`} 
 	
-	
+  def self.add_transition(name, func)
+    Transform::ALGORITHMS[name] = func
+    Transform::ALGORITHMS["#{name}:in"]     = `function(pos){return func(pos, params);}`
+    Transform::ALGORITHMS["#{name}:out"]    = `function(pos){return 1 - func(1 - pos, params);}`
+    Transform::ALGORITHMS["#{name}:in:out"] = `function(pos){return (pos <= 0.5) ? func(2 * pos, params) / 2 : (2 - func(2 * (1 - pos), params)) / 2;}`
+  end
+  
+  def transition(transition, *args)
+    `#{ALGORITHMS[transition]}(args)`
+  end
 	# at the end of an interval based transformation clears the Timeout and Intervals
 	# in the browser and returns nil.
 	`$clear = function(timer){clearTimeout(timer);clearInterval(timer);return nil;};`
@@ -39,6 +50,7 @@ class Transform
 	`Function.prototype.periodical = function(periodical, bind, args){
 		return this.create({bind: bind, arguments: args, periodical: periodical})();
 	};`
+	
 	
 	def self.compute(from, to, delta)
   	`(to - from) * delta + from`
@@ -66,6 +78,10 @@ class Transform
 	  return nil
 	end
 	
+	def set_transition
+	  `this.__transition__ = #{Transform::ALGORITHMS[(@options[:transition] || 'sine:in:out')]}`
+	end
+	
 	def set(now)
 	  return now
 	end
@@ -89,9 +105,11 @@ class Transform
 		`this.__from__ = from`
 		`this.__to__   = to`
 		`this.__time__ = 0`
-		`this.__transition__ = function(p){
-			return -(Math.cos(Math.PI * p) - 1) / 2;
-		}`
+    # `this.m$set_transition`
+    `this.__transition__ = function(p){
+      return -(Math.cos(Math.PI * p) - 1) / 2;
+    }`
+	  
     self.start_timer
 		self.fire(:start)
 		return self
@@ -134,8 +152,25 @@ class Transform
 	end
   
 
-  # Module +Parser+ is responsible for turning a value into a computable value (integer or array of integers),
-  # computing this value to the correct 
+  # Built-in algorithms 
+  `x = {'pow'  : function(p, x){return Math.pow(p, x[0] || 6);},
+   'expo' : function(p){return Math.pow(2, 8 * (p - 1));},
+   'circ' : function(p){return 1 - Math.sin(Math.acos(p));},
+   'sine' : function(p){return 1 - Math.sin((1 - p) * Math.PI / 2);},
+   'back' : function(p, x){x = x[0] || 1.618;return Math.pow(p, 2) * ((x + 1) * p - x);},
+   'bounce' : function(p){ var value; for (var a = 0, b = 1; 1; a += b, b /= 2){ if (p >= (7 - 4 * a) / 11){value = b * b - Math.pow((11 - 6 * a - 11 * p) / 4, 2);break;}}return value;},
+   'elastic' : function(p, x){return Math.pow(2, 10 * --p) * Math.cos(20 * p * Math.PI * (x[0] || 1) / 3);}
+  };
+  for (prop in x) {
+    c$Transform.m$add_transition($q(prop), x.prop) 
+  };
+  x = ['quad', 'cubic', 'quart', 'quint'];
+    for (var i = 0, l = x.length; i < l; i ++) {
+    c$Transform.m$add_transition($q(x[i]), function(p){return Math.pow(p, [i + 2]);}) 
+  };`
+    
+  # Module +Parser+ is responsible for turning a css value into a computable value (integer or array of integers),
+  # computing this value to the correct new value in a computation and serving the final value in the correct format
   module Parser
     
     # Class Color is responsible for handling css color values in either hex (#fff) or rgb triplet (rgb(0,0,0))
@@ -237,8 +272,8 @@ class Transform
       end
     end
     
-    # Class String is responsible for handling css string values which cannot be parsed. Simple transforms
-    # from a start value to end value with no transform.
+    # Class String is responsible for handling css string values which cannot be parsed. String transforms
+    # from a start value to end value with no transform.  This class exists mostly for polymorphic reasons.
     class String
       def self.parse(value)
         false
