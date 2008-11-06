@@ -206,7 +206,7 @@ class Element
     return self
   end
   
-  def insert_after(element) # :nodoc
+  def insert_after(element) # :nodoc:
     `if (!element.parentNode) return`
     `next = #{self}.__native__.nextSibling`
     `(next) ? #{self}.__native__.parentNode.insertBefore(#{element}.__native__, next) : #{self}__native__.parentNode.appendChild(#{element}.__native__)`
@@ -218,7 +218,7 @@ class Element
     return true
   end
   
-  def insert_bottom(element) # :nodoc
+  def insert_bottom(element) # :nodoc:
     `#{self}.__native__.appendChild(#{element}.__native__)`
     return true
   end
@@ -310,7 +310,7 @@ class Element
   #   </div>
   #   
   #   elem = Document['#b_element']   #=> #<Element: DIV id="b_element">
-  #   elem.previous_elements          #=> [#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
+  #   elem.next_elements          #=> [#<Element: DIV id="c_element">, #<Element: DIV id="d_element">]
   # 
   def next_elements(match_selector = nil)
     Document.walk(self, 'nextSibling', nil, match_selector, true)
@@ -338,7 +338,7 @@ class Element
   end
   
   # call-seq:
-  #   elem.parents -> array
+  #   elem.parents -> [element, ...]
   # 
   # Returns the array of _elem_'s ancestors on the DOM tree.
   # 
