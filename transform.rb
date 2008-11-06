@@ -1,5 +1,7 @@
 require 'code_events'
 
+# Class +Transform+ provides the ability for transition from a starting number value to a final number value
+# by stepping through a series of sequential transformations using a transition algorithm. 
 class Transform
   include CodeEvents
   OPTIONS = {:fps => 50,
@@ -8,16 +10,17 @@ class Transform
 	           :link => 'ignore'
 	          }
 	
-	Durations = {:short => 250, 
+	DURATIONS = {:short => 250, 
 	             :normal => 500,
 	             :long => 1000
 	            }
 	
-		
+	
+	# at the end of an interval based transformation clears the Timeout and Intervals
+	# in the browser and returns nil.
 	`$clear = function(timer){clearTimeout(timer);clearInterval(timer);return nil;};`
 	
-	# need periodical fot setInterval on Effect#step. Find out what
-	# setInterval is when there is net again.
+	# need periodical for setInterval on Effect#step. 
 	`Function.prototype.create = function(options){
 		var self = this;
 		options = options || {};
@@ -44,7 +47,7 @@ class Transform
 	def initialize(options={})
 	  @subject = @subject || self
 		@options = OPTIONS.merge(options)
-		@options[:duration] = Transform::Durations[@options[:duration]] || @options[:duration].to_i
+		@options[:duration] = Transform::DURATIONS[@options[:duration]] || @options[:duration].to_i
 		wait = @options[:wait]
 		@options[:link] = 'cancel' if wait === false
 	end
@@ -236,6 +239,7 @@ class Transform
     
     # Class String is responsible for handling css string values which cannot be parsed. Simple transforms
     # from a start value to end value with no transform.
+    class String
       def self.parse(value)
         false
       end
