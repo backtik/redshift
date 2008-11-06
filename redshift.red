@@ -1,4 +1,3 @@
-require 'accessors.red'
 require 'chainable.red'
 require 'cookie.red'
 require 'request.red'
