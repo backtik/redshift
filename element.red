@@ -1,39 +1,52 @@
-require 'document.red'
-require 'user_events.red'
-require 'code_events.red'
+require 'document'
+require 'user_events'
+require 'code_events'
+require 'accessors'
 
+# +Element+ objects represent DOM elements from the browser.
+# 
 class Element
   `window.$E=function(element){if(element==null){return nil;};var E=c$Element.m$new(null);E.__native__=element;return E;}`
   
   include UserEvents
   include CodeEvents
   
-  def self.destroy(elem) # :nodoc
+  def self.destroy(elem) # :nodoc:
     `var el = elem.__native__ || elem`
-    `c$Element.m$empty(el);`
-    `c$Element.m$remove(el);`
+    `c$Element.m$empty(el)`
+    `c$Element.m$remove(el)`
     return true
   end
   
-  def self.empty(elem) # :nodoc
-    `var el = elem.__native__ || elem`
-    `for (var i = 0, c = el.childNodes, l = c.length; i < l; i++){
-      c$Element.m$destroy(c[i]);
-    };`
+  def self.empty(elem) # :nodoc:
+    `for (var c=(elem.__native__||elem).childNodes,i=c.length;i>0;){c$Element.m$destroy(c[--i]);};`
     return true
   end
   
-  def self.remove(elem) # :nodoc
+  def self.remove(elem) # :nodoc:
     `var el = elem.__native__ || elem`
     `(el.parentNode) ? el.parentNode.removeChild(el) : this`
   end
   
   # call-seq:
-  #   Element.new(tag, attributes = {}) -> element
+  #   Element.new(sym, attributes = {}) -> element
+  # 
+  # Returns a new +Element+ with the tag _sym_ and the given attributes.
+  # 
+  #   Element.new(:div, :id => 'my_div', :class => 'inserted')    #=> #<Element: DIV id="my_div" class="inserted">
   # 
   def initialize(tag, attributes = {})
-    `if(!tag){ return nil; }`
+    `if(!tag){return nil;}`
     `this.__native__ = document.createElement(tag.__value__)`
+    self.set_properties(attributes)
+  end
+  
+  def ==(elem) # :nodoc:
+    `this.__native__ === elem.__native__`
+  end
+  
+  def ===(elem) # :nodoc:
+    `this.__native__ === elem.__native__`
   end
   
   # call-seq:
@@ -71,26 +84,37 @@ class Element
     Document.walk(self, 'nextSibling', 'firstChild', match_selector, true)
   end
   
-  # call-seq:
-  #   elem.destroy! -> true or false
+  # TODO: re: the native object and event listeners; does it really do this stuff?
   # Removes the element from the page and the DOM, destroys the element object, the native object,
   # any attached event listeners, and frees their memory location. Returns +true+ if successful, +false+ otherwise.
+  
+  # call-seq:
+  #   elem.destroy! -> true
+  # 
+  # Removes _elem_ and all its children from the page and from the DOM, then
+  # returns +true+.
+  # 
   def destroy!
     Element.destroy(self)
     return true
   end
   
-  def document
+  def document # :nodoc:
     `this.__native__.ownerDocument`
   end
   
   # call-seq:
   #   elem.empty! -> true or false
-  # Removes every child element from elem
+  # 
+  # Removes _elem_'s inner text and child elements from the page.
   # 
   def empty!
     Element.empty(self)
     return self
+  end
+  
+  def eql?(elem) # :nodoc:
+    `this.__native__ === elem.__native__`
   end
   
   # call-seq:
@@ -373,12 +397,21 @@ class Element
   end
   
   # call-seq:
-  #   elem.empty! -> elem
+  #   elem.remove! -> elem
   # 
-  # Removes the element and all of its children elements from the page
+  # Removes _elem_ and all of its child elements from the page, then returns
+  # _elem_.
   # 
   def remove!
     Element.remove(self)
     return self
+  end
+  
+  # call-seq:
+  #   elem.to_s -> string
+  # 
+  # FIX: Incomplete
+  # 
+  def to_s
   end
 end
