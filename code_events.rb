@@ -71,7 +71,11 @@ module CodeEvents
   def fire(sym, delay, *args)
     name = sym.to_sym
     return self unless @code_events && events_group = @code_events[name]
-    events_group.each {|proc| proc.process_event(self, delay, args) }
+    events_group.each do |proc|
+      `var f=function(){return proc.__block__.apply(null,args);}`
+      `if(delay){return setTimeout(f,delay);}`
+      `f()`
+    end
     return self
   end
   
@@ -191,14 +195,6 @@ module CodeEvents
       @code_events[name] << block
       `block.__block__.__unignorable__=typeof(unignorable)=='function'?false:unignorable`
       return self
-    end
-  end
-  
-  class ::Proc # :nodoc:
-    def process_event(context, delay, args_array) # :nodoc:
-      `var f=this.__block__.__unbound__,event_function=function(){return f.apply(context,args_array);}`
-      `if(delay){return setTimeout(event_function,delay);}`
-      `event_function()`
     end
   end
 end
