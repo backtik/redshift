@@ -1,3 +1,5 @@
+require 'document'
+
 # Class +Cookie+ governs the writing and accessing of cookies in the browser.
 # 
 # A cookie is a key-value pair stored by your browser as text data. If you
@@ -91,7 +93,7 @@ class Cookie
     end
     `str += '; secure'` if cookie.secure
     
-    `#{cookie.document.native}.cookie = str`
+    `#{cookie.document}.__native__.cookie = str`
     return cookie
   end
   
