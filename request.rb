@@ -25,6 +25,15 @@ class Request
     }
   }
   
+  class Response
+    attr :text, :xml
+    
+    def initialize(text,xml)
+      @text = text
+      @xml  = xml
+    end
+  end
+  
   # call-seq:
   #   Request.new(options = {}) -> request
   # 
@@ -128,15 +137,6 @@ class Request
   end
   
   # call-seq:
-  #   req.failure! -> req
-  # 
-  # Fires _req_'s "response" and "failure" callbacks, then returns _req_.
-  # 
-  def failure!
-    self.fire(:response).fire(:failure, @xhr);
-  end
-  
-  # call-seq:
   #   req.headers -> hash
   # 
   # Returns _req_'s HTTP headers as a +Hash+.
@@ -161,11 +161,11 @@ class Request
       `try{#{@status}=xhr.status}catch(e){;}`
       
       if self.success?
-        @response = {:text => `$q(xhr.responseText)`, :xml => `xhr.responseXML`}
-        self.success!(self.process_scripts(@response[:text]), @response[:xml])
+        @response = Response.new(self.process_scripts(`$q(xhr.responseText)`), `xhr.responseXML`)
+        self.fire(:response, 0, @response).fire(:success, 0, @response).call_chain
       else
-        @response = {:text => nil, :xml => nil};
-        self.failure!
+        @response = Response.new(nil,nil)
+        self.fire(:response, 0, @response).fire(:failure, 0, @xhr)
       end
       
       `xhr.onreadystatechange=function(){;}`
@@ -188,15 +188,6 @@ class Request
   def process_scripts(str)
     return Document.execute_js(str) if @options[:eval_response] || `/(ecma|java)script/.test(this.__xhr__.getResponseHeader('Content-Type'))`
     return str.strip_scripts(@options[:eval_scripts])
-  end
-  
-  # call-seq:
-  #   req.success!(text, xml) -> req
-  # 
-  # Fires _req_'s "response" and "success" callbacks, then returns _req_.
-  # 
-  def success!(text, xml)
-    self.fire(:response, [text, xml]).fire(:success, [text, xml]).call_chain
   end
   
   # call-seq:
