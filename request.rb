@@ -221,7 +221,7 @@ class Request
     # 
     def strip_scripts(evaluate = false)
       scripts = ''
-      result = `this.__value__.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi,function(){scripts.__value__+=arguments[1]+'\\n';return '';})`
+      result = `$q(this.__value__.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi,function(){scripts.__value__+=arguments[1]+'\\n';return '';}))`
       Document.execute_js(scripts) if evaluate
       return result
     end
