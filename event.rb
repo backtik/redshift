@@ -222,8 +222,8 @@ class Event
   # _evnt_.
   # 
   def prevent_default
-    native = `this.__native__`
-    `native.preventDefault?native.preventDefault():native.returnValue=false`
+    `var Native = this.__native__`
+    `Native.preventDefault?Native.preventDefault():Native.returnValue=false`
     return self
   end
   
@@ -264,8 +264,8 @@ class Event
   # Instructs the event to stop propagating, then returns _evnt_.
   # 
   def stop_propagation
-    native = `this.__native__`
-    `native.stopPropagation?native.stopPropagation():native.cancelBubble=true`
+    `var Native = this.__native__`
+    `Native.stopPropagation?Native.stopPropagation():Native.cancelBubble=true`
     return self
   end
   

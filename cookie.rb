@@ -72,7 +72,7 @@ class Cookie
   #   Cookie.new(:user_jds, '8557acb0') unless Cookie.read(:user_jds)
   # 
   def self.read(key)
-    value = `#{OPTIONS[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}.__value__ + '=([^;]*)')`
+    value = `#{OPTIONS[:document]}.__native__.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}.__value__ + '=([^;]*)')`
     return value ? `$q(decodeURIComponent(value[1]))` : nil
   end
   

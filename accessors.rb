@@ -1,7 +1,7 @@
 require 'element'
 
 class Element
-  `c$Element.__keyed_attributes__={class:'className',for:'htmlFor'}`
+  `c$Element.__keyed_attributes__={'class':'className','for':'htmlFor'}`
   `c$Element.__boolean_attributes__={checked:'checked',declare:'declare',defer:'defer',disabled:'disabled',ismap:'ismap',multiple:'multiple',noresize:'noresize',noshade:'noshade',readonly:'readonly',selected:'selected'}`
   
   # call-seq:

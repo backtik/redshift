@@ -1,4 +1,6 @@
 require 'selectors'
+require 'user_events'
+require 'window'
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
@@ -8,7 +10,6 @@ require 'selectors'
 # powerful <tt>Document.[]</tt> method.
 # 
 module Document
-  
   `document.head=document.getElementsByTagName('head')[0]`
   `document.html=document.getElementsByTagName('html')[0]`
   `document.window=(document.defaultView||document.parentWindow)`

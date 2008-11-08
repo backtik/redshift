@@ -174,9 +174,9 @@ module Situated
     end
     
     def offsets
-      `var native = this.__native__`
+      `var Native = this.__native__`
       if trident?
-        `var bound = native.getBoundingClientRect()`
+        `var bound = Native.getBoundingClientRect()`
         `var html  = this.m$document.__native__.documentElement`
         return {
           :x => `bound.left + html.scrollLeft - html.clientLeft`,
@@ -188,7 +188,7 @@ module Situated
       return {:x => `position.x`, :y => `position.y`} if self.is_body?
       `
       
-      element = native
+      element = Native
       while (element && !c$Situated.c$Utilities.m$is_body_bool(element)){
         position.x += element.offsetLeft;
         position.y += element.offsetTop;
@@ -211,17 +211,17 @@ module Situated
         element = element.offsetParent;
       }
       
-      if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(native)){
-        position.x -= c$Situated.c$Utilities.m$left_border(native);
-        position.y -= c$Situated.c$Utilities.m$top_border(native);
+      if (#{gecko?} && !c$Situated.c$Utilities.m$border_box(Native)){
+        position.x -= c$Situated.c$Utilities.m$left_border(Native);
+        position.y -= c$Situated.c$Utilities.m$top_border(Native);
       }
       `
       return {:x => `position.x`, :y => `position.y`}
     end
         
     def position_at(x,y)
-      native = `this.__native__`
-      h = {:left => x - Situated::Utilities.styleNumber(native, `'margin-left'`), :top => y - Situated::Utilities.styleNumber(native, `'margin-top'`), :position => 'absolute'}
+      `var Native = this.__native__`
+      h = {:left => x - Situated::Utilities.styleNumber(`Native`, `'margin-left'`), :top => y - Situated::Utilities.styleNumber(`Native`, `'margin-top'`), :position => 'absolute'}
       self.set_styles(h)
     end
     
