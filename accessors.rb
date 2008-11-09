@@ -161,7 +161,7 @@ class Element
   # call-seq:
   #   elem.id -> string
   # 
-  # Returns the HTML id of _elem_.
+  # Returns a string representation of the HTML id of _elem_.
   # 
   #   
   # 
