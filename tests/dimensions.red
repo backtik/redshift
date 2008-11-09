@@ -14,17 +14,17 @@ Document.ready? do
    puts green.top
    puts green.left
     
-   puts green.size
-   puts green.scroll
-   puts container.scrolls
-   puts green.scroll_size
+   puts green.size.inspect
+   puts green.scroll.inspect
+   puts container.scrolls.inspect
+   puts green.scroll_size.inspect
    
-   container.scroll_to(100,40)
+   puts container.scroll_to(100,40).inspect
    puts green.offset_parent.inspect
-   puts green.offsets
-   green.position_at(40,200)
-   puts green.styles
-   puts green.position
+   puts green.offsets.inspect
+   puts green.position_at(40,200).inspect
+   puts green.styles.inspect
+   puts green.position.inspect
    
    puts Document.height
    puts Document.width
@@ -35,10 +35,10 @@ Document.ready? do
    puts Document.top
    puts Document.left
    
-   puts Document.size
-   puts Document.scroll
-   puts Document.scroll_size
-   puts Document.position
+   puts Document.size.inspect
+   puts Document.scroll.inspect
+   puts Document.scroll_size.inspect
+   puts Document.position.inspect
    puts Document.coordinates.inspect
      
    
@@ -51,9 +51,9 @@ Document.ready? do
    puts Window.top
    puts Window.left
    
-   puts Window.size
-   puts Window.scroll
-   puts Window.scroll_size
-   puts Window.position
+   puts Window.size.inspect
+   puts Window.scroll.inspect
+   puts Window.scroll_size.inspect
+   puts Window.position.inspect
    puts Window.coordinates.inspect
 end
