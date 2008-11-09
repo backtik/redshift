@@ -54,6 +54,7 @@ module Document
   # 
   def self.[](*args)
     if args.length == 1
+      return nil unless args[0]
       return self.find_by_string(args[0])
     else
       args.map do |str|
