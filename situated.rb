@@ -4,9 +4,9 @@ require 'window'
 module Situated # :nodoc:
   `window.styleString=function(el,prop){if(el.currentStyle){return el.currentStyle[prop.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();})];};var computed=document.defaultView.getComputedStyle(el,null);return(computed?computed.getPropertyValue([prop.replace(/[A-Z]/g, function(match){return('-'+match.charAt(0).toLowerCase());})]):null);}`
   
-  # Module +PositionAndSize+ mixes in convenience methods for finding
-  # height/width and vertical/horizontal position, with and without scrolling
-  # factored in.
+  # Module <tt>Situated::PositionAndSize</tt> mixes in convenience methods for
+  # finding height/width and vertical/horizontal position, with and without
+  # scrolling factored in.
   # 
   module PositionAndSize
     # call-seq:
@@ -142,10 +142,11 @@ module Situated # :nodoc:
     end
   end
   
-  # Module +Situated::Element+ provides the methods used by +Element+ objects
-  # when calling the methods in +PositionAndSize+.
+  # Module <tt>Situated::Element</tt> provides the methods used by +Element+
+  # objects when calling the methods in +PositionAndSize+, as well as the
+  # element manipulation methods <tt>scroll_to</tt> and <tt>position_at</tt>.
   # 
-  module Element
+  module Situated::Element
     include PositionAndSize
     
     # call-seq:
@@ -251,7 +252,7 @@ module Situated # :nodoc:
     #   Document['#inner'].position_at(25,35).position        #=> {:x => 125, :y => 135}
     # 
     def position_at(x,y)
-      u = Situate::Utilities
+      u = Situated::Utilities
       native_element = `this.__native__`
       left = x - u.styleNumber(native_element, `'margin-left'`)
       top  = y - u.styleNumber(native_element, `'margin-top'`)
@@ -307,7 +308,7 @@ module Situated # :nodoc:
     # 
     # Scrolls _elem_ to the position _x_ (horizontal) and _y_ (vertical)
     # pixels away from the top left corner of the area inside _elem_, then
-    # returns _elem. If a given dimension is larger than the maximum possible
+    # returns _elem_. If a given dimension is larger than the maximum possible
     # scroll position, scrolls that dimension to the maximum scroll position.
     # 
     #   <textarea id="example">
@@ -359,10 +360,10 @@ module Situated # :nodoc:
     end
   end
   
-  # Module +Situated::Viewport+ provides the methods used by +Document+ and
-  # +Window+ when calling the methods in +PositionAndSize+.
+  # Module <tt>Situated::Viewport</tt> provides the methods used by +Document+
+  # and +Window+ when calling the methods in +PositionAndSize+.
   # 
-  module Viewport
+  module Situated::Viewport
     include PositionAndSize
     
     # call-seq:
@@ -454,7 +455,7 @@ module Situated # :nodoc:
   end
 end
 
-class Element
+class ::Element
   include Situated::Element
 end
 
