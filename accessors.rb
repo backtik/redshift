@@ -159,6 +159,17 @@ class Element
   end
   
   # call-seq:
+  #   elem.id -> string
+  # 
+  # Returns the HTML id of _elem_.
+  # 
+  #   
+  # 
+  def id
+    `$q(this.__native__.id||nil)`
+  end
+  
+  # call-seq:
   #   elem.properties -> object
   # 
   # Returns an Element::Properties accessor object, which represents the
