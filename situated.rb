@@ -6,7 +6,9 @@ module Situated # :nodoc:
   
   # Module <tt>Situated::PositionAndSize</tt> mixes in convenience methods for
   # finding height/width and vertical/horizontal position, with and without
-  # scrolling factored in.
+  # scrolling factored in. _obj_ in the examples below may refer to the
+  # +Document+ or +Window+ singleton objects, or to an instance of class
+  # +Element+.
   # 
   module PositionAndSize
     # call-seq:
