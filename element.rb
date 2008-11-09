@@ -254,6 +254,7 @@ class Element
   # 
   #   Document['#my_div'].is_body?   #=> false
   #   Document.body.is_body?         #=> true
+  #   Document.html.is_body?         #=> true
   #
   def is_body?
     `(/^(?:body|html)$/i).test(#{self}.__native__.tagName)`
