@@ -341,7 +341,7 @@ module Situated # :nodoc:
       native_element = `this.__native__`
       x = 0
       y = 0
-      `while (native_element && !c$Situated.c$Utilities.m$is_body_bool(native_element)){x+=native_element.scrollLeft;y+=native_element.scrollTop;elem=native_element.parentNode;}`
+      `while (native_element && !c$Situated.c$Utilities.m$is_body_bool(native_element)){x+=native_element.scrollLeft;y+=native_element.scrollTop;native_element=native_element.parentNode;}`
       {:x => x, :y => y}
     end
     
