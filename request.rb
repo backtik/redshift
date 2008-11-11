@@ -56,8 +56,9 @@ class Request
   def cancel
     return self unless @running
     @running = false
-    `this.__xhr__.abort`
-    `this.__xhr__.onreadystatechange=function(){;}`
+    xhr = `this.__xhr__`
+    `xhr.abort`
+    `xhr.onreadystatechange=function(){;}`
     `this.__xhr__=typeof(ActiveXObject)=='undefined' ? new XMLHttpRequest : new ActiveXObject('MSXML2.XMLHTTP')`
     self.fire(:cancel)
     return self
@@ -90,29 +91,30 @@ class Request
   # 
   def execute(options = {})
     # return self unless self.check(options)
-    @options.update(options)
-    raise(TypeError, 'can\'t convert %s to a String' % @options[:url].inspect) unless [String].include?(@options[:url].class)
-    raise(TypeError, 'can\'t convert %s to a String' % @options[:method].inspect) unless [String, Symbol].include?(@options[:method].class)
-    raise(TypeError, 'can\'t convert %s to a Hash' % @options[:data].inspect) unless [Hash].include?(@options[:data].class)
-    raise(HttpMethodError, 'invalid HTTP method "%s" for %s' % [@options[:method],self]) unless METHODS.include?(method = @options[:method].to_s.upcase)
+    options = @options.update(options)
+    raise(TypeError, 'can\'t convert %s to a String' % options[:url].inspect) unless [String].include?(options[:url].class)
+    raise(TypeError, 'can\'t convert %s to a String' % options[:method].inspect) unless [String, Symbol].include?(options[:method].class)
+    raise(TypeError, 'can\'t convert %s to a Hash' % options[:data].inspect) unless [Hash].include?(options[:data].class)
+    raise(HttpMethodError, 'invalid HTTP method "%s" for %s' % [options[:method],self]) unless METHODS.include?(method = options[:method].to_s.upcase)
     
     @running = true
-    data = @options[:data].to_query_string
-    url = @options[:url]
+    xhr = `this.__xhr__`
+    data = options[:data].to_query_string
+    url = options[:url]
     
-    if @options[:format]
-      format = "format=%s" % @options[:format]
+    if options[:format]
+      format = "format=%s" % options[:format]
       data   = data.empty? ? format : [format, data].join('&')
     end
     
-    if @options[:emulation] && %w(PUT DELETE).include?(method)
+    if options[:emulation] && %w(PUT DELETE).include?(method)
       _method = "_method=%s" % method
       data    = data.empty? ? _method : [_method, data].join('&')
       method  = 'POST'
     end
     
-    if @options[:url_encoded] && method == 'POST'
-      encoding = @options[:encoding] ? "; charset=%s" % @options[:encoding] : ""
+    if options[:url_encoded] && method == 'POST'
+      encoding = options[:encoding] ? "; charset=%s" % options[:encoding] : ""
       self.headers['Content-type'] = "application/x-www-form-urlencoded" + encoding
     end
     
@@ -122,17 +124,17 @@ class Request
       data      = nil
     end
     
-    `this.__xhr__.open(method.__value__, url.__value__, #{@options[:async]})`
-    `this.__xhr__.onreadystatechange = #{self.on_state_change}.__block__`
+    `xhr.open(method.__value__, url.__value__, #{options[:async]})`
+    `xhr.onreadystatechange = #{self.on_state_change}.__block__`
     
-    @options[:headers].each do |k,v|
-      `this.__xhr__.setRequestHeader(k.__value__,v.__value__)`
+    options[:headers].each do |k,v|
+      `xhr.setRequestHeader(k.__value__,v.__value__)`
     # raise(HeaderError, "#{k} => #{v}")
     end
     
     self.fire(:request)
-    `this.__xhr__.send($T(data)?data.__value__:'')`
-    self.on_state_change.call unless @options[:async]
+    `xhr.send($T(data)?data.__value__:'')`
+    self.on_state_change.call unless options[:async]
     return self
   end
   
