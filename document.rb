@@ -1,5 +1,4 @@
 require 'selectors'
-require 'user_events'
 require 'window'
 
 # The +Document+ object enables access to top-level HTML elements like

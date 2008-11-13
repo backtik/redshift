@@ -1,3 +1,5 @@
+require 'document'
+require 'element'
 require 'event'
 
 # The +UserEvents+ module mixes in methods for handling user-generated events
@@ -109,11 +111,11 @@ module UserEvents
   end
   
   def self.included(base) # :nodoc:
-    raise(TypeError, 'only class Element and the singleton objects Window and Document may include UserEvents; use CodeEvents instead') unless base == `c$Element`
+    raise(TypeError, 'only class Element and the singleton objects Window and Document may include UserEvents; use CodeEvents instead') unless base == ::Element
   end
   
   def self.extended(base) # :nodoc:
-    raise(TypeError, 'only Document and Window may be extended with UserEvents; use CodeEvents instead') unless [`c$Document`, `c$Window`].include?(base)
+    raise(TypeError, 'only Document and Window may be extended with UserEvents; use CodeEvents instead') unless [Document, Window].include?(base)
   end
   
   # call-seq:
@@ -206,10 +208,14 @@ module UserEvents
     self.remove_listener(type, &listener) if NATIVE_EVENTS[type]
     return self
   end
-   
+  
   def remove_listener(sym, &block) # :nodoc:
     `var el=this.__native__,type=sym.__value__,fn=block.__block__`
     `if(this.removeEventListener){this.removeEventListener(type,fn,false);}else{this.detachEvent('on'+type,fn);}`
     return self
   end
+end
+
+module ::Document
+  extend UserEvents
 end
