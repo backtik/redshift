@@ -94,7 +94,7 @@ module Browser
     #   gecko?        #=> true
     #   gecko?(18)    #=> false
     # 
-    def gecko?(version)
+    def gecko?(version=nil)
       self.browser?('gecko', version)
     end
     
@@ -108,7 +108,7 @@ module Browser
     #   presto?         #=> true
     #   presto?(925)    #=> false
     # 
-    def presto?(version)
+    def presto?(version=nil)
       self.browser?('presto', version)
     end
     
@@ -122,7 +122,7 @@ module Browser
     #   trident?      #=> true
     #   trident?(4)   #=> false
     # 
-    def trident?(version)
+    def trident?(version=nil)
       self.browser?('trident', version)
     end
     
@@ -136,7 +136,7 @@ module Browser
     #   webkit?         #=> true
     #   webkit?(419)    #=> false
     # 
-    def webkit?(version)
+    def webkit?(version=nil)
       self.browser?('webkit', version)
     end
     
