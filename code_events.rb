@@ -138,10 +138,10 @@ module CodeEvents
       if block
         events_group.delete(block) unless `block.__block__.__unignorable__`
       else
-        events_group.each {|proc| self.disregard(name, &proc) }
+        events_group.each {|proc| self.ignore(name, &proc) }
       end
     else
-      @code_events.each_key {|name| self.disregard(name) }
+      @code_events.each_key {|name| self.ignore(name) }
     end
     return self
   end

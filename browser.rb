@@ -2,7 +2,15 @@
 # rendering engine.
 # 
 module Browser
-  Plugins = {}
+  `var b = c$Browser`
+  `b.__platform__=(window.orientation==undefined ? (navigator.platform.match(/mac|win|linux/i)||['other'])[0].toLowerCase() : 'ipod')`
+  `b.__xpath__=!!(document.evaluate)`
+  `b.__air__=!!(window.runtime)`
+  `b.__query__=!!(document.querySelector)`
+  `if(window.opera){b.__engine__='presto';b.__version__=(arguments.callee.caller ? 960 : (document.getElementsByClassName ? 950 : 925));}`
+  `if(window.ActiveXObject){b.__engine__='trident';b.__version__=(window.XMLHttpRequest ? 5 : 4);}`
+  `if(!navigator.taintEnabled){b.__engine__='webkit';b.__version__=(b.__xpath__ ? (b.__query__ ? 525 : 420) : 419);}`
+  `if(document.getBoxObjectFor!=undefined){b.__engine__='gecko';b.__version__=(document.getElementsByClassName ? 19 : 18);}`
   
   # call-seq:
   #   Browser.engine -> hash
@@ -13,7 +21,7 @@ module Browser
   #   Browser.engine    #=> {:name => "gecko", :version => 19}
   # 
   def self.engine
-    {:name => Engine.instance_variable_get('@name'), :version => Engine.instance_variable_get('@version')}
+    {:name => `$q(c$Browser.__engine__||'unknown')`, :version => `c$Browser.__version__?c$Browser.__version__:0`}
   end
   
   # call-seq:
@@ -24,24 +32,20 @@ module Browser
   #   Browser.platform    #=> "mac"
   # 
   def self.platform
-    @platform ||= `$q(window.orientation==undefined?(navigator.platform.match(/mac|win|linux/i)||['other'])[0].toLowerCase():'ipod')`
+    `$q(c$Browser.__platform__)`
   end
   
   # The +Features+ module mixes in methods to check for browser features such
   # as XPath and Adobe AIR.
   # 
   module Features
-    `c$Browser.c$Features.__xpath__=!!(document.evaluate)`
-    `c$Browser.c$Features.__air__=!!(window.runtime)`
-    `c$Browser.c$Features.__query__=!!(document.querySelector)`
-    
     # call-seq:
     #   xpath? -> true or false
     # 
     # Returns +true+ if XPath is available, +false+ otherwise.
     # 
     def xpath?
-      `c$Browser.c$Features.__xpath__`
+      `c$Browser.__xpath__`
     end
     
     # call-seq:
@@ -50,7 +54,7 @@ module Browser
     # Returns +true+ if Adobe AIR is available, +false+ otherwise.
     # 
     def air?
-      `c$Browser.c$Features.__air__`
+      `c$Browser.__air__`
     end
     
     # call-seq:
@@ -59,7 +63,7 @@ module Browser
     # Returns +true+ if the W3C Selectors API is available, +false+ otherwise.
     #
     def query?
-      `c$Browser.c$Features.__query__`
+      `c$Browser.__query__`
     end
   end
   
@@ -67,23 +71,6 @@ module Browser
   # rendering engine and its version.
   # 
   module Engine
-    if `window.opera`
-      @name    = 'presto'
-      @version = `document.getElementsByClassName` ? 950 : 925
-    elsif `window.ActiveXObject`
-      @name    = 'trident'
-      @version = `window.XMLHttpRequest` ? 5 : 4
-    elsif `!navigator.taintEnabled`
-      @name    = 'webkit'
-      @version = `#{Browser::Features}.__xpath__` ? (`#{Browser::Features}.__query__` ? 525 : 420) : 419
-    elsif `document.getBoxObjectFor != null`
-      @name    = 'gecko'
-      @version = `document.getElementsByClassName` ? 19 : 18
-    else
-      @name    = 'unknown'
-      @version = 0
-    end
-    
     # call-seq:
     #   gecko?      -> true or false
     #   gecko?(num) -> true or false

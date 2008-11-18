@@ -1,7 +1,7 @@
 require 'element'
 
 class Element
-  `c$Element.__keyed_attributes__={class:'className',for:'htmlFor'}`
+  `c$Element.__keyed_attributes__={'class':'className','for':'htmlFor'}`
   `c$Element.__boolean_attributes__={checked:'checked',declare:'declare',defer:'defer',disabled:'disabled',ismap:'ismap',multiple:'multiple',noresize:'noresize',noshade:'noshade',readonly:'readonly',selected:'selected'}`
   
   # call-seq:
@@ -159,6 +159,17 @@ class Element
   end
   
   # call-seq:
+  #   elem.id -> string
+  # 
+  # Returns a string representation of the HTML id of _elem_.
+  # 
+  #   
+  # 
+  def id
+    `$q(this.__native__.id||nil)`
+  end
+  
+  # call-seq:
   #   elem.properties -> object
   # 
   # Returns an Element::Properties accessor object, which represents the
@@ -248,6 +259,23 @@ class Element
     return self
   end
   
+  def set_opacity(opacity, novisibility = true) # :nodoc:
+    native_element = `this.__native__`
+    unless novisibility
+      if opacity == 0
+        `if(native_element.style.visibility != 'hidden'){native_element.style.visibility = 'hidden';}`
+      else
+        `if(native_element.style.visibility != 'visible'){native_element.style.visibility = 'visible';}`
+      end
+    end
+    
+    `native_element.style.zoom = 1` unless `native_element.currentStyle && native_element.currentStyle.hasLayout`
+    `native_element.style.filter = (opacity == 1) ? '' : 'alpha(opacity='+opacity * 100+')'` if trident?
+    `native_element.style.opacity = opacity`
+    `this.__opacity__ = opacity`
+    return self
+  end
+  
   # call-seq:
   #   elem.set_property(sym, value) -> elem
   # 
@@ -282,8 +310,8 @@ class Element
   # 
   def set_style(attribute, value)
     `var attr=attribute.__value__.replace(/[_-]\\D/g, function(match){return match.charAt(1).toUpperCase();}),val=value.__value__||value`
+    `if(attr == 'opacity'){return this.m$set_opacity(value);}`
     `if(attr==='float'){val=#{trident?}?'styleFloat':'cssFloat'}`
-    `if(attr==='opacity'){m$raise("nobody wrote the opacity setter yet!");}`
     `if(val===String(Number(val))){val=Math.round(val)}`
     `this.__native__.style[attr]=val`
     return self

@@ -1,3 +1,5 @@
+require 'document'
+
 # Class +Cookie+ governs the writing and accessing of cookies in the browser.
 # 
 # A cookie is a key-value pair stored by your browser as text data. If you
@@ -70,7 +72,7 @@ class Cookie
   #   Cookie.new(:user_jds, '8557acb0') unless Cookie.read(:user_jds)
   # 
   def self.read(key)
-    value = `#{OPTIONS[:document].native}.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}.__value__ + '=([^;]*)')`
+    value = `#{OPTIONS[:document]}.__native__.cookie.match('(?:^|;)\\s*' + #{Regexp.escape(key)}.__value__ + '=([^;]*)')`
     return value ? `$q(decodeURIComponent(value[1]))` : nil
   end
   
@@ -91,7 +93,7 @@ class Cookie
     end
     `str += '; secure'` if cookie.secure
     
-    `#{cookie.document.native}.cookie = str`
+    `#{cookie.document}.__native__.cookie = str`
     return cookie
   end
   

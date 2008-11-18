@@ -1,4 +1,5 @@
 require 'selectors'
+require 'window'
 
 # The +Document+ object enables access to top-level HTML elements like
 # <i><head></i>, <i><html></i>, and <i><body></i>.
@@ -8,7 +9,6 @@ require 'selectors'
 # powerful <tt>Document.[]</tt> method.
 # 
 module Document
-  
   `document.head=document.getElementsByTagName('head')[0]`
   `document.html=document.getElementsByTagName('html')[0]`
   `document.window=(document.defaultView||document.parentWindow)`
@@ -53,6 +53,7 @@ module Document
   # 
   def self.[](*args)
     if args.length == 1
+      return nil unless args[0]
       return self.find_by_string(args[0])
     else
       args.map do |str|
