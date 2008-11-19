@@ -81,8 +81,8 @@ module Browser
     #   gecko?        #=> true
     #   gecko?(18)    #=> false
     # 
-    def gecko?(version=nil)
-      self.browser?('gecko', version)
+    def gecko?(version = nil)
+      `c$Browser.__engine__=='gecko'&&($T(version) ? c$Browser.__version__==version : true)`
     end
     
     # call-seq:
@@ -95,8 +95,8 @@ module Browser
     #   presto?         #=> true
     #   presto?(925)    #=> false
     # 
-    def presto?(version=nil)
-      self.browser?('presto', version)
+    def presto?(version = nil)
+      `c$Browser.__engine__=='presto'&&($T(version) ? c$Browser.__version__==version : true)`
     end
     
     # call-seq:
@@ -109,8 +109,8 @@ module Browser
     #   trident?      #=> true
     #   trident?(4)   #=> false
     # 
-    def trident?(version=nil)
-      self.browser?('trident', version)
+    def trident?(version = nil)
+      `c$Browser.__engine__=='trident'&&($T(version) ? c$Browser.__version__==version : true)`
     end
     
     # call-seq:
@@ -123,12 +123,8 @@ module Browser
     #   webkit?         #=> true
     #   webkit?(419)    #=> false
     # 
-    def webkit?(version=nil)
-      self.browser?('webkit', version)
-    end
-    
-    def browser?(name, version) # :nodoc:
-      Engine.instance_variable_get('@name') == name && (version ? Engine.instance_variable_get('@version') == version : true)
+    def webkit?(version = nil)
+      `c$Browser.__engine__=='webkit'&&($T(version) ? c$Browser.__version__==version : true)`
     end
   end
 end

@@ -30,7 +30,7 @@ Element.prototype.getElementById = function(id, nocash){
 },
 
 Element.Attributes = {
-  Props: {'html': 'innerHTML', 'class': 'className', 'for': 'htmlFor', 'text': (trident_bool()) ? 'innerText' : 'textContent'},
+  Props: {'html': 'innerHTML', 'class': 'className', 'for': 'htmlFor', 'text': (m$trident_bool()) ? 'innerText' : 'textContent'},
   Bools: ['compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'disabled', 'readonly', 'multiple', 'selected', 'noresize', 'defer'],
   Camels: ['value', 'accessKey', 'cellPadding', 'cellSpacing', 'colSpan', 'frameBorder', 'maxLength', 'readOnly', 'rowSpan', 'tabIndex', 'useMap']
 };
