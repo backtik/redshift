@@ -7,7 +7,15 @@
 <body>
   
   <!-- Document['#a_id'] -->
-  <div id="a_id"></div>
+  <div id="a_id">
+    <!-- Document['#a_id']['#alpha_id'] -->
+    <div id='alpha_id'></div>
+    
+    <!-- Document['#a_id']['.beta_class, .alpha_class'] -->
+    <div class='beta_class'></div>
+    <div class='beta_class'></div>
+    <div class='alpha_class'></div>
+  </div>
   
   <!-- Document['.a_class'] -->
   <div class="a_class"></div>

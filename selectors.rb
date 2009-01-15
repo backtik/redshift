@@ -1,5 +1,4 @@
 require 'browser'
-
 `
 Array.fromCollection = function(collection){
   for (var i = 0, a = [], j = collection.length; i < j; i++){
@@ -7,368 +6,847 @@ Array.fromCollection = function(collection){
    }
    return a
 };
-// used in several places where element/selector comparison is used
-// tells whether an element matches another element or selector
-Element.prototype.match = function(selector){
-  if (!selector) return true;
-  var tagid = Selectors.Utils.parseTagAndID(selector);
-  var tag = tagid[0], id = tagid[1];
-  if (!Selectors.Filters.byID(this, id) || !Selectors.Filters.byTag(this, tag)) return false;
-  var parsed = Selectors.Utils.parseSelector(selector);
-  return (parsed) ? Selectors.Utils.filter(this, parsed, {}) : true;
+
+/*!
+ * Sizzle CSS Selector Engine - v0.9.1
+ *  Copyright 2009, The Dojo Foundation
+ *  Released under the MIT, BSD, and GPL Licenses.
+ *  More information: http://sizzlejs.com/
+ */
+(function(){
+
+var chunker = /((?:\\((?:\\([^()]+\\)|[^()]+)+\\)|\\[(?:\\[[^[\\]]*\\]|[^[\\]]+)+\\]|\\\\.|[^ >+~,(\\[]+)+|[>+~])(\\s*,\\s*)?/g,
+	done = 0,
+	toString = Object.prototype.toString;
+
+var Sizzle = function(selector, context, results, seed) {
+	results = results || [];
+	context = context || document;
+
+	if ( context.nodeType !== 1 && context.nodeType !== 9 )
+		return [];
+	
+	if ( !selector || typeof selector !== \"string\" ) {
+		return results;
+	}
+
+	var parts = [], m, set, checkSet, check, mode, extra, prune = true;
+	
+	// Reset the position of the chunker regexp (start from head)
+	chunker.lastIndex = 0;
+	
+	while ( (m = chunker.exec(selector)) !== null ) {
+		parts.push( m[1] );
+		
+		if ( m[2] ) {
+			extra = RegExp.rightContext;
+			break;
+		}
+	}
+
+	if ( parts.length > 1 && Expr.match.POS.exec( selector ) ) {
+		if ( parts.length === 2 && Expr.relative[ parts[0] ] ) {
+			var later = \"\", match;
+
+			// Position selectors must be done after the filter
+			while ( (match = Expr.match.POS.exec( selector )) ) {
+				later += match[0];
+				selector = selector.replace( Expr.match.POS, \"\" );
+			}
+
+			set = Sizzle.filter( later, Sizzle( /\\s$/.test(selector) ? selector + \"*\" : selector, context ) );
+		} else {
+			set = Expr.relative[ parts[0] ] ?
+				[ context ] :
+				Sizzle( parts.shift(), context );
+
+			while ( parts.length ) {
+				var tmpSet = [];
+
+				selector = parts.shift();
+				if ( Expr.relative[ selector ] )
+					selector += parts.shift();
+
+				for ( var i = 0, l = set.length; i < l; i++ ) {
+					Sizzle( selector, set[i], tmpSet );
+				}
+
+				set = tmpSet;
+			}
+		}
+	} else {
+		var ret = seed ?
+			{ expr: parts.pop(), set: makeArray(seed) } :
+			Sizzle.find( parts.pop(), parts.length === 1 && context.parentNode ? context.parentNode : context );
+		set = Sizzle.filter( ret.expr, ret.set );
+
+		if ( parts.length > 0 ) {
+			checkSet = makeArray(set);
+		} else {
+			prune = false;
+		}
+
+		while ( parts.length ) {
+			var cur = parts.pop(), pop = cur;
+
+			if ( !Expr.relative[ cur ] ) {
+				cur = \"\";
+			} else {
+				pop = parts.pop();
+			}
+
+			if ( pop == null ) {
+				pop = context;
+			}
+
+			Expr.relative[ cur ]( checkSet, pop, isXML(context) );
+		}
+	}
+
+	if ( !checkSet ) {
+		checkSet = set;
+	}
+
+	if ( !checkSet ) {
+		throw \"Syntax error, unrecognized expression: \" + (cur || selector);
+	}
+
+	if ( toString.call(checkSet) === \"[object Array]\" ) {
+		if ( !prune ) {
+			results.push.apply( results, checkSet );
+		} else if ( context.nodeType === 1 ) {
+			for ( var i = 0; checkSet[i] != null; i++ ) {
+				if ( checkSet[i] && (checkSet[i] === true || checkSet[i].nodeType === 1 && contains(context, checkSet[i])) ) {
+					results.push( set[i] );
+				}
+			}
+		} else {
+			for ( var i = 0; checkSet[i] != null; i++ ) {
+				if ( checkSet[i] && checkSet[i].nodeType === 1 ) {
+					results.push( set[i] );
+				}
+			}
+		}
+	} else {
+		makeArray( checkSet, results );
+	}
+
+	if ( extra ) {
+		Sizzle( extra, context, results, seed );
+	}
+
+	return results;
 };
 
-// Provides polymorphic access to getElementById to Elements as well as documents, both of which
-// can be passed into Selectors.Utils.search as location for searching for subelements.
-Element.prototype.getElementById = function(id, nocash){
-  var el = this.ownerDocument.getElementById(id);
-  if (!el) return null;
-  for (var parent = el.parentNode; parent != this; parent = parent.parentNode){
-    if (!parent) return null;
-  }
-  return $E(el);
-},
-
-Element.Attributes = {
-  Props: {'html': 'innerHTML', 'class': 'className', 'for': 'htmlFor', 'text': (m$trident_bool()) ? 'innerText' : 'textContent'},
-  Bools: ['compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'disabled', 'readonly', 'multiple', 'selected', 'noresize', 'defer'],
-  Camels: ['value', 'accessKey', 'cellPadding', 'cellSpacing', 'colSpan', 'frameBorder', 'maxLength', 'readOnly', 'rowSpan', 'tabIndex', 'useMap']
+Sizzle.matches = function(expr, set){
+	return Sizzle(expr, null, null, set);
 };
 
-Element.prototype.getProperty = function(attribute){
-  var EA = Element.Attributes, key = EA.Props[attribute];
-  var value = (key) ? this[key] : this.getAttribute(attribute, 2);
-  return (EA.Bools[attribute]) ? !!value : (key) ? value : value || null;
-},
+Sizzle.find = function(expr, context){
+	var set, match;
 
-String.prototype.contains = function(string, separator){
-  return (separator) ? (separator + this + separator).indexOf(separator + string + separator) > -1 : this.indexOf(string) > -1;
+	if ( !expr ) {
+		return [];
+	}
+
+	for ( var i = 0, l = Expr.order.length; i < l; i++ ) {
+		var type = Expr.order[i], match;
+		
+		if ( (match = Expr.match[ type ].exec( expr )) ) {
+			var left = RegExp.leftContext;
+
+			if ( left.substr( left.length - 1 ) !== \"\\\\\" ) {
+				match[1] = (match[1] || \"\").replace(/\\\\/g, \"\");
+				set = Expr.find[ type ]( match, context );
+				if ( set != null ) {
+					expr = expr.replace( Expr.match[ type ], \"\" );
+					break;
+				}
+			}
+		}
+	}
+
+	if ( !set ) {
+		set = context.getElementsByTagName(\"*\");
+	}
+
+	return {set: set, expr: expr};
 };
 
-String.prototype.trim = function(){
-  return this.replace(/^\s+|\s+$/g, '');
+Sizzle.filter = function(expr, set, inplace, not){
+	var old = expr, result = [], curLoop = set, match, anyFound;
+
+	while ( expr && set.length ) {
+		for ( var type in Expr.filter ) {
+			if ( (match = Expr.match[ type ].exec( expr )) != null ) {
+				var filter = Expr.filter[ type ], goodArray = null, goodPos = 0, found, item;
+				anyFound = false;
+
+				if ( curLoop == result ) {
+					result = [];
+				}
+
+				if ( Expr.preFilter[ type ] ) {
+					match = Expr.preFilter[ type ]( match, curLoop, inplace, result, not );
+
+					if ( !match ) {
+						anyFound = found = true;
+					} else if ( match === true ) {
+						continue;
+					} else if ( match[0] === true ) {
+						goodArray = [];
+						var last = null, elem;
+						for ( var i = 0; (elem = curLoop[i]) !== undefined; i++ ) {
+							if ( elem && last !== elem ) {
+								goodArray.push( elem );
+								last = elem;
+							}
+						}
+					}
+				}
+
+				if ( match ) {
+					for ( var i = 0; (item = curLoop[i]) !== undefined; i++ ) {
+						if ( item ) {
+							if ( goodArray && item != goodArray[goodPos] ) {
+								goodPos++;
+							}
+	
+							found = filter( item, match, goodPos, goodArray );
+							var pass = not ^ !!found;
+
+							if ( inplace && found != null ) {
+								if ( pass ) {
+									anyFound = true;
+								} else {
+									curLoop[i] = false;
+								}
+							} else if ( pass ) {
+								result.push( item );
+								anyFound = true;
+							}
+						}
+					}
+				}
+
+				if ( found !== undefined ) {
+					if ( !inplace ) {
+						curLoop = result;
+					}
+
+					expr = expr.replace( Expr.match[ type ], \"\" );
+
+					if ( !anyFound ) {
+						return [];
+					}
+
+					break;
+				}
+			}
+		}
+
+		expr = expr.replace(/\\s*,\\s*/, \"\");
+
+		// Improper expression
+		if ( expr == old ) {
+			if ( anyFound == null ) {
+				throw \"Syntax error, unrecognized expression: \" + expr;
+			} else {
+				break;
+			}
+		}
+
+		old = expr;
+	}
+
+	return curLoop;
 };
 
-var Selectors = {Cache: {nth: {}, parsed: {}}};
+var Expr = Sizzle.selectors = {
+	order: [ \"ID\", \"NAME\", \"TAG\" ],
+	match: {
+		ID: /#((?:[\\w\\u00c0-\\uFFFF_-]|\\\\.)+)/,
+		CLASS: /\\.((?:[\\w\\u00c0-\\uFFFF_-]|\\\\.)+)/,
+		NAME: /\\[name=['\"]*((?:[\\w\\u00c0-\\uFFFF_-]|\\\\.)+)['\"]*\\]/,
+		ATTR: /\\[\\s*((?:[\\w\\u00c0-\\uFFFF_-]|\\\\.)+)\\s*(?:(\\S?=)\\s*(['\"]*)(.*?)\\3|)\\s*\\]/,
+		TAG: /^((?:[\\w\\u00c0-\\uFFFF\\*_-]|\\\\.)+)/,
+		CHILD: /:(only|nth|last|first)-child(?:\\((even|odd|[\\dn+-]*)\\))?/,
+		POS: /:(nth|eq|gt|lt|first|last|even|odd)(?:\\((\\d*)\\))?(?=[^-]|$)/,
+		PSEUDO: /:((?:[\\w\\u00c0-\\uFFFF_-]|\\\\.)+)(?:\\((['"]*)((?:\\([^\\)]+\\)|[^\\2\\(\\)]*)+)\\2\\))?/
+	},
+	attrMap: {
+		\"class\": \"className\",
+		\"for\": \"htmlFor\"
+	},
+	attrHandle: {
+		href: function(elem){
+			return elem.getAttribute(\"href\");
+		}
+	},
+	relative: {
+		\"+\": function(checkSet, part){
+			for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+				var elem = checkSet[i];
+				if ( elem ) {
+					var cur = elem.previousSibling;
+					while ( cur && cur.nodeType !== 1 ) {
+						cur = cur.previousSibling;
+					}
+					checkSet[i] = typeof part === \"string\" ?
+						cur || false :
+						cur === part;
+				}
+			}
 
-Selectors.RegExps = {
-  id: (/#([\\w-]+)/),
-  tag: (/^(\\w+|\\*)/),
-  quick: (/^(\\w+|\\*)$/),
-  splitter: (/\\s*([+>~\\s])\\s*([a-zA-Z#.*:\\[])/g),
-  combined: (/\\.([\\w-]+)|\\[(\\w+)(?:([!*^$~|]?=)(["']?)([^\\4]*?)\\4)?\\]|:([\\w-]+)(?:\\(["']?(.*?)?["']?\\)|$)/g)
+			if ( typeof part === \"string\" ) {
+				Sizzle.filter( part, checkSet, true );
+			}
+		},
+		\">\": function(checkSet, part, isXML){
+			if ( typeof part === \"string\" && !/\\W/.test(part) ) {
+				part = isXML ? part : part.toUpperCase();
+
+				for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+					var elem = checkSet[i];
+					if ( elem ) {
+						var parent = elem.parentNode;
+						checkSet[i] = parent.nodeName === part ? parent : false;
+					}
+				}
+			} else {
+				for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+					var elem = checkSet[i];
+					if ( elem ) {
+						checkSet[i] = typeof part === \"string\" ?
+							elem.parentNode :
+							elem.parentNode === part;
+					}
+				}
+
+				if ( typeof part === \"string\" ) {
+					Sizzle.filter( part, checkSet, true );
+				}
+			}
+		},
+		\"\": function(checkSet, part, isXML){
+			var doneName = \"done\" + (done++), checkFn = dirCheck;
+
+			if ( !part.match(/\\W/) ) {
+				var nodeCheck = part = isXML ? part : part.toUpperCase();
+				checkFn = dirNodeCheck;
+			}
+
+			checkFn(\"parentNode\", part, doneName, checkSet, nodeCheck, isXML);
+		},
+		\"~\": function(checkSet, part, isXML){
+			var doneName = \"done\" + (done++), checkFn = dirCheck;
+
+			if ( typeof part === \"string\" && !part.match(/\\W/) ) {
+				var nodeCheck = part = isXML ? part : part.toUpperCase();
+				checkFn = dirNodeCheck;
+			}
+
+			checkFn(\"previousSibling\", part, doneName, checkSet, nodeCheck, isXML);
+		}
+	},
+	find: {
+		ID: function(match, context){
+			if ( context.getElementById ) {
+				var m = context.getElementById(match[1]);
+				return m ? [m] : [];
+			}
+		},
+		NAME: function(match, context){
+			return context.getElementsByName ? context.getElementsByName(match[1]) : null;
+		},
+		TAG: function(match, context){
+			return context.getElementsByTagName(match[1]);
+		}
+	},
+	preFilter: {
+		CLASS: function(match, curLoop, inplace, result, not){
+			match = \" \" + match[1].replace(/\\\\/g, \"\") + \" \";
+
+			for ( var i = 0; curLoop[i]; i++ ) {
+				if ( not ^ (\" \" + curLoop[i].className + \" \").indexOf(match) >= 0 ) {
+					if ( !inplace )
+						result.push( curLoop[i] );
+				} else if ( inplace ) {
+					curLoop[i] = false;
+				}
+			}
+
+			return false;
+		},
+		ID: function(match){
+			return match[1].replace(/\\\\/g, \"\");
+		},
+		TAG: function(match, curLoop){
+			for ( var i = 0; !curLoop[i]; i++ ){}
+			return isXML(curLoop[i]) ? match[1] : match[1].toUpperCase();
+		},
+		CHILD: function(match){
+			if ( match[1] == \"nth\" ) {
+				// parse equations like 'even', 'odd', '5', '2n', '3n+2', '4n-1', '-n+6'
+				var test = /(-?)(\\d*)n((?:\\+|-)?\\d*)/.exec(
+					match[2] == \"even\" && \"2n\" || match[2] == \"odd\" && \"2n+1\" ||
+					!/\D/.test( match[2] ) && \"0n+\" + match[2] || match[2]);
+
+				// calculate the numbers (first)n+(last) including if they are negative
+				match[2] = (test[1] + (test[2] || 1)) - 0;
+				match[3] = test[3] - 0;
+			}
+
+			// TODO: Move to normal caching system
+			match[0] = \"done\" + (done++);
+
+			return match;
+		},
+		ATTR: function(match){
+			var name = match[1];
+			
+			if ( Expr.attrMap[name] ) {
+				match[1] = Expr.attrMap[name];
+			}
+
+			if ( match[2] === \"~=\" ) {
+				match[4] = \" \" + match[4] + \" \";
+			}
+
+			return match;
+		},
+		PSEUDO: function(match, curLoop, inplace, result, not){
+			if ( match[1] === \"not\" ) {
+				// If we're dealing with a complex expression, or a simple one
+				if ( match[3].match(chunker).length > 1 ) {
+					match[3] = Sizzle(match[3], null, null, curLoop);
+				} else {
+					var ret = Sizzle.filter(match[3], curLoop, inplace, true ^ not);
+					if ( !inplace ) {
+						result.push.apply( result, ret );
+					}
+					return false;
+				}
+			} else if ( Expr.match.POS.test( match[0] ) ) {
+				return true;
+			}
+			
+			return match;
+		},
+		POS: function(match){
+			match.unshift( true );
+			return match;
+		}
+	},
+	filters: {
+		enabled: function(elem){
+			return elem.disabled === false && elem.type !== \"hidden\";
+		},
+		disabled: function(elem){
+			return elem.disabled === true;
+		},
+		checked: function(elem){
+			return elem.checked === true;
+		},
+		selected: function(elem){
+			// Accessing this property makes selected-by-default
+			// options in Safari work properly
+			elem.parentNode.selectedIndex;
+			return elem.selected === true;
+		},
+		parent: function(elem){
+			return !!elem.firstChild;
+		},
+		empty: function(elem){
+			return !elem.firstChild;
+		},
+		has: function(elem, i, match){
+			return !!Sizzle( match[3], elem ).length;
+		},
+		header: function(elem){
+			return /h\\d/i.test( elem.nodeName );
+		},
+		text: function(elem){
+			return \"text\" === elem.type;
+		},
+		radio: function(elem){
+			return \"radio\" === elem.type;
+		},
+		checkbox: function(elem){
+			return \"checkbox\" === elem.type;
+		},
+		file: function(elem){
+			return \"file\" === elem.type;
+		},
+		password: function(elem){
+			return \"password\" === elem.type;
+		},
+		submit: function(elem){
+			return \"submit\" === elem.type;
+		},
+		image: function(elem){
+			return \"image\" === elem.type;
+		},
+		reset: function(elem){
+			return \"reset\" === elem.type;
+		},
+		button: function(elem){
+			return \"button\" === elem.type || elem.nodeName.toUpperCase() === \"BUTTON\";
+		},
+		input: function(elem){
+			return /input|select|textarea|button/i.test(elem.nodeName);
+		}
+	},
+	setFilters: {
+		first: function(elem, i){
+			return i === 0;
+		},
+		last: function(elem, i, match, array){
+			return i === array.length - 1;
+		},
+		even: function(elem, i){
+			return i % 2 === 0;
+		},
+		odd: function(elem, i){
+			return i % 2 === 1;
+		},
+		lt: function(elem, i, match){
+			return i < match[3] - 0;
+		},
+		gt: function(elem, i, match){
+			return i > match[3] - 0;
+		},
+		nth: function(elem, i, match){
+			return match[3] - 0 == i;
+		},
+		eq: function(elem, i, match){
+			return match[3] - 0 == i;
+		}
+	},
+	filter: {
+		CHILD: function(elem, match){
+			var type = match[1], parent = elem.parentNode;
+
+			var doneName = \"child\" + parent.childNodes.length;
+			
+			if ( parent && (!parent[ doneName ] || !elem.nodeIndex) ) {
+				var count = 1;
+
+				for ( var node = parent.firstChild; node; node = node.nextSibling ) {
+					if ( node.nodeType == 1 ) {
+						node.nodeIndex = count++;
+					}
+				}
+
+				parent[ doneName ] = count - 1;
+			}
+
+			if ( type == \"first\" ) {
+				return elem.nodeIndex == 1;
+			} else if ( type == \"last\" ) {
+				return elem.nodeIndex == parent[ doneName ];
+			} else if ( type == \"only\" ) {
+				return parent[ doneName ] == 1;
+			} else if ( type == \"nth\" ) {
+				var add = false, first = match[2], last = match[3];
+
+				if ( first == 1 && last == 0 ) {
+					return true;
+				}
+
+				if ( first == 0 ) {
+					if ( elem.nodeIndex == last ) {
+						add = true;
+					}
+				} else if ( (elem.nodeIndex - last) % first == 0 && (elem.nodeIndex - last) / first >= 0 ) {
+					add = true;
+				}
+
+				return add;
+			}
+		},
+		PSEUDO: function(elem, match, i, array){
+			var name = match[1], filter = Expr.filters[ name ];
+
+			if ( filter ) {
+				return filter( elem, i, match, array );
+			} else if ( name === \"contains\" ) {
+				return (elem.textContent || elem.innerText || \"\").indexOf(match[3]) >= 0;
+			} else if ( name === \"not\" ) {
+				var not = match[3];
+
+				for ( var i = 0, l = not.length; i < l; i++ ) {
+					if ( not[i] === elem ) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		},
+		ID: function(elem, match){
+			return elem.nodeType === 1 && elem.getAttribute(\"id\") === match;
+		},
+		TAG: function(elem, match){
+			return (match === \"*\" && elem.nodeType === 1) || elem.nodeName === match;
+		},
+		CLASS: function(elem, match){
+			return match.test( elem.className );
+		},
+		ATTR: function(elem, match){
+			var result = Expr.attrHandle[ match[1] ] ? Expr.attrHandle[ match[1] ]( elem ) : elem[ match[1] ] || elem.getAttribute( match[1] ), value = result + \"\", type = match[2], check = match[4];
+			return result == null ?
+				false :
+				type === \"=\" ?
+				value === check :
+				type === \"*=\" ?
+				value.indexOf(check) >= 0 :
+				type === \"~=\" ?
+				(\" \" + value + \" \").indexOf(check) >= 0 :
+				!match[4] ?
+				result :
+				type === \"!=\" ?
+				value != check :
+				type === \"^=\" ?
+				value.indexOf(check) === 0 :
+				type === \"$=\" ?
+				value.substr(value.length - check.length) === check :
+				type === \"|=\" ?
+				value === check || value.substr(0, check.length + 1) === check + \"-\" :
+				false;
+		},
+		POS: function(elem, match, i, array){
+			var name = match[2], filter = Expr.setFilters[ name ];
+
+			if ( filter ) {
+				return filter( elem, i, match, array );
+			}
+		}
+	}
 };
 
-Selectors.Utils = {
-  // added to replace $uid
-  // uses internal Red.id
-  object_uid: function(item){
-    return item.__id__||(item.__id__=Red.id++)
-  },
-  
-  chk: function(item, uniques){
-    if (!uniques) return true;
-    var uid = Selectors.Utils.object_uid(item);
-    if (!uniques[uid]) return uniques[uid] = true;
-    return false;
-  },
-    
-  parseNthArgument: function(argument){
-    if (Selectors.Cache.nth[argument]) return Selectors.Cache.nth[argument];
-    var parsed = argument.match(/^([+-]?\\d*)?([a-z]+)?([+-]?\\d*)?$/);
-    if (!parsed) return false;
-    var inta = parseInt(parsed[1]);
-    var a = (inta || inta === 0) ? inta : 1;
-    var special = parsed[2] || false;
-    var b = parseInt(parsed[3]) || 0;
-    if (a != 0){
-      b--;
-      while (b < 1) b += a;
-      while (b >= a) b -= a;
-    } else {
-      a = b;
-      special = 'index';
-    }
-    switch (special){
-      case 'n': parsed = {a: a, b: b, special: 'n'}; break;
-      case 'odd': parsed = {a: 2, b: 0, special: 'n'}; break;
-      case 'even': parsed = {a: 2, b: 1, special: 'n'}; break;
-      case 'first': parsed = {a: 0, special: 'index'}; break;
-      case 'last': parsed = {special: 'last-child'}; break;
-      case 'only': parsed = {special: 'only-child'}; break;
-      default: parsed = {a: (a - 1), special: 'index'};
-    }
-    
-    return Selectors.Cache.nth[argument] = parsed;
-  },
-  
-  parseSelector: function(selector){
-    if (Selectors.Cache.parsed[selector]) return Selectors.Cache.parsed[selector];
-    var m, parsed = {classes: [], pseudos: [], attributes: []};
-    while ((m = Selectors.RegExps.combined.exec(selector))){
-      var cn = m[1], an = m[2], ao = m[3], av = m[5], pn = m[6], pa = m[7];
-      if (cn){
-        parsed.classes.push(cn);
-      } else if (pn){
-        var parser = Selectors.Pseudo[pn];
-        
-        if (parser) parsed.pseudos.push({parser: parser, argument: pa});
-        else parsed.attributes.push({name: pn, operator: '=', value: pa});
-      } else if (an){
-        parsed.attributes.push({name: an, operator: ao, value: av});
-      }
-    }
-    if (!parsed.classes.length) delete parsed.classes;
-    if (!parsed.attributes.length) delete parsed.attributes;
-    if (!parsed.pseudos.length) delete parsed.pseudos;
-    if (!parsed.classes && !parsed.attributes && !parsed.pseudos) parsed = null;
-    return Selectors.Cache.parsed[selector] = parsed;
-  },
-  
-  parseTagAndID: function(selector){
-    var tag = selector.match(Selectors.RegExps.tag);
-    var id = selector.match(Selectors.RegExps.id);
-    return [(tag) ? tag[1] : '*', (id) ? id[1] : false];
-  },
-  
-  filter: function(item, parsed, local){
-    var i;
-    if (parsed.classes){
-      for (i = parsed.classes.length; i--; i){
-        var cn = parsed.classes[i];
-        if (!Selectors.Filters.byClass(item, cn)) return false;
-      }
-    }
-    if (parsed.attributes){
-      for (i = parsed.attributes.length; i--; i){
-        var att = parsed.attributes[i];
-        if (!Selectors.Filters.byAttribute(item, att.name, att.operator, att.value)) return false;
-      }
-    }
-    if (parsed.pseudos){
-      for (i = parsed.pseudos.length; i--; i){
-        var psd = parsed.pseudos[i];
-        if (!Selectors.Filters.byPseudo(item, psd.parser, psd.argument, local)) return false;
-      }
-    }
-    return true;
-  },
-  
-  getByTagAndID: function(ctx, tag, id){
-    if (id){
-      var item = (ctx.getElementById) ? ctx.getElementById(id, true) : Element.getElementById(ctx, id, true);
-      return (item && Selectors.Filters.byTag(item, tag)) ? [item] : [];
-    } else {
-      return ctx.getElementsByTagName(tag);
-    }
-  },
-  
-  search: function(self, expression, local){
-    var splitters = [];
-    
-    var selectors = expression.trim().replace(Selectors.RegExps.splitter, function(m0, m1, m2){
-      splitters.push(m1);
-      return ':)' + m2;
-    }).split(':)');
-    
-    
-    var items, filtered, item;
-    for (var i = 0, l = selectors.length; i < l; i++){
-      var selector = selectors[i];
-      
-      if (i == 0 && Selectors.RegExps.quick.test(selector)){
-        items = self.getElementsByTagName(selector);
-        continue;
-      }
-            
-      var splitter = splitters[i - 1];
-      
-      var tagid = Selectors.Utils.parseTagAndID(selector);
-      var tag = tagid[0], id = tagid[1];
-      if (i == 0){
-        items = Selectors.Utils.getByTagAndID(self, tag, id);
-      } else {
-        var uniques = {}, found = [];
-        for (var j = 0, k = items.length; j < k; j++) found = Selectors.Getters[splitter](found, items[j], tag, id, uniques);
-        items = found;
-      }
-            
-      var parsed = Selectors.Utils.parseSelector(selector);
-      if (parsed){
-        filtered = [];
-        for (var m = 0, n = items.length; m < n; m++){
-          item = items[m];
-          if (Selectors.Utils.filter(item, parsed, local)) filtered.push(item);
-        }
-        items = filtered;
-      }
-      
-    }
-    return items;
-    
-  }
-  
+for ( var type in Expr.match ) {
+	Expr.match[ type ] = RegExp( Expr.match[ type ].source + /(?![^\\[]*\\])(?![^\\(]*\\))/.source );
+}
+
+var makeArray = function(array, results) {
+	array = Array.prototype.slice.call( array );
+
+	if ( results ) {
+		results.push.apply( results, array );
+		return results;
+	}
+	
+	return array;
 };
 
-Selectors.Getters = {
-  
-  ' ': function(found, self, tag, id, uniques){
-    var items = Selectors.Utils.getByTagAndID(self, tag, id);
-    for (var i = 0, l = items.length; i < l; i++){
-      var item = items[i];
-      if (Selectors.Utils.chk(item, uniques)) found.push(item);
-    }
-    return found;
-  },
-  
-  '>': function(found, self, tag, id, uniques){
-    var children = Selectors.Utils.getByTagAndID(self, tag, id);
-    for (var i = 0, l = children.length; i < l; i++){
-      var child = children[i];
-      if (child.parentNode == self && Selectors.Utils.chk(child, uniques)) found.push(child);
-    }
-    return found;
-  },
-  
-  '+': function(found, self, tag, id, uniques){
-    while ((self = self.nextSibling)){
-      if (self.nodeType == 1){
-        if (Selectors.Utils.chk(self, uniques) && Selectors.Filters.byTag(self, tag) && Selectors.Filters.byID(self, id)) found.push(self);
-        break;
-      }
-    }
-    return found;
-  },
-  
-  '~': function(found, self, tag, id, uniques){
-    
-    while ((self = self.nextSibling)){
-      if (self.nodeType == 1){
-        if (!Selectors.Utils.chk(self, uniques)) break;
-        if (Selectors.Filters.byTag(self, tag) && Selectors.Filters.byID(self, id)) found.push(self);
-      } 
-    }
-    return found;
-  }
-  
+// Perform a simple check to determine if the browser is capable of
+// converting a NodeList to an array using builtin methods.
+try {
+	Array.prototype.slice.call( document.documentElement.childNodes );
+
+// Provide a fallback method if it does not work
+} catch(e){
+	makeArray = function(array, results) {
+		var ret = results || [];
+
+		if ( toString.call(array) === \"[object Array]\" ) {
+			Array.prototype.push.apply( ret, array );
+		} else {
+			if ( typeof array.length === \"number\" ) {
+				for ( var i = 0, l = array.length; i < l; i++ ) {
+					ret.push( array[i] );
+				}
+			} else {
+				for ( var i = 0; array[i]; i++ ) {
+					ret.push( array[i] );
+				}
+			}
+		}
+
+		return ret;
+	};
+}
+
+// Check to see if the browser returns elements by name when
+// querying by getElementById (and provide a workaround)
+(function(){
+	// We're going to inject a fake input element with a specified name
+	var form = document.createElement(\"form\"),
+		id = \"script\" + (new Date).getTime();
+	form.innerHTML = \"<input name='\" + id + \"'/>\";
+
+	// Inject it into the root element, check its status, and remove it quickly
+	var root = document.documentElement;
+	root.insertBefore( form, root.firstChild );
+
+	// The workaround has to do additional checks after a getElementById
+	// Which slows things down for other browsers (hence the branching)
+	if ( !!document.getElementById( id ) ) {
+		Expr.find.ID = function(match, context){
+			if ( context.getElementById ) {
+				var m = context.getElementById(match[1]);
+				return m ? m.id === match[1] || m.getAttributeNode && m.getAttributeNode(\"id\").nodeValue === match[1] ? [m] : undefined : [];
+			}
+		};
+
+		Expr.filter.ID = function(elem, match){
+			var node = elem.getAttributeNode && elem.getAttributeNode(\"id\");
+			return elem.nodeType === 1 && node && node.nodeValue === match;
+		};
+	}
+
+	root.removeChild( form );
+})();
+
+(function(){
+	// Check to see if the browser returns only elements
+	// when doing getElementsByTagName("*")
+
+	// Create a fake element
+	var div = document.createElement(\"div\");
+	div.appendChild( document.createComment(\"\") );
+
+	// Make sure no comments are found
+	if ( div.getElementsByTagName(\"*\").length > 0 ) {
+		Expr.find.TAG = function(match, context){
+			var results = context.getElementsByTagName(match[1]);
+
+			// Filter out possible comments
+			if ( match[1] === \"*\" ) {
+				var tmp = [];
+
+				for ( var i = 0; results[i]; i++ ) {
+					if ( results[i].nodeType === 1 ) {
+						tmp.push( results[i] );
+					}
+				}
+
+				results = tmp;
+			}
+
+			return results;
+		};
+	}
+
+	// Check to see if an attribute returns normalized href attributes
+	div.innerHTML = "<a href='#'></a>";
+	if ( div.firstChild.getAttribute(\"href\") !== \"#\" ) {
+		Expr.attrHandle.href = function(elem){
+			return elem.getAttribute(\"href\", 2);
+		};
+	}
+})();
+
+if ( document.querySelectorAll ) (function(){
+	var oldSizzle = Sizzle;
+	
+	Sizzle = function(query, context, extra, seed){
+		context = context || document;
+
+		if ( !seed && context.nodeType === 9 ) {
+			try {
+				return makeArray( context.querySelectorAll(query), extra );
+			} catch(e){}
+		}
+		
+		return oldSizzle(query, context, extra, seed);
+	};
+
+	Sizzle.find = oldSizzle.find;
+	Sizzle.filter = oldSizzle.filter;
+	Sizzle.selectors = oldSizzle.selectors;
+	Sizzle.matches = oldSizzle.matches;
+})();
+
+if ( document.documentElement.getElementsByClassName ) {
+	Expr.order.splice(1, 0, \"CLASS\");
+	Expr.find.CLASS = function(match, context) {
+		return context.getElementsByClassName(match[1]);
+	};
+}
+
+function dirNodeCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
+	for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+		var elem = checkSet[i];
+		if ( elem ) {
+			elem = elem[dir];
+			var match = false;
+
+			while ( elem && elem.nodeType ) {
+				var done = elem[doneName];
+				if ( done ) {
+					match = checkSet[ done ];
+					break;
+				}
+
+				if ( elem.nodeType === 1 && !isXML )
+					elem[doneName] = i;
+
+				if ( elem.nodeName === cur ) {
+					match = elem;
+					break;
+				}
+
+				elem = elem[dir];
+			}
+
+			checkSet[i] = match;
+		}
+	}
+}
+
+function dirCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
+	for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+		var elem = checkSet[i];
+		if ( elem ) {
+			elem = elem[dir];
+			var match = false;
+
+			while ( elem && elem.nodeType ) {
+				if ( elem[doneName] ) {
+					match = checkSet[ elem[doneName] ];
+					break;
+				}
+
+				if ( elem.nodeType === 1 ) {
+					if ( !isXML )
+						elem[doneName] = i;
+
+					if ( typeof cur !== \"string\" ) {
+						if ( elem === cur ) {
+							match = true;
+							break;
+						}
+
+					} else if ( Sizzle.filter( cur, [elem] ).length > 0 ) {
+						match = elem;
+						break;
+					}
+				}
+
+				elem = elem[dir];
+			}
+
+			checkSet[i] = match;
+		}
+	}
+}
+
+var contains = document.compareDocumentPosition ?  function(a, b){
+	return a.compareDocumentPosition(b) & 16;
+} : function(a, b){
+	return a !== b && (a.contains ? a.contains(b) : true);
 };
 
-Selectors.Filters = {
-  
-  byTag: function(self, tag){
-    return (tag == '*' || (self.tagName && self.tagName.toLowerCase() == tag));
-  },
-  
-  byID: function(self, id){
-    return (!id || (self.id && self.id == id));
-  },
-  
-  byClass: function(self, klass){
-    return (self.className && self.className.contains(klass, ' '));
-  },
-  
-  byPseudo: function(self, parser, argument, local){
-    return parser.call(self, argument, local);
-  },
-  
-  byAttribute: function(self, name, operator, value){
-    var result = Element.prototype.getProperty.call(self, name);
-    if (!result) return false;
-    if (!operator || value == undefined) return true;
-    switch (operator){
-      case '=': return (result == value);
-      case '*=': return (result.contains(value));
-      case '^=': return (result.substr(0, value.length) == value);
-      case '$=': return (result.substr(result.length - value.length) == value);
-      case '!=': return (result != value);
-      case '~=': return result.contains(value, ' ');
-      case '|=': return result.contains(value, '-');
-    }
-    return false;
-  }
-  
+var isXML = function(elem){
+	return elem.documentElement && !elem.body ||
+		elem.tagName && elem.ownerDocument && !elem.ownerDocument.body;
 };
 
-Selectors.Pseudo = {
-  
-  // w3c pseudo selectors
-  
-  empty: function(){
-    return !(this.innerText || this.textContent || '').length;
-  },
-  
-  not: function(selector){
-    return !Element.match(this, selector);
-  },
-  
-  contains: function(text){
-    return (this.innerText || this.textContent || '').contains(text);
-  },
-  
-  'first-child': function(){
-    return Selectors.Pseudo.index.call(this, 0);
-  },
-  
-  'last-child': function(){
-    var element = this;
-    while ((element = element.nextSibling)){
-      if (element.nodeType == 1) return false;
-    }
-    return true;
-  },
-  
-  'only-child': function(){
-    var prev = this;
-    while ((prev = prev.previousSibling)){
-      if (prev.nodeType == 1) return false;
-    }
-    var next = this;
-    while ((next = next.nextSibling)){
-      if (next.nodeType == 1) return false;
-    }
-    return true;
-  },
-  
-  'nth-child': function(argument, local){
-    argument = (argument == undefined) ? 'n' : argument;
-    var parsed = Selectors.Utils.parseNthArgument(argument);
-    if (parsed.special != 'n') return Selectors.Pseudo[parsed.special].call(this, parsed.a, local);
-    var count = 0;
-    local.positions = local.positions || {};
-    var uid = Selectors.Utils.object_uid(this);
-    if (!local.positions[uid]){
-      var self = this;
-      while ((self = self.previousSibling)){        
-        if (self.nodeType != 1) continue;
-        count ++;
-        var position = local.positions[Selectors.Utils.object_uid(self)];
-        if (position != undefined){
-          count = position + count;
-          break;
-        }
-      }
-      local.positions[uid] = count;
-    }
-    return (local.positions[uid] % parsed.a == parsed.b);
-  },
-  
-  // custom pseudo selectors
-  
-  index: function(index){
-    var element = this, count = 0;
-    while ((element = element.previousSibling)){
-      if (element.nodeType == 1 && ++count > index) return false;
-    }
-    return (count == index);
-  },
-  
-  even: function(argument, local){
-    return Selectors.Pseudo['nth-child'].call(this, '2n+1', local);
-  },
+// EXPOSE
 
-  odd: function(argument, local){
-    return Selectors.Pseudo['nth-child'].call(this, '2n', local);
-  }
-  
-};
+window.Sizzle = Sizzle;
+
+})();
 `

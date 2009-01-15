@@ -148,7 +148,8 @@ module Document
   
   # Uses the Selector library to find native elements and retrun an array of extended elements
   def self.find_all_by_selector(selector) # :nodoc:
-    `Array.fromCollection(Selectors.Utils.search(document, selector.__value__, {}));`
+    # `Array.fromCollection(Selectors.Utils.search(document, selector.__value__, {}));`
+    `Array.fromCollection(Sizzle(selector.__value__));`
   end
   
   # Uses the browser's native getElementById to find an element. Returns an extended element.

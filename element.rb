@@ -51,19 +51,12 @@ class Element
   
   # call-seq:
   #   elem[str] -> array
+  #   elem[str] -> element
   # 
-  # *args?
   # 
-  def [](expression, *args)
-    `if (expression.__value__.match(/^#[a-zA-z_]*$/) && #{args.empty?}){return #{self}.__native__.getElementById(expression.__value__.replace('#',''));}`
-    expression = expression.split(',')
-    items = []
-    `for (var i = 0, l = expression.length, local = {}; i < l; i++){
-      var selector = expression[i].__value__, elements = Selectors.Utils.search(#{self}.__native__, selector, local);
-      elements = Array.fromCollection(elements);
-      items = (i == 0) ? elements : items.concat(elements);     
-    }`
-    return items
+  def [](expression)
+    `if (expression.__value__.match(/^#[a-zA-z_]*$/)){return $E(Sizzle(expression.__value__, #{self}.__native__)[0]);}`
+    `Array.fromCollection(Sizzle(expression.__value__, #{self}.__native__));`
   end
   
   # call-seq:

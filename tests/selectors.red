@@ -17,20 +17,22 @@ Document.ready? do
   puts Document['#c_id div:even'].inspect             
   puts Document['#c_id div:odd'].inspect              
   puts Document['#c_id div:nth-child(odd)'].inspect   
-  puts Document['#c_id div:nth-child(first)'].inspect 
+  puts Document['#c_id div:first'].inspect 
   puts Document['#c_id div:nth-child(2n)'].inspect    
-  puts Document['#c_id div:nth-child(last)'].inspect  
+  puts Document['#c_id div:last'].inspect  
   puts Document['#c_id div:nth-child(n)'].inspect     
   puts Document['#c_id div:nth-child(even)'].inspect  
   puts Document['#c_id div:nth-child(2n+1)'].inspect  
   puts Document['#c_id div:nth-child(4n+3)'].inspect  
   puts Document['#c_id div:nth-child(4n+3)'].inspect  
-  puts Document['#d_id div:nth-child(only)'].inspect  
   puts Document['div em'].inspect
   puts Document['div > em'].inspect
   puts Document['h4 + p'].inspect
   
-  # no work
-  # `console.log($z(#{        Document['strong:contains("find me")      }))`
+  puts Document['#a_id']['.beta_class, .alpha_class'].inspect
+  puts Document['#a_id'].inspect
   
+  puts Document['#a_id']['#alpha_i'].inspect
+  puts Document['#a_id']['#alpha_id'].inspect
+
 end

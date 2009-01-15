@@ -12,6 +12,6 @@ Document.ready? do
   puts Document['#b_inner_element'].parents.inspect
   puts Document['#container'].children.inspect
   puts Document['#container']['#b_inner_element'].inspect
-  puts Document['#container']['div'].inspect
-  puts Document['#query_string_form']['input, textarea'].inspect
+  # puts Document['#container']['div'].inspect
+  # puts Document['#query_string_form']['input, textarea'].inspect
 end
