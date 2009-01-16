@@ -39,7 +39,7 @@ Document.ready? do
    puts Document.scroll.inspect
    puts Document.scroll_size.inspect
    puts Document.position.inspect
-   puts Document.coordinates.inspect
+   # puts Document.coordinates.inspect
      
    
    puts Window.height
@@ -55,5 +55,5 @@ Document.ready? do
    puts Window.scroll.inspect
    puts Window.scroll_size.inspect
    puts Window.position.inspect
-   puts Window.coordinates.inspect
+   # puts Window.coordinates.inspect
 end
